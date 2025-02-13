@@ -43,6 +43,9 @@ dependencies {
 
 	// annotation
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// common
+	implementation 'org.apache.commons:commons-lang3:3.0'
 }
 
 tasks.named('test') {
