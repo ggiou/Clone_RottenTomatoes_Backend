@@ -1,12 +1,12 @@
 package com.clone.rottentomato.common.component.dto;
 
+import com.clone.rottentomato.common.constant.CustomError;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.ObjectUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -15,8 +15,8 @@ public class CommonResponse {
     //RESULT_CODE_SUCCESS: 성공
     private static Integer STATUS_CODE_SUCCESS = 200;
     private static String STATUS_SUCCESS = "success";
-    private static String FAIL_STATUS  = "fail";
-    private static final String ERROR_STATUS = "error";
+    private static String STATUS_FAIL  = "fail";
+    private static final String STATUS_ERROR = "error";
 
 
     /**
@@ -44,20 +44,26 @@ public class CommonResponse {
      */
     private Object data;
 
-    private void setBasicResponse(int statusCode, String status, String message){
+    /** 기본 함수 */
+    private void setCommonResponse(int statusCode, String status, String message, Object data){
         this.setStatusCode(statusCode);
         this.setStatus(status);
         this.setMessage(message);
     }
 
+    public void setCommonResponse(int statusCode, String status, String message){
+        setCommonResponse(statusCode, status, message, null);
+    }
 
-    public static CommonResponse Success(String msg){
+
+    /** 성공 응답 관련 */
+    public static CommonResponse success(String msg){
         CommonResponse response = new CommonResponse();
         response.setSuccessResponse(msg);
         return response;
     }
 
-    public static CommonResponse Success(String msg, Object data){
+    public static CommonResponse success(String msg, Object data){
         CommonResponse response = new CommonResponse();
         response.setSuccessResponse(msg);
         response.setData(data);
@@ -66,8 +72,60 @@ public class CommonResponse {
 
     private void setSuccessResponse(String msg) {
         String resMsg = StringUtils.isBlank(msg) ? StringUtils.EMPTY : msg;
-        this.setBasicResponse(STATUS_CODE_SUCCESS, STATUS_SUCCESS, resMsg);
+        this.setCommonResponse(STATUS_CODE_SUCCESS, STATUS_SUCCESS, resMsg);
     }
+
+    /** 실패 응답 관련 */
+    public static CommonResponse fail(String msg){
+        CommonResponse response = new CommonResponse();
+        response.setFailResponse(msg);
+        return response;
+    }
+
+    public static CommonResponse fail(String msg, Object data){
+        CommonResponse response = new CommonResponse();
+        response.setFailResponse(msg);
+        response.setData(data);
+        return response;
+    }
+
+    private void setFailResponse(String msg) {
+        String resMsg = StringUtils.isBlank(msg) ? StringUtils.EMPTY : msg;
+        this.setCommonResponse(STATUS_CODE_SUCCESS, STATUS_FAIL, resMsg);
+    }
+
+    /** 에러 응답 관련 */
+    public static CommonResponse error(String msg){
+        return error(msg, 500, null);
+    }
+
+    public static CommonResponse error(String msg, int errCode){
+        return error(msg, errCode, null);
+    }
+
+    public static CommonResponse error(String msg, int errorCode, Object data){
+        CommonResponse response = new CommonResponse();
+        response.setErrorResponse(errorCode, msg);
+        response.setData(data);
+        return response;
+    }
+
+    public static CommonResponse error(String msg, CustomError error){
+        Map<String, Object> errorData = new HashMap<>();
+        errorData.put("errorCode", error.getResCode());
+        errorData.put("errorMessage", error.getMsg());
+        return error(msg, error.getCode(), errorData);
+    }
+
+    public void setErrorResponse(CustomError error){
+        setErrorResponse(error.getCode(), error.getMsg());
+    }
+
+    private void setErrorResponse(int code, String msg){
+        setCommonResponse(code, STATUS_ERROR, msg);
+    }
+
+
 
 }
 
