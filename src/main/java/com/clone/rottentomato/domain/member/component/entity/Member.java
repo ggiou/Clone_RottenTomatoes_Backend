@@ -29,7 +29,7 @@ public class Member {
     public Member(String memberEmail, String memberName,  String provider , String authCode) {
         this.memberEmail = memberEmail;
         this.memberName = memberName;
-        this.provider = provider;;
+        this.provider = provider;
         this.authCode = authCode;
     }
 
