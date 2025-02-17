@@ -3,7 +3,6 @@ package com.clone.rottentomato.domain.member.component.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.boot.model.internal.Nullability;
 
 @Entity
 @Getter
@@ -19,14 +18,23 @@ public class Member {
     @Column( nullable = false )
     private String memberName;
 
+    @Column( nullable = false)
+    private String provider;
+
     @Column( nullable = false )
     private String authCode;
 
 
 
-    public Member(String memberEmail, String memberName, String authCode) {
+    public Member(String memberEmail, String memberName,  String provider , String authCode) {
         this.memberEmail = memberEmail;
         this.memberName = memberName;
+        this.provider = provider;;
         this.authCode = authCode;
     }
+
+    public void updateAuthCode(String updateCode){
+        this.authCode = updateCode;
+    }
+
 }
