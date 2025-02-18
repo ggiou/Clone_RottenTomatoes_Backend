@@ -47,8 +47,12 @@ dependencies {
 	// common
 	implementation 'org.apache.commons:commons-lang3:3.0'
 
-	// valid
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	//OAuth client
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	// Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 }
 
