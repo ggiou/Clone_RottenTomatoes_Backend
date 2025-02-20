@@ -13,6 +13,6 @@ public class MovieService {
 
     public CommonResponse saveMovieProcess(MovieSaveRequest request){
 
-
+        return new CommonResponse();
     }
 }
