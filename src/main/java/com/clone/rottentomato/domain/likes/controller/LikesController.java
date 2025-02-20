@@ -1,0 +1,31 @@
+package com.clone.rottentomato.domain.likes.controller;
+
+
+import com.clone.rottentomato.domain.likes.component.dto.LikesResponseDto;
+import com.clone.rottentomato.domain.likes.service.LikesService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@Slf4j
+@RequestMapping("likes")
+public class LikesController {
+
+    private final LikesService likesService;
+
+    //  좋아요
+    @PostMapping("/{movie_id}/ok")
+    public ResponseEntity<LikesResponseDto> ok(@PathVariable Long movie_id) {
+        return likesService.ok(movie_id);
+    }
+
+
+    //  취소하기
+    @DeleteMapping("/{movie_id}/cancel")
+    public ResponseEntity<LikesResponseDto> cancel(@PathVariable Long movie_id) {
+        return likesService.cancel(movie_id);
+    }
+}
