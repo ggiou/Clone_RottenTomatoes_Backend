@@ -5,9 +5,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
+@NoArgsConstructor
 public class MovieTrailer extends TimeStamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;    // 영화 예고편 id
