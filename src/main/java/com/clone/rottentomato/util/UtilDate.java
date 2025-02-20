@@ -1,5 +1,7 @@
 package com.clone.rottentomato.util;
 
+import com.clone.rottentomato.common.constant.CommonError;
+import com.clone.rottentomato.exception.CommonException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
@@ -56,13 +58,22 @@ public class UtilDate {
         }
     }
 
+    /** 날짜 문자열이 유효하다면 날짜로 변환, 없다면 throw */
+    public static LocalDateTime getLocalDateTime(String dateStr){
+        DateTimeFormatter parser = getParsingType(dateStr);
+        if(Objects.isNull(parser)) throw new CommonException("유요한 날짜 문자열이 아닙니다.", CommonError.DATE_FORMAL_ERROR);
+        if(parser.equals(format_defaultDate) || parser.equals(format_defaultDateTime)) return LocalDate.parse(dateStr, parser).atStartOfDay();
+        return LocalDateTime.parse(dateStr, parser);
+    }
+
     /** 날짜 문자열이 유효하다면 날짜로 변환, 없다면 now 반환 */
-    public static LocalDateTime getLocalDateTimeOrEls(String dateStr){
+    public static LocalDateTime getLocalDateTimeOrNow(String dateStr){
         DateTimeFormatter parser = getParsingType(dateStr);
         if(Objects.isNull(parser)) return LocalDateTime.now();
         if(parser.equals(format_defaultDate) || parser.equals(format_defaultDateTime)) return LocalDate.parse(dateStr, parser).atStartOfDay();
         return LocalDateTime.parse(dateStr, parser);
     }
+
 
     /** 날짜 문자열이 유효하다면 날짜로 변환, 없다면 설정한 default 값 반환 */
     public static LocalDateTime getLocalDateTimeOrEls(String dateStr, LocalDateTime defaultDateTime){

@@ -16,7 +16,9 @@ public enum CommonError implements CustomError {
     NOT_FOUND(404, "요청한 URI path에 해당하는 리소스가 존재하지 않습니다.", "NOT_FOUND"),
     INTERNAL_SERVER_ERROR(500, "오류가 발생하여 요청을 수행할 수 없습니다.", "INTERNAL_SERVER_ERROR"),
     UNKNOWN_ERROR(500, "", "UNKNOWN_ERROR"),
-    API_ERROR_OK(400, "오류 응답을 받았습니다. 응답 메시지를 확인 바랍니다."		, "E0000"),
+    API_ERROR_OK(400, "오류 응답을 받았습니다. 응답 메시지를 확인 바랍니다.", "API_ERROR_OK"),
+    FORMAL_ERROR(500, "유효한 형식이 아닙니다.", "INVALID_FORMAT"),
+    DATE_FORMAL_ERROR(500, "유효한 날짜 형식이 아닙니다.", "INVALID_DATE_FORMAT")
     ;
 
 

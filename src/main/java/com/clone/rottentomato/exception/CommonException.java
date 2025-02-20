@@ -23,6 +23,12 @@ public class CommonException extends RuntimeException {
         this.errorStatus = errorStatus;
     }
 
+    public CommonException(String message, CustomError errorStatus){
+        super(message);
+        this.errorCode = getErrorCode();
+        this.errorStatus = errorStatus;
+    }
+
     public CommonException(String message, String errorCode) {
         super(message);
         this.errorCode = errorCode;
