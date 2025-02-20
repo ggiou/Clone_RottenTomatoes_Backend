@@ -5,11 +5,13 @@ import com.clone.rottentomato.common.converter.CommaStringListConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
 @Entity
+@NoArgsConstructor
 public class MovieDetail extends TimeStamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;    // 영화 상세정보 id
