@@ -46,6 +46,10 @@ dependencies {
 
 	// common
 	implementation 'org.apache.commons:commons-lang3:3.0'
+
+	// valid
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
 }
 
 tasks.named('test') {
