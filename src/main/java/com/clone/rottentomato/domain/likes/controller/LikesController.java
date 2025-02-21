@@ -17,15 +17,10 @@ public class LikesController {
     private final LikesService likesService;
 
     //  좋아요
-    @PostMapping("/{movie_id}/ok")
+    @PostMapping("/{movie_id}/isLiked")
     public ResponseEntity<LikesResponseDto> ok(@PathVariable Long movie_id) {
         return likesService.ok(movie_id);
     }
 
 
-    //  취소하기
-    @DeleteMapping("/{movie_id}/cancel")
-    public ResponseEntity<LikesResponseDto> cancel(@PathVariable Long movie_id) {
-        return likesService.cancel(movie_id);
-    }
 }

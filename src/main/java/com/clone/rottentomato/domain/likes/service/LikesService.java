@@ -23,32 +23,22 @@ public class LikesService {
     private final MovieRepository movieRepository;
 
 
-    //  지원하기
+    //  좋아요
     public ResponseEntity<LikesResponseDto> ok(Long movieId) {
-        Movie movie = getMovie(movieId);
-        Optional<Likes> likes = likesRepository.findByMovie(movie);
-        if(likes.isPresent()) {
-            throw new IllegalArgumentException("이미 좋아요 버튼을 누르셨습니다.");
-        }
-        Likes newLikes = Likes.of(movie);
-        likesRepository.save(newLikes);
-        int count = likesRepository.countByMovie(movie);
-        return ResponseEntity.ok(LikesResponseDto.of(HttpStatus.OK,true,count));
-    }
-
-    //  취소하기
-    public ResponseEntity<LikesResponseDto> cancel(Long movieId) {
         Movie movie = getMovie(movieId);
         Optional<Likes> likes = likesRepository.findByMovie(movie);
         if(likes.isPresent()) {
             Likes findLikes = likes.get();
             likesRepository.delete(findLikes);
             int count = likesRepository.countByMovie(movie);
-            return ResponseEntity.ok(LikesResponseDto.of(HttpStatus.OK,false,0));
-        }else{
-            throw new IllegalArgumentException("이미 취소되었습니다.");
+            return ResponseEntity.ok(LikesResponseDto.of(HttpStatus.OK,true,count));
         }
+        Likes newLikes = Likes.of(movie);
+        likesRepository.save(newLikes);
+        int count = likesRepository.countByMovie(movie);
+        return ResponseEntity.ok(LikesResponseDto.of(HttpStatus.OK,false,count));
     }
+
 
 
 //          --              메서드             --
