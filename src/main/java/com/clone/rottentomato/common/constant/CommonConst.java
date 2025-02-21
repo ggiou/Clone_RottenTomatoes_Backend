@@ -1,12 +1,14 @@
 package com.clone.rottentomato.common.constant;
 
-import com.clone.rottentomato.common.service.crawling.CommonService;
-import com.clone.rottentomato.common.service.crawling.WebDriverService;
+import com.clone.rottentomato.crawling.service.CommonService;
 
 import java.time.format.DateTimeFormatter;
 
 /** 프로젝트 공통으로 사용할 수 있는 상수 */
 public class CommonConst {
+    // 현재 디렉터리 위치
+    public final static String USER_DIR = System.getProperty("user.dir");
+
     /** 날짜 */
     public static class DATE {
         // 날짜 형식
