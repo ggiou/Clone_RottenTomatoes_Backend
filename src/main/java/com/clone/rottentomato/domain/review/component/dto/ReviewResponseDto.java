@@ -1,0 +1,38 @@
+package com.clone.rottentomato.domain.review.component.dto;
+
+
+import com.clone.rottentomato.domain.member.component.entity.Member;
+import com.clone.rottentomato.domain.movie.component.entity.Movie;
+import com.clone.rottentomato.domain.review.component.entity.Review;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+public class ReviewResponseDto {
+    private Long id;
+    private Integer field;
+    private String reviewContent;
+    private String memberEmail;
+    private String memberName;
+
+
+    @Builder
+    public ReviewResponseDto(Review review, Member member, Movie movie) {
+        this.id = review.getReview_id();
+        this.field = review.getField();
+        this.reviewContent = review.getReviewContent();
+        this.memberEmail = member.getMemberEmail();
+        this.memberName = member.getMemberName();
+    }
+
+
+    public static ReviewResponseDto of(Review review,Member member, Movie movie) {
+        return ReviewResponseDto.builder()
+                .review(review)
+                .member(member)
+                .review(review)
+                .build();
+    }
+}

@@ -16,4 +16,5 @@ public interface LikesRepository extends JpaRepository<Likes,Long> {
     Optional<Likes> findByMovie(Movie movie);
 
     int countByMovie(Movie movie);
+
 }

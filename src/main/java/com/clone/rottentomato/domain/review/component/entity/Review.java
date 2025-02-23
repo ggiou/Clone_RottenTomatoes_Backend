@@ -5,6 +5,7 @@ import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,8 @@ public class Review {
     private Long review_id;
     @Column(nullable = false)
     private Integer field;
-    @Column(nullable = false,length = 5000)
+    @Column(nullable = false)
+    @Size(max = 1000, message = "리뷰는 최대 1000자까지 입력 가능합니다.")
     private String reviewContent;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID",nullable = false)
