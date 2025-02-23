@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -63,8 +65,12 @@ public class WebDriverService {
             // Unix 기반 운영체제(macOS, Linux)에서는 ChromeDriver 실행 권한 부여
             setChmod(chromeDriverPath);
 
+            // WebDriver 시스템 속성 설정
+            System.setProperty("webdriver.chrome.driver", chromeDriverPath);
 
-
+            // ChromeWebDriver 실행
+            ChromeOptions options = new ChromeOptions();
+            driver = new ChromeDriver(options);
         }
     }
 
@@ -125,4 +131,14 @@ public class WebDriverService {
         return RUNNING_OS.equals(OS_WIN) ? "\\" + appName + ".exe" : "/" + appName;
     }
 
+    /**
+     * 현재 실행 중인 WebDriver를 종료하는 메서드
+     * WebDriver를 종료한 후 null로 설정하여 새로운 WebDriver를 생성할 수 있도록 함
+     */
+    public void quitDriver() {
+        if (driver != null) {
+            driver.quit();
+            driver = null;
+        }
+    }
 }

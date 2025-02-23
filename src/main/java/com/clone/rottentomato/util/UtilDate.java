@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
-import static com.clone.rottentomato.common.constant.CommonConst.*;
+import static com.clone.rottentomato.common.constant.CommonConst.DATE.*;
 
 public class UtilDate {
     final static DateTimeFormatter format_defaultDate = DateTimeFormatter.ofPattern(DEFAULT_DATE);
