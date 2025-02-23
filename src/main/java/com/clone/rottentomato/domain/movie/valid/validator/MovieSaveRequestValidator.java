@@ -28,8 +28,7 @@ public class MovieSaveRequestValidator implements ConstraintValidator<ValidMovie
         boolean hasSearchUrl = StringUtils.isNotBlank(req.getSearchUrl());
 
         if(hasSearchUrl){
-            UrlValidator urlValidator = new UrlValidator();
-            hasSearchUrl = urlValidator.isValid(req.getSearchUrl());
+            hasSearchUrl = UtilString.isUrlForm(req.getSearchUrl());
         }
 
         // 영화 제목이나, 영화 url 둘 중 1개는 필수 (크롤링용)

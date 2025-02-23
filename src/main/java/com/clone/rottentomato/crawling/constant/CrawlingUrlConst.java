@@ -8,4 +8,8 @@ public class CrawlingUrlConst {
     public static final String WINDOW_WEB_DRIVER_BASIC_PATH = USER_DIR + "\\crawling-module\\src\\main\\resources\\driver\\selenium";
     public static final String MAC_LINUX_WEB_DRIVER_BASIC_PATH = USER_DIR + "/crawling-module/src/main/resources/driver/selenium";
 
+    /** 크롤링에서 사용하는 사이트의 공통 url */
+    public static class CRAWLING_SITE {
+        public static final String NAMU_WIKI_SEARCH_URL = "https://namu.wiki/w/";
+    }
 }
