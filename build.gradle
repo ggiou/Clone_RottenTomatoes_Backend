@@ -36,7 +36,8 @@ dependencies {
 
 	// db
 	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'com.mysql:mysql-connector-j'
+//	runtimeOnly 'com.mysql:mysql-connector-j'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
@@ -47,11 +48,22 @@ dependencies {
 	// common
 	implementation 'org.apache.commons:commons-lang3:3.0'
 
+
+	//OAuth client
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	// Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
 	// valid
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'commons-validator:commons-validator:1.7'
 
-	// crawling
+	// aws
+	compileOnly 'org.springframework.cloud:spring-cloud-starter-aws:2.0.1.RELEASE'
+	implementation "com.amazonaws:aws-java-sdk-s3:1.12.395"
+
+    // crawling
 	implementation 'org.jsoup:jsoup:1.16.1'
 	implementation 'org.seleniumhq.selenium:selenium-java:4.21.0'
 	// 안쓰면 삭제 예정.. 일단 패키지 안에 넣어두기로
