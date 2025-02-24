@@ -16,7 +16,8 @@ public class MovieTrailer extends TimeStamped {
     @Column(nullable = false)
     @Max(value = 10, message = "영화 예고편은 최대 10개 까지 등록 가능합니다.")
     private int displayOrder;   // 예고편 노출 순서
-    // TODO 영화 예고편 노출을 url로만 전달할거라면, url 값 컬럼 추가.. 이처럼 노출해주는 방식에 따라 컬럼 추가 필요
+    @Column(columnDefinition = "varchar(255) default ''")
+    private String playUrl;
 
     @OneToOne
     @JoinColumn(name = "MOVIE_ID", nullable = false)

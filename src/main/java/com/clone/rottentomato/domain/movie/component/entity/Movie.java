@@ -41,7 +41,7 @@ public class Movie extends TimeStamped {
         this.releaseDate = releaseDate;
     }
 
-    public Movie fromDto(MovieDto dto){
+    public static Movie fromDto(MovieDto dto){
         if(Objects.isNull(dto)) throw new MovieException("영화 정보가 없습니다.", CommonError.BAD_REQUEST);
         LocalDateTime releaseDate = UtilDate.getLocalDateTimeOrEls(dto.getReleaseDate(), null);
         if(Objects.isNull(releaseDate)) throw new MovieException("유효한 개봉일자가 아닙니다.", CommonError.DATE_FORMAL_ERROR);

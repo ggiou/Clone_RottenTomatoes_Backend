@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Optional;
 
+/** jpa 관련 util class */
 @RequiredArgsConstructor
 public class UtilJpa<T, ID>{
     @PersistenceContext

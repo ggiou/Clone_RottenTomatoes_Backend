@@ -12,5 +12,5 @@ public class MovieSaveRequest {
     private String name;    // 영화 이름
     private int releaseYear;    // 개봉 년도
     private String searchUrl;   // 검색 url
-    private CrawlingSite crawlingSite = CrawlingSite.NAMU_WIKI;
+    private CrawlingSite crawlingSite = CrawlingSite.NAMU_WIKI; // 정보를 크롤링할 대상 사이트
 }

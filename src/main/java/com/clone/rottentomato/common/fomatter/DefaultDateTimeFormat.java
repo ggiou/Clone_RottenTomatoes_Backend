@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static com.clone.rottentomato.common.constant.CommonConst.DEFAULT_DATE_TIME;
+import static com.clone.rottentomato.common.constant.CommonConst.DATE.DEFAULT_DATE_TIME;
 
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

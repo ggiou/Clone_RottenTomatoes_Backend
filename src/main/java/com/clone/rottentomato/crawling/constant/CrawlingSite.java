@@ -17,9 +17,9 @@ import static com.clone.rottentomato.crawling.constant.CrawlingUrlConst.CRAWLING
 @Getter
 @RequiredArgsConstructor
 public enum CrawlingSite implements EnumType {
-    NAMU_WIKI("namuWiki", NAMU_WIKI_SEARCH_URL)
+    NAMU_WIKI("나무위키", NAMU_WIKI_SEARCH_URL)
     ;
-    private final String name;
+    private final String krName;
     private final String searchUrl;
 
 
@@ -30,7 +30,7 @@ public enum CrawlingSite implements EnumType {
 
     @Override
     public String getValue() {
-        return name;
+        return krName;
     }
 
     public static CrawlingSite find(CrawlingSite type){
