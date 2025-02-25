@@ -13,10 +13,9 @@ import java.util.Objects;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class MovieDto extends ResponseDto {
-    private long id;    // 영화 id
+    private Long id;    // 영화 id
     private String name;    // 영화명
     private BigDecimal rating;  // 영화 평점 (리뷰 별점 기준 -> 0.0 ~ 5.0)
     private String posterUrl;   // 영화 포스터 url

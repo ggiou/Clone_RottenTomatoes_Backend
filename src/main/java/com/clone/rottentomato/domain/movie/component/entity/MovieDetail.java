@@ -22,7 +22,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class MovieDetail extends TimeStamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;    // 영화 상세정보 id
+    private Long id;    // 영화 상세정보 id
     @Column(columnDefinition = "varchar(1000) default ''")
     @Size(max = 1000, message = "영화 줄거리는 최대 1000자까지 입력 가능합니다.")
     private String story;   // 영화 줄거리

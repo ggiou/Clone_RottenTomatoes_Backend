@@ -14,6 +14,8 @@ public class CommonConst {
         // 날짜 형식
         public static final String DEFAULT_DATE = "yyyy-MM-dd";
         public static final String DEFAULT_DATE_TIME = "yyyy-MM-dd HH:mm:ss";
+        public static final String HOUR_MINUTE = "mm:ss";
+
         // formatter
         public static DateTimeFormatter DEFAULT_DATE_FORMATTER = DateTimeFormatter.ofPattern(DEFAULT_DATE);
         public static DateTimeFormatter DEFAULT_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME);

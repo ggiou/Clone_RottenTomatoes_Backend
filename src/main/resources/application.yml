@@ -1,4 +1,8 @@
 spring:
+  ## secret info yml
+  profiles:
+    include: secret
+  ## h2
   h2:
     console:
       enabled: true
@@ -8,6 +12,7 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  # jpa setting
   jpa:
     hibernate:
       ddl-auto: create
@@ -16,15 +21,3 @@ spring:
       hibernate:
       format_sql: true
       show_sql: true
-
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            redirect-uri: "http://localhost:8080/login/oauth2/code/google"
-            client-id: "859588785984-gl9ufkend5flgvkfqi4840dqknauk7vj.apps.googleusercontent.com"
-            client-secret: ""
-            scope:
-             - email
-             - profile
