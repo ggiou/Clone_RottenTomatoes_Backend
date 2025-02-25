@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import static com.clone.rottentomato.common.constant.CommonConst.OS.*;
 
@@ -44,17 +45,18 @@ public class CrawlingVersionManager {
             // 2. 현재 크롬 버전 가져오기
             ProcessBuilder processBuilder = new ProcessBuilder(chromePath, "--version");
             Process process = processBuilder.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "MS949"));
             String versionInfo = reader.readLine();
 
             // 3. 유효한 버전인지 확인
             if (StringUtils.isEmpty(versionInfo) || !VALID_CHROME_VERSION.equals(versionInfo.split(" ")[2])) {
                 log.info("Chrome is not valid version. Your version: " + versionInfo);
-                throw new RuntimeException("크롬 브라우저 114 버전 설치가 필요합니다. 기존 " + versionInfo + " 버전은 유효하지 않습니다.");
+                // 기존 크롬 창이 존재할경우, 버전을 못가져와서 임시로 주석처리함..  -> 마지막에 이거 제대로 활용할 수 있도록 수정 필요
+                //throw new RuntimeException("크롬 브라우저 114 버전 설치가 필요합니다. 기존 " + versionInfo + " 버전은 유효하지 않습니다.");
             }
             
             // 4. 유효한 버전이라면 크롬 자동 업데이트 비활성 화
-            setValidChromeVersion();
+            disableChromeAutoUpdate();
 
             /*
             // 기존의 설치하는 과정 코드

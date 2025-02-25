@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 public class Movie extends TimeStamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;    // 영화 id
+    private Long id;    // 영화 id
     @Column(nullable = false)
     @Size(max = 100, message = "영화 제목은 최대 100자까지 입력가능합니다.")
     private String name;    // 영화명

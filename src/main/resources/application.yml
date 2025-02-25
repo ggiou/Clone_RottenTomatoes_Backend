@@ -1,4 +1,8 @@
 spring:
+  ## secret info yml
+  profiles:
+    include: secret
+  ## h2
   h2:
     console:
       enabled: true
@@ -8,6 +12,7 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  # jpa setting
   jpa:
     hibernate:
       ddl-auto: create

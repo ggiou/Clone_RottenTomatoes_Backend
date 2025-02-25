@@ -3,11 +3,9 @@ package com.clone.rottentomato.domain.movie.component.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.mapping.Collection;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Getter

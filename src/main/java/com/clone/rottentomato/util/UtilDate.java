@@ -2,10 +2,13 @@ package com.clone.rottentomato.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Locale;
 import java.util.Objects;
 
 import static com.clone.rottentomato.common.constant.CommonConst.DATE.*;
@@ -84,5 +87,18 @@ public class UtilDate {
     /** LocalDateTime 을 기본 날짜 포맷의 문자열로 변환하는 함수 */
     public static String convertDate(LocalDateTime dateTime){
         return convertDate(dateTime, false);
+    }
+
+    /** 유효한 날짜 문자열인이 판단하는 함수 - SimpleDateFormat*/
+    public static boolean isValidDate(String str, String format){
+        if(StringUtils.isBlank(str) || StringUtils.isBlank(format)) return false;
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format, Locale.KOREA);
+        dateFormat.setLenient(false);
+        try {
+            dateFormat.parse(str);
+            return true;
+        }catch (ParseException e){
+            return false;
+        }
     }
 }
