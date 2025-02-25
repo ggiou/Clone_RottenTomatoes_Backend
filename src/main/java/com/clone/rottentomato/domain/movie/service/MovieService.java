@@ -14,6 +14,7 @@ import com.clone.rottentomato.exception.JpaException;
 import com.clone.rottentomato.util.UtilString;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,16 +81,42 @@ public class MovieService {
         // 2. 크롤링 대상 사이트 별 각 리스트가 존재하면 크롤링해 정보는 반환한다. (현재는 나무 위키만 존재, 추후 확장된다면, 타입별로 서비스 분리)
         if(!CollectionUtils.isEmpty(namuWikiReqs)){
             // 2-1 나무 위키에서 크롤링해 정보 반환
-            MovieSaveResponse movieInfoByNamuWikiList = getMovieInfoOfNamuWikiByCrawling();
+            MovieSaveResponse movieInfoByNamuWikiList = getMovieInfoOfNamuWikiByCrawling(namuWikiReqs);
             response.addResponse(movieInfoByNamuWikiList);
         }
         
         return response;
     }
 
-    private MovieSaveResponse getMovieInfoOfNamuWikiByCrawling(){
+    private MovieSaveResponse getMovieInfoOfNamuWikiByCrawling(List<MovieSaveRequest> requests){
+        // 0. 응답 값 세팅
+        List<MovieInfoDto> successList = new ArrayList<>();
+        List<MovieInfoDto> failList = new ArrayList<>();
+
+        for(MovieSaveRequest crawlingReq : requests) {
+            // 1. 데이터를 가져올 나무 위키 사이트 접속
+            getValidWebDriverSiteForMovieSave(crawlingReq);
+
+
+            // 데이터를 다 가져온 창은 닫기
+            webDriver.close();
+        }
 
         return new MovieSaveResponse();
+    }
+
+    /** 영화 정보 저장을 위한 대상 사이트를 찾는 기능*/
+    private void getValidWebDriverSiteForMovieSave(MovieSaveRequest request){
+        boolean isValidSite = false;
+        if (CrawlingSite.NAMU_WIKI.equals(request.getCrawlingSite())){
+            if (StringUtils.isNotBlank(request.getSearchUrl())){
+                // 사용자가 입력한 크롤링 사이트로 검색
+                webDriver.get(request.getSearchUrl());
+                return;
+            }
+
+            String searchUrl = CrawlingSite.NAMU_WIKI.getSearchFullUrl(request.getName());
+        }
     }
 
     /** */
