@@ -13,6 +13,6 @@ public class MovieSaveRequest {
     private String name;    // 영화 이름
     private int releaseYear;    // 개봉 년도
     private String searchUrl;   // 검색 url
-    @ValidEnumType(message = "크롤링 대상 사이트가 유효하지 않습니다.", enumClass = CrawlingSite.class)
+    @ValidEnumType(enumClass = CrawlingSite.class, fieldName = "크롤링 대상 사이트_crawlingSite")
     private CrawlingSite crawlingSite = CrawlingSite.NAMU_WIKI; // 정보를 크롤링할 대상 사이트
 }

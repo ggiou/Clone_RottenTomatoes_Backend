@@ -4,6 +4,7 @@ import com.clone.rottentomato.common.constant.CommonError;
 import com.clone.rottentomato.common.handler.EnumType;
 import com.clone.rottentomato.exception.CommonException;
 import com.clone.rottentomato.util.UtilString;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +59,12 @@ public enum CrawlingSite implements EnumType {
 
     private static String getErrorMsg(){
         return "입력한 크롤링할 사이트의 url이 잘못되었습니다.";
+    }
+
+    @JsonCreator
+    public static CrawlingSite parsing(String inputValue) {
+        return Arrays.stream(CrawlingSite.values()).filter(type
+                -> type.name().equals(inputValue)).findFirst().orElse(null);
     }
 
 }

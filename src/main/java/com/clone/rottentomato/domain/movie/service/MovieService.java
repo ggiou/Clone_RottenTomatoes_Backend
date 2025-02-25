@@ -5,10 +5,14 @@ import com.clone.rottentomato.crawling.constant.CrawlingSite;
 import com.clone.rottentomato.crawling.service.WebDriverService;
 import com.clone.rottentomato.crawling.service.WebElementService;
 import com.clone.rottentomato.domain.movie.component.dto.*;
+import com.clone.rottentomato.domain.movie.component.entity.CategoryInfo;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.component.entity.MovieDetail;
 import com.clone.rottentomato.domain.movie.component.entity.MovieTrailer;
+import com.clone.rottentomato.domain.movie.repository.CategoryInfoRepository;
+import com.clone.rottentomato.domain.movie.repository.MovieDetailRepository;
 import com.clone.rottentomato.domain.movie.repository.MovieRepository;
+import com.clone.rottentomato.domain.movie.repository.MovieTrailerRepository;
 import com.clone.rottentomato.exception.CommonException;
 import com.clone.rottentomato.exception.JpaException;
 import com.clone.rottentomato.util.UtilString;
@@ -28,6 +32,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MovieService {
     private final MovieRepository movieRepository;
+    private final MovieDetailRepository movieDetailRepository;
+    private final MovieTrailerRepository movieTrailerRepository;
+    private final CategoryInfoRepository categoryInfoRepository;
 
     private final WebDriver webDriver = WebDriverService.getInstance().getChromeDriver();
     private final WebElementService webElementService = new WebElementService(webDriver);
@@ -145,10 +152,20 @@ public class MovieService {
             MovieDetail movieDetail = MovieDetail.fromDto(reqDto.getMovieDetailDto(), movie);
             try {
                 // 2. 영화 상세 정보 저장
-                resDto.setMovieDetailDto(movieRepository.returnSaveOrUpdateMovieDetail(movieDetail));
+                resDto.setMovieDetailDto(movieDetailRepository.returnSaveOrUpdateMovieDetail(movieDetail));
             }catch (Exception e){
                 resDto.setMovieDetailDto(MovieDetailDto.fromEntity(movieDetail,false, "영화 상세 정보를 저장하는 중 오류가 발생했습니다."));
                 log.error(String.format("[%s] 영화 상세 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", site.getKrName(), e.getMessage(), UtilString.stringify(movieDetail)));
+            }
+
+            // 3. 영화 카테고리 정보 저장
+            try {
+                // 3-1. 카테고리 정보가 없다면 저장해 정보 반환
+                List<CategoryInfo> savedCategories = categoryInfoRepository.saveCategoryInfoList(reqDto.getCategoryList());
+                // 3-2. 영화 - 카테고리 연결 중복 정보가 없다면 저장해 반환
+
+            }catch (Exception e){
+                // todo 저장 성공된 애들만 반환하기..
             }
 
             List<MovieTrailer> movieTrailers = reqDto.getMovieTrailerDtoList().stream().map(t->MovieTrailer.fromDto(t, movie)).toList();
@@ -156,8 +173,8 @@ public class MovieService {
                 List<MovieTrailerDto> saveResults = new ArrayList<>();
                 for(MovieTrailer trailer : movieTrailers) {
                     try {
-                        // 3. 영화 예고편 리스트 정보 저장
-                        saveResults.add(movieRepository.returnSaveOrUpdateMovieTrailer(trailer));
+                        // 4. 영화 예고편 리스트 정보 저장
+                        saveResults.add(movieTrailerRepository.returnSaveOrUpdateMovieTrailer(trailer));
                     } catch (Exception e) {
                         saveResults.add(MovieTrailerDto.fromEntity(trailer, false, "영화 예고편 정보를 저장하는 중 오류가 발생했습니다."));
                         log.error(String.format("[%s] 영화 예고편 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", site.getKrName(), e.getMessage(), UtilString.stringify(trailer)));

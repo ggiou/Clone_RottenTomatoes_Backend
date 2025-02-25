@@ -15,6 +15,7 @@ public class EnumTypeValidator implements ConstraintValidator<ValidEnumType, Enu
     private String defaultMessage;
     private boolean isExistDefaultMessage;
     private String fieldName;
+    private boolean isExistFieldName;
 
     @Override
     public void initialize(ValidEnumType constraintAnnotation) {
@@ -22,6 +23,7 @@ public class EnumTypeValidator implements ConstraintValidator<ValidEnumType, Enu
         this.defaultMessage = constraintAnnotation.message();
         this.isExistDefaultMessage = !StringUtils.isBlank(defaultMessage);
         this.fieldName = UtilString.isNull(String.format("[%s]", constraintAnnotation.fieldName()));
+        this.isExistFieldName = !StringUtils.isBlank(fieldName);
     }
 
     @Override
@@ -50,6 +52,7 @@ public class EnumTypeValidator implements ConstraintValidator<ValidEnumType, Enu
     }
 
     private String getErrorMessage(String msg){
-        return isExistDefaultMessage ? defaultMessage : fieldName + msg;
+        if(isExistDefaultMessage) msg = defaultMessage;
+        return isExistFieldName ?  String.format("[%s] %s",fieldName , msg) : msg;
     }
 }

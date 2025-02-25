@@ -35,10 +35,10 @@ public class MovieDto extends ResponseDto {
         this.setResult(success, resultMsg);
     }
 
-    public static MovieDto fromEntity(Movie dto){
-        if(Objects.isNull(dto)) return null;
-        String releaseDate = UtilDate.convertDate(dto.getReleaseDate());
-        return new MovieDto(dto.getId(), dto.getName(), dto.getRating(), dto.getPosterUrl(), releaseDate);
+    public static MovieDto fromEntity(Movie entity){
+        if(Objects.isNull(entity)) return null;
+        String releaseDate = UtilDate.convertDate(entity.getReleaseDate());
+        return new MovieDto(entity.getId(), entity.getName(), entity.getRating(), entity.getPosterUrl(), releaseDate);
     }
 
     public static MovieDto fromEntity(Movie dto, boolean isSuccess,String resultMsg){

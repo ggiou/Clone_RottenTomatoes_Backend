@@ -36,14 +36,14 @@ public class MovieTrailerDto extends ResponseDto {
         this.setResult(success, resultMsg);
     }
 
-    public static MovieTrailerDto fromEntity(MovieTrailer dto){
-        if(Objects.isNull(dto)) return null;
-        return new MovieTrailerDto(dto.getId(), dto.getDisplayOrder(), dto.getPlayUrl(), dto.getPlayName(), dto.getPlayTime(), dto.getMovie().getId());
+    public static MovieTrailerDto fromEntity(MovieTrailer entity){
+        if(Objects.isNull(entity)) return null;
+        return new MovieTrailerDto(entity.getId(), entity.getDisplayOrder(), entity.getPlayUrl(), entity.getPlayName(), entity.getPlayTime(), entity.getMovie().getId());
     }
 
-    public static MovieTrailerDto fromEntity(MovieTrailer dto, boolean isSuccess, String resultMsg){
-        if(Objects.isNull(dto)) return new MovieTrailerDto(false, resultMsg);
-        MovieTrailerDto resDto = new MovieTrailerDto(dto.getId(), dto.getDisplayOrder(), dto.getPlayUrl(), dto.getPlayName(), dto.getPlayTime(), dto.getMovie().getId());
+    public static MovieTrailerDto fromEntity(MovieTrailer entity, boolean isSuccess, String resultMsg){
+        if(Objects.isNull(entity)) return new MovieTrailerDto(false, resultMsg);
+        MovieTrailerDto resDto = new MovieTrailerDto(entity.getId(), entity.getDisplayOrder(), entity.getPlayUrl(), entity.getPlayName(), entity.getPlayTime(), entity.getMovie().getId());
         resDto.setResult(isSuccess, resultMsg);
         return resDto;
     }

@@ -1,6 +1,6 @@
 package com.clone.rottentomato.domain.movie.component.dto;
 
-import com.clone.rottentomato.common.component.dto.ResponseDto;
+import com.clone.rottentomato.domain.movie.component.entity.CategoryInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,4 +15,6 @@ public class MovieInfoDto {
     private MovieDto movieDto;
     private MovieDetailDto movieDetailDto;
     private List<MovieTrailerDto> movieTrailerDtoList = new ArrayList<>();
+    private List<CategoryInfo> categoryList = new ArrayList<>();
+    private String categoryStr;
 }
