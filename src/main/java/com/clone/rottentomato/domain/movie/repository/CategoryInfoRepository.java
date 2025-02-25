@@ -1,0 +1,14 @@
+package com.clone.rottentomato.domain.movie.repository;
+
+import com.clone.rottentomato.domain.movie.component.entity.CategoryInfo;
+import com.clone.rottentomato.domain.movie.repository.custom.CategoryInfoCustomRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface CategoryInfoRepository extends JpaRepository<CategoryInfo, Long>, CategoryInfoCustomRepository {
+    /** 이름을 가진 카테고리 정보 리스트 검색*/
+    @Query("SELECT c FROM CategoryInfo c WHERE c.name IN :names")
+    List<CategoryInfo> findByNames(List<String> names);
+}

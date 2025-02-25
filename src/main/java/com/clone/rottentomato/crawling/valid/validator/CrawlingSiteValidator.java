@@ -8,17 +8,11 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.util.Objects;
 
 public class CrawlingSiteValidator implements ConstraintValidator<ValidCrawlingSite, CrawlingSite> {
-    private String defaultMessage;
-
-    @Override
-    public void initialize(ValidCrawlingSite constraintAnnotation) {
-        this.defaultMessage = constraintAnnotation.message();
-    }
 
     @Override
     public boolean isValid(CrawlingSite req, ConstraintValidatorContext context) {
         if(Objects.isNull(req)){
-            context.buildConstraintViolationWithTemplate("유효한 크롤링 사이트가 존재하지 않습니다.").addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("입력한 크롤링 대상 사이트가 빈 값입니다.").addConstraintViolation();
             return false;
         }
         try {

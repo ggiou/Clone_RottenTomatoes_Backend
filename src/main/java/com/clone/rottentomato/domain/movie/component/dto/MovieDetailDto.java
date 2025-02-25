@@ -29,14 +29,14 @@ public class MovieDetailDto extends ResponseDto {
         this.setResult(success, resultMsg);
     }
 
-    public static MovieDetailDto fromEntity(MovieDetail dto){
-        if(Objects.isNull(dto)) return null;
-        return new MovieDetailDto(dto.getId(), dto.getStory(), dto.getActorNames(), dto.getDirectorNames(), dto.getMovie().getId());
+    public static MovieDetailDto fromEntity(MovieDetail entity){
+        if(Objects.isNull(entity)) return null;
+        return new MovieDetailDto(entity.getId(), entity.getStory(), entity.getActorNames(), entity.getDirectorNames(), entity.getMovie().getId());
     }
 
-    public static MovieDetailDto fromEntity(MovieDetail dto, boolean isSuccess, String resultMsg){
-        if(Objects.isNull(dto)) return new MovieDetailDto(false, resultMsg);
-        MovieDetailDto resDto = new MovieDetailDto(dto.getId(), dto.getStory(), dto.getActorNames(), dto.getDirectorNames(), dto.getMovie().getId());
+    public static MovieDetailDto fromEntity(MovieDetail entity, boolean isSuccess, String resultMsg){
+        if(Objects.isNull(entity)) return new MovieDetailDto(false, resultMsg);
+        MovieDetailDto resDto = new MovieDetailDto(entity.getId(), entity.getStory(), entity.getActorNames(), entity.getDirectorNames(), entity.getMovie().getId());
         resDto.setResult(isSuccess, resultMsg);
         return resDto;
     }
