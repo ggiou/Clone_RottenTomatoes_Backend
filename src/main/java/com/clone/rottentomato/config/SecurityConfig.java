@@ -1,5 +1,6 @@
 package com.clone.rottentomato.config;
 
+
 import com.clone.rottentomato.domain.auth.JwtAuthenticationFilter;
 import com.clone.rottentomato.domain.auth.JwtUtil;
 import com.clone.rottentomato.domain.auth.service.UserDetailsServiceImpl;
@@ -26,6 +27,7 @@ public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtUtil jwtUtil; // final 추가
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -70,6 +72,7 @@ public class SecurityConfig {
                             response.getWriter().write("LOGOUT_SUCCESS");
                             response.getWriter().flush();
                         })));
+
         return http.build();
     }
 
