@@ -8,6 +8,20 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+
+  mail:
+    host: smtp.naver.com
+    port: 587
+    username: REMOVED_SECRET_EMAIL
+    password: REMOVED_SECRET
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true # 587 포트 사용 시 true
+      mail.smtp.ssl.enable: false # 587 포트 사용 시 false
+      mail.smtp.ssl.protocols: "TLSv1.2" # 또는 TLSv1.3
+
+
+
   jpa:
     hibernate:
       ddl-auto: create
@@ -24,7 +38,15 @@ spring:
           google:
             redirect-uri: "http://localhost:8080/login/oauth2/code/google"
             client-id: "859588785984-gl9ufkend5flgvkfqi4840dqknauk7vj.apps.googleusercontent.com"
-            client-secret: ""
+            client-secret: "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"
             scope:
              - email
              - profile
+
+jwt:
+  secret:
+    key: '7ZWt7ZW0OTntmZTsnbTtjIXtlZzqta3snYTrhIjrqLjshLjqs4TroZzrgpjslYTqsIDsnpDtm4zrpa3tlZzqsJzrsJzsnpDrpbzrp4zrk6TslrTqsIDsnpA='
+
+logging:
+  level:
+    org.springframework.mail: DEBUG
