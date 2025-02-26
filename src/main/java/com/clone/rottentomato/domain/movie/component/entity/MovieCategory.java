@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+@IdClass(MovieCategoryId.class) // 복합 키 클래스 지정 (영화/카테고리 정보)
 public class MovieCategory {
     @Id
     @ManyToOne

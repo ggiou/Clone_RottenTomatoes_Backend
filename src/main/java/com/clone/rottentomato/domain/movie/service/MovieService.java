@@ -10,6 +10,7 @@ import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.component.entity.MovieDetail;
 import com.clone.rottentomato.domain.movie.component.entity.MovieTrailer;
 import com.clone.rottentomato.domain.movie.repository.*;
+import com.clone.rottentomato.domain.movie.repository.custom.*;
 import com.clone.rottentomato.exception.CommonException;
 import com.clone.rottentomato.exception.JpaException;
 import com.clone.rottentomato.util.UtilString;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -28,11 +30,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MovieService {
-    private final MovieRepository movieRepository;
-    private final MovieDetailRepository movieDetailRepository;
-    private final MovieTrailerRepository movieTrailerRepository;
-    private final CategoryInfoRepository categoryInfoRepository;
-    private final MovieCategoryRepository movieCategoryRepository;
+    private final MovieCustomRepository movieRepository;
+    private final MovieDetailCustomRepository movieDetailRepository;
+    private final MovieTrailerCustomRepository movieTrailerRepository;
+    private final CategoryInfoCustomRepository categoryInfoRepository;
+    private final MovieCategoryCustomRepository movieCategoryRepository;
 
     private final WebDriver webDriver = WebDriverService.getInstance().getChromeDriver();
     private final WebElementService webElementService = new WebElementService(webDriver);
@@ -102,6 +104,11 @@ public class MovieService {
             // 1. 데이터를 가져올 나무 위키 사이트 접속
             getValidWebDriverSiteForMovieSave(crawlingReq);
 
+            // 2. 영화 기본 정보를 찾기
+            // 2-1. 기본 정보가 담긴 div 요소 가져오기
+            WebElement movieDe = webElementService.getByClassName("#dEUruEi2 MfnhXK3-");
+
+
 
             // 데이터를 다 가져온 창은 닫기
             webDriver.close();
@@ -124,7 +131,7 @@ public class MovieService {
         }
     }
 
-    /** */
+    /** 영화 정보 전체를 db 에 저장 */
     private MovieSaveResponse saveMovieInfo(List<MovieInfoDto> saveMovieInfos, CrawlingSite site){
         // 0. 응답 값 기본 세팅
         List<MovieInfoDto> successList = new ArrayList<>();

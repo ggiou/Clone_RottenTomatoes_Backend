@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface MovieCustomRepository {
     // 영화 기본 정보 저장
-    Movie saveOrUpdateMovie(Movie entity);
     MovieDto returnSaveOrUpdateMovie(Movie entity);
     List<Movie> saveOrUpdateAllMovie(List<Movie> entityList);
 }

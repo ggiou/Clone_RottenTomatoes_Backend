@@ -1,14 +1,11 @@
-package com.clone.rottentomato.domain.movie.repository.impl;
+package com.clone.rottentomato.domain.movie.repository.custom.impl;
 
 import com.clone.rottentomato.domain.movie.component.entity.CategoryInfo;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.component.entity.MovieCategory;
 import com.clone.rottentomato.domain.movie.repository.MovieCategoryRepository;
 import com.clone.rottentomato.domain.movie.repository.custom.MovieCategoryCustomRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import jdk.jfr.Category;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -21,8 +18,6 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class MovieCategoryCustomRepositoryImpl implements MovieCategoryCustomRepository {
-    @PersistenceContext
-    private EntityManager entityManager;
     private final MovieCategoryRepository movieCategoryRepository;
 
     /**

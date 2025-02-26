@@ -4,14 +4,13 @@ import com.clone.rottentomato.common.component.entity.TimeStamped;
 import com.clone.rottentomato.common.constant.CommonError;
 import com.clone.rottentomato.common.fomatter.DefaultDateFormat;
 import com.clone.rottentomato.domain.movie.component.dto.MovieDto;
-import com.clone.rottentomato.exception.CommonException;
 import com.clone.rottentomato.exception.MovieException;
 import com.clone.rottentomato.util.UtilDate;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

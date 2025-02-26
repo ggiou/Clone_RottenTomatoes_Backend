@@ -58,7 +58,6 @@ dependencies {
 
 	// valid
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'commons-validator:commons-validator:1.7'
 
 	// aws
 	compileOnly 'org.springframework.cloud:spring-cloud-starter-aws:2.0.1.RELEASE'

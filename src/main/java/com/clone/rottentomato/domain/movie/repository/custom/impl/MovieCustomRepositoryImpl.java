@@ -1,35 +1,47 @@
-package com.clone.rottentomato.domain.movie.repository.impl;
+package com.clone.rottentomato.domain.movie.repository.custom.impl;
 
 import com.clone.rottentomato.domain.movie.component.dto.MovieDto;
-import com.clone.rottentomato.domain.movie.component.dto.MovieTrailerDto;
-import com.clone.rottentomato.domain.movie.component.entity.CategoryInfo;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
-import com.clone.rottentomato.domain.movie.component.entity.MovieTrailer;
+import com.clone.rottentomato.domain.movie.repository.MovieRepository;
 import com.clone.rottentomato.domain.movie.repository.custom.MovieCustomRepository;
 import com.clone.rottentomato.util.UtilJpa;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
-@Transactional
 @Repository
+@Transactional
+@RequiredArgsConstructor
 public class MovieCustomRepositoryImpl implements MovieCustomRepository {
-    @PersistenceContext
-    private EntityManager entityManager;
-    private UtilJpa<Movie, Long> utilJpaForMovie;
+    private final MovieRepository movieRepository;
+    private final UtilJpa<Movie> utilJpa;
+
 
     // ================================= 영화 기본정보 =================================
     /** 영화 기본정보 데이터가 없다면 저장, 있으면 업데이트
      * @return 저장한 movie 객체 단건 */
-    @Override
     public Movie saveOrUpdateMovie(Movie entity) {
-        return utilJpaForMovie.saveOrUpdateByPk(entity.getId(), entity);
+        if(Objects.isNull(entity)) return null;
+        if(!Objects.isNull(entity.getId())) {
+            // id 있다면, 영화 정보 pk로 찾아 없다면 save, 있다면 다른 값만 update.
+            return saveOrUpdate(movieRepository.findById(entity.getId()), entity);
+        }
+        if(!StringUtils.isBlank(entity.getName())) {
+            // id 값이 없다면, 영화 정보 이름으로 찾아 없다면 save, 있다면 다른 값만 update.
+            return saveOrUpdate(movieRepository.findByName(entity.getName()), entity);
+        }
+        // 영화의 경우, 구분자를 pk or name 으로 해, 없다면 저장이 불가능하게 한다.
+        throw new NullPointerException("저장할 수 없는 데이터 입니다.");
     }
 
     /** 영화 기본정보 데이터가 없다면 저장, 있으면 업데이트
@@ -59,6 +71,15 @@ public class MovieCustomRepositoryImpl implements MovieCustomRepository {
             }
         }
         return saveResult;
+    }
+
+    private Movie saveOrUpdate(Optional<Movie> findDbEntity, Movie requestEntity){
+        // 이미 존재한다면, null 이 아닌 값만 업데이트
+        if(findDbEntity.isPresent()) {
+            utilJpa.setNotEqualsProperties(findDbEntity.get(), requestEntity);
+            return movieRepository.save(findDbEntity.get());
+        }
+        return movieRepository.save(requestEntity);
     }
 
 }
