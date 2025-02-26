@@ -10,13 +10,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MovieCategory {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;        // 영화 카테고리 id
     @ManyToOne
     @JoinColumn(name = "MOVIE_ID")
     private Movie movie;    // 영화 id
+
+    @Id
     @ManyToOne
     @JoinColumn(name = "CATEGORY_INFO_ID")
     private CategoryInfo categoryInfo;    // 영화 카테고리 정보 id
 
+    private MovieCategory(Movie movie, CategoryInfo categoryInfo){
+        this.movie = movie;
+        this.categoryInfo = categoryInfo;
+    }
+
+    public static MovieCategory of(Movie movie, CategoryInfo categoryInfo){
+        return new MovieCategory(movie, categoryInfo);
+    }
 }

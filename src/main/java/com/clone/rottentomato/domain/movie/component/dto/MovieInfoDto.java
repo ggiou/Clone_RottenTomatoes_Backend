@@ -15,6 +15,6 @@ public class MovieInfoDto {
     private MovieDto movieDto;
     private MovieDetailDto movieDetailDto;
     private List<MovieTrailerDto> movieTrailerDtoList = new ArrayList<>();
-    private List<CategoryInfo> categoryList = new ArrayList<>();
+    private List<CategoryInfoDto> categoryList = new ArrayList<>();
     private String categoryStr;
 }
