@@ -1,17 +1,20 @@
 package com.clone.rottentomato.config;
 
+
 import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Getter
-@Setter
 @Configuration
-@ConfigurationProperties(prefix = "google")
 public class GoogleConfig {
 
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
+
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String clientSecret;
+
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
     private String redirectUri;
 }
