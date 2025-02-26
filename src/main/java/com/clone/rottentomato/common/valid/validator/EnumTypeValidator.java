@@ -13,15 +13,17 @@ public class EnumTypeValidator implements ConstraintValidator<ValidEnumType, Enu
 
     private Class<? extends Enum<? extends EnumType>> enumClass;
     private String defaultMessage;
-    private boolean isExistDefaultMessage;
+    private boolean isExistDefaultMessage = false;
     private String fieldName;
-    private boolean isExistFieldName;
+    private boolean isExistFieldName = false;
 
     @Override
     public void initialize(ValidEnumType constraintAnnotation) {
         this.enumClass = constraintAnnotation.enumClass();
-        this.defaultMessage = constraintAnnotation.message();
-        this.isExistDefaultMessage = !StringUtils.isBlank(defaultMessage);
+        if(!StringUtils.isBlank(defaultMessage) && !this.defaultMessage.equals("해당 값이 존재하지 않습니다.")) {
+            this.defaultMessage = constraintAnnotation.message();
+            this.isExistDefaultMessage = true;
+        }
         this.fieldName = UtilString.isNull(String.format("[%s]", constraintAnnotation.fieldName()));
         this.isExistFieldName = !StringUtils.isBlank(fieldName);
     }
@@ -29,13 +31,15 @@ public class EnumTypeValidator implements ConstraintValidator<ValidEnumType, Enu
     @Override
     public boolean isValid(Enum<?> value, ConstraintValidatorContext context) {
         if (Objects.isNull(value)) {
-            context.buildConstraintViolationWithTemplate(getErrorMessage(" 해당 값이 존재하지 않습니다.")).addConstraintViolation();
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(getErrorMessage(" 해당 값이 빈 값으로 들어왔습니다.")).addConstraintViolation();
             return false;
         }
 
         // EnumType 인터페이스 구현 여부 확인
         if (!EnumType.class.isAssignableFrom(enumClass)) {
-            context.buildConstraintViolationWithTemplate(getErrorMessage(" 유효하지 않은 EnumType입니다.")).addConstraintViolation();
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(getErrorMessage(" 유효하지 않은 EnumType 입니다.")).addConstraintViolation();
             return false;
         }
 
@@ -44,8 +48,14 @@ public class EnumTypeValidator implements ConstraintValidator<ValidEnumType, Enu
             EnumType enumType = (EnumType) value;
 
             // EnumType의 key 값 검증
-            return enumType.getKey() != null;
+            if(enumType.getKey() != null){
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate(getErrorMessage(" 유효하지 않은 EnumType 입니다.")).addConstraintViolation();
+                return false;
+            }
+            return true;
         } catch (IllegalArgumentException e) {
+            context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(getErrorMessage(" 유효하지 않은 구분자 값입니다.")).addConstraintViolation();
             return false;
         }

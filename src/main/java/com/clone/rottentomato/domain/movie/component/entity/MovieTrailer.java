@@ -47,4 +47,6 @@ public class MovieTrailer extends TimeStamped {
         if(Objects.isNull(movie)) throw new MovieException("영화 정보가 없습니다.", CommonError.DATE_FORMAL_ERROR);
         return new MovieTrailer(dto.getId(), dto.getDisplayOrder(), dto.getPlayUrl(), dto.getPlayName(), dto.getPlayTime(), movie);
     }
+
+
 }

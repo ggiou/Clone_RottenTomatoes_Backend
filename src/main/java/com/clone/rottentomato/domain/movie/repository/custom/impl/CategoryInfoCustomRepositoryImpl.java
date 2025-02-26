@@ -1,4 +1,4 @@
-package com.clone.rottentomato.domain.movie.repository.impl;
+package com.clone.rottentomato.domain.movie.repository.custom.impl;
 
 import com.clone.rottentomato.domain.movie.component.dto.CategoryInfoDto;
 import com.clone.rottentomato.domain.movie.component.entity.CategoryInfo;
