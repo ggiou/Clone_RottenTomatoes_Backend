@@ -1,6 +1,7 @@
 package com.clone.rottentomato.domain.review.component.entity;
 
 
+import com.clone.rottentomato.common.component.entity.TimeStamped;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
@@ -10,10 +11,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor
 @Entity
-public class Review {
+public class Review extends TimeStamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long review_id;
     @Column(nullable = false)

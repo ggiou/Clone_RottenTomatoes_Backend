@@ -2,6 +2,7 @@ package com.clone.rottentomato.domain.likes.repository;
 
 
 import com.clone.rottentomato.domain.likes.component.entity.Likes;
+import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,8 +13,8 @@ import java.util.Optional;
 @Repository
 public interface LikesRepository extends JpaRepository<Likes,Long> {
 
-    @Query("select l from Likes l where l.movie=:movie")
-    Optional<Likes> findByMovie(Movie movie);
+    @Query("select l from Likes l where l.movie=:movie and l.member =:member")
+    Optional<Likes> findByMovieAndMember(Movie movie,Member member);
 
     int countByMovie(Movie movie);
 
