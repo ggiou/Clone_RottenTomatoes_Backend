@@ -1,6 +1,7 @@
 package com.clone.rottentomato.domain.mypage.service;
 
 
+import com.clone.rottentomato.domain.likes.component.entity.Likes;
 import com.clone.rottentomato.domain.likes.repository.LikesRepository;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
@@ -9,6 +10,8 @@ import com.clone.rottentomato.domain.mypage.component.dto.MypageResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +30,8 @@ public class MypageService {
 
     //  회원 정보 조회
     @Transactional(readOnly = true)
-    public ResponseEntity<MypageResponseDto> getMembers(String email) {
-        Optional<Member> find = memberRepository.findByMemberEmail(email);
+    public ResponseEntity<MypageResponseDto> getMembers(Member member) {
+        Optional<Member> find = memberRepository.findByMemberEmail(member.getMemberEmail());
         if(find.isEmpty()){
             throw new IllegalArgumentException("회원이 아닙니다.");
         }
@@ -38,9 +41,9 @@ public class MypageService {
 
 
 
-    public Page<MypageMovieResponseDto> getMovies(int page, int size) {
-//        Pageable pageable = (Pageable) PageRequest.of(page,size);
-//        Page<Likes> likespage = likesRepository.findByAndMemberEmail(pageable)
+    public Page<MypageMovieResponseDto> getMovies(int page, int size, Member member) {
+        Pageable pageable = (Pageable) PageRequest.of(page,size);
+        Page<Likes> likespage = likesRepository.findByAndMemberEmail(pageable,member.getMemberEmail());
         return null;
     }
 }

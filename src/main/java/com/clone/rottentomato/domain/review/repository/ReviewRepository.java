@@ -14,4 +14,7 @@ import java.util.Optional;
 public interface ReviewRepository extends CrudRepository<Review, Long> {
     @Query("SELECT r FROM Review r WHERE r.member = :member AND r.movie = :movie ORDER BY r.regDate DESC")
     Optional<Review> findTopByMemberAndMovieOrderByRegDateDesc(Member member, Movie movie);
+
+    @Query("select r from Review r where r.review_id=:reviewId and r.member=:member")
+    Optional<Review> findByIdAndMember(Long reviewId, Member member);
 }

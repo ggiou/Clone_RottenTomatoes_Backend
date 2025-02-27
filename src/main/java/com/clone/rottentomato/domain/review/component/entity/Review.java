@@ -11,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -47,5 +46,11 @@ public class Review extends TimeStamped {
                 .member(member)
                 .movie(movie)
                 .build();
+    }
+
+
+    public void update(ReviewRequestDto reviewRequestDto) {
+        this.field = reviewRequestDto.getField();
+        this.reviewContent = reviewRequestDto.getReviewContent();
     }
 }

@@ -40,4 +40,11 @@ public class ReviewResponseDto {
                 .movie(movie)
                 .build();
     }
+
+
+    public static ReviewResponseDto update_from(Review review) {
+        return ReviewResponseDto.builder()
+                .review(review)
+                .build();
+    }
 }
