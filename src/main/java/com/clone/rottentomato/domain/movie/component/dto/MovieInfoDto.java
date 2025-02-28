@@ -1,9 +1,11 @@
 package com.clone.rottentomato.domain.movie.component.dto;
 
+import com.clone.rottentomato.crawling.constant.CrawlingSite;
 import com.clone.rottentomato.domain.movie.component.entity.CategoryInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.List;

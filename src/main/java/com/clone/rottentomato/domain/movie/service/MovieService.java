@@ -1,6 +1,8 @@
 package com.clone.rottentomato.domain.movie.service;
 
 import com.clone.rottentomato.common.component.dto.CommonResponse;
+import com.clone.rottentomato.common.constant.CommonError;
+import com.clone.rottentomato.common.constant.CustomError;
 import com.clone.rottentomato.crawling.constant.CrawlingSite;
 import com.clone.rottentomato.crawling.service.WebDriverService;
 import com.clone.rottentomato.crawling.service.WebElementService;
@@ -13,6 +15,7 @@ import com.clone.rottentomato.domain.movie.repository.*;
 import com.clone.rottentomato.domain.movie.repository.custom.*;
 import com.clone.rottentomato.exception.CommonException;
 import com.clone.rottentomato.exception.JpaException;
+import com.clone.rottentomato.exception.MovieException;
 import com.clone.rottentomato.util.UtilString;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +63,7 @@ public class MovieService {
         if(!CollectionUtils.isEmpty(crawlingResponse.getSaveSuccessList())){
             // 2-2. 크롤링을 성공한 영화 정보에 대해 db에 저장한다.
             try {
-                dbSaveResponse = saveMovieInfo(crawlingResponse.getSaveSuccessList(), CrawlingSite.NAMU_WIKI);
+                dbSaveResponse = saveMovieInfo(crawlingResponse.getSaveSuccessList());
                 // 3. db 저장 성공 여부에 따라 응답값을 set 한다.
                 processData.addResponse(dbSaveResponse);
             }catch (Exception e){
@@ -83,32 +86,49 @@ public class MovieService {
         Map<CrawlingSite, List<MovieSaveRequest>> saveReqListBySite = requests.stream()
                 .collect(Collectors.groupingBy(MovieSaveRequest :: getCrawlingSite,Collectors.toList()));
 
-        List<MovieSaveRequest> namuWikiReqs = saveReqListBySite.get(CrawlingSite.NAMU_WIKI);
+        // 1-1. 네이버 검색을 통한 데이터 저장
+        List<MovieSaveRequest> naverSearchReqs = saveReqListBySite.get(CrawlingSite.NAVER);
 
-        // 2. 크롤링 대상 사이트 별 각 리스트가 존재하면 크롤링해 정보는 반환한다. (현재는 나무 위키만 존재, 추후 확장된다면, 타입별로 서비스 분리)
-        if(!CollectionUtils.isEmpty(namuWikiReqs)){
-            // 2-1 나무 위키에서 크롤링해 정보 반환
-            MovieSaveResponse movieInfoByNamuWikiList = getMovieInfoOfNamuWikiByCrawling(namuWikiReqs);
-            response.addResponse(movieInfoByNamuWikiList);
+        // 2. 크롤링 대상 사이트 별 각 리스트가 존재하면 크롤링해 정보는 반환한다. (현재는 네이버만 존재, 추후 확장된다면, 타입별로 서비스 분리)
+        if(!CollectionUtils.isEmpty(naverSearchReqs)){
+            // 2-1 네이버 검색에서 영화 정보를 크롤링해 정보 반환
+            MovieSaveResponse movieInfoByNaverList = getMovieInfoOfNaverByCrawling(naverSearchReqs);
+            response.addResponse(movieInfoByNaverList);
         }
         
         return response;
     }
 
-    private MovieSaveResponse getMovieInfoOfNamuWikiByCrawling(List<MovieSaveRequest> requests){
+    private MovieSaveResponse getMovieInfoOfNaverByCrawling(List<MovieSaveRequest> requests){
         // 0. 응답 값 세팅
         List<MovieInfoDto> successList = new ArrayList<>();
         List<MovieInfoDto> failList = new ArrayList<>();
 
         for(MovieSaveRequest crawlingReq : requests) {
-            // 1. 데이터를 가져올 나무 위키 사이트 접속
-            getValidWebDriverSiteForMovieSave(crawlingReq);
+            MovieInfoDto movieInfoDto = new MovieInfoDto();
+            // 네이버 검색 결과의, 영화 정보 영역
+            WebElement naverMovieArea;
+
+            // 1. 데이터를 가져올 사이트 접속
+            try {
+                // 1-1. 네이버 검색 결과 창 접속
+                getWebDriverSiteForMovieSave(crawlingReq);
+                // 1-2. 검색 결과 창이 유효한지 확인 (네이버 영화 영역이 존재해야, 영화 정보 탐색 가능)
+                //naverMovieArea =
+
+            }catch (Exception e){
+                // 사이트 접속에 실패하면 중단
+                MovieDto failDto = MovieDto.fromResult(crawlingReq.getName(),false, "[CrawlingSiteGet] 유효한 네이버 크롤링 대상 사이트에 접근하는데 실패했습니다. [Error] "+e.getMessage());
+                movieInfoDto.setMovieDto(failDto);
+                failList.add(movieInfoDto);
+                continue;
+            }
 
             // 2. 영화 기본 정보를 찾기
-            // 2-1. 기본 정보가 담긴 div 요소 가져오기
+            // 2-1. 기본 정보가 담긴 요소 가져오기 (네이버 영화 검색 결과 영역)
             WebElement movieDe = webElementService.getByClassName("#dEUruEi2 MfnhXK3-");
 
-
+            // 개봉일자의 경우 - - 로 바뀌게.. 문자열 변경
 
             // 데이터를 다 가져온 창은 닫기
             webDriver.close();
@@ -118,21 +138,24 @@ public class MovieService {
     }
 
     /** 영화 정보 저장을 위한 대상 사이트를 찾는 기능*/
-    private void getValidWebDriverSiteForMovieSave(MovieSaveRequest request){
-        boolean isValidSite = false;
-        if (CrawlingSite.NAMU_WIKI.equals(request.getCrawlingSite())){
+    private void getWebDriverSiteForMovieSave(MovieSaveRequest request){
+        if (CrawlingSite.NAVER.equals(request.getCrawlingSite())){
             if (StringUtils.isNotBlank(request.getSearchUrl())){
-                // 사용자가 입력한 크롤링 사이트로 검색
+                // 사용자가 입력한 크롤링 사이트 url 접속
                 webDriver.get(request.getSearchUrl());
                 return;
+            }else if(StringUtils.isNotBlank(request.getName())){
+                // 사용자가 입력한 이름 + "영화" 로 네이버 검색창 url 결과로 사이트 접속
+                String searchUrl = CrawlingSite.NAVER.getMovieSearchFullUrl(request.getName() + " 영화");
+                webDriver.get(searchUrl);
+                return;
             }
-
-            String searchUrl = CrawlingSite.NAMU_WIKI.getSearchFullUrl(request.getName());
         }
+        throw new MovieException("크롤링 대상 사이트 접속에 실패했습니다.", CommonError.INVALID_REQUEST);
     }
 
     /** 영화 정보 전체를 db 에 저장 */
-    private MovieSaveResponse saveMovieInfo(List<MovieInfoDto> saveMovieInfos, CrawlingSite site){
+    private MovieSaveResponse saveMovieInfo(List<MovieInfoDto> saveMovieInfos){
         // 0. 응답 값 기본 세팅
         List<MovieInfoDto> successList = new ArrayList<>();
         List<MovieInfoDto> failList = new ArrayList<>();
@@ -142,11 +165,13 @@ public class MovieService {
 
             // 1. 영화 기본 정보 저장
             Movie movie = Movie.fromDto(reqDto.getMovieDto());
+            String movieName = UtilString.isNull(reqDto.getMovieDto().getName(), "ERROR");
+
             try {
                 resDto.setMovieDto(movieRepository.returnSaveOrUpdateMovie(movie));
             } catch (Exception e) {
                 resDto.setMovieDto(MovieDto.fromResult(false, "영화 기본 정보를 저장하는 중 오류가 발생했습니다."));
-                log.error(String.format("[%s] 영화 기본 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", site.getKrName(), e.getMessage(),UtilString.stringify(movie)));
+                log.error(String.format("[%s] 영화 기본 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", movieName, e.getMessage(),UtilString.stringify(movie)));
             }
 
             // 기본 영화 정보 저장에 실패한다면, 하위는 모두 영화 정보를 외래키로 가지므로, 중단
@@ -161,7 +186,7 @@ public class MovieService {
                 resDto.setMovieDetailDto(movieDetailRepository.returnSaveOrUpdateMovieDetail(movieDetail));
             }catch (Exception e){
                 resDto.setMovieDetailDto(MovieDetailDto.fromEntity(movieDetail,false, "영화 상세 정보를 저장하는 중 오류가 발생했습니다."));
-                log.error(String.format("[%s] 영화 상세 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", site.getKrName(), e.getMessage(), UtilString.stringify(movieDetail)));
+                log.error(String.format("[%s] 영화 상세 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", movieName, e.getMessage(), UtilString.stringify(movieDetail)));
             }
 
             // 3. 영화 카테고리 정보 저장
@@ -174,7 +199,7 @@ public class MovieService {
                 // 카테고리 정보와, 연결 정보가 정상적으로 수행됬다면, 요청으로 들어온 값 전체 정보가 정상 저장되니, 요청값으로 세팅
                 resDto.setCategoryList(reqDto.getCategoryList());
             }catch (Exception e){
-                log.error(String.format("[%s] 영화 카테고리 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", site.getKrName(), e.getMessage(), categoryInfoList));
+                log.error(String.format("[%s] 영화 카테고리 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", movieName, e.getMessage(), categoryInfoList));
             }
 
             // 4. 영화 예고편 리스트 정보 저장
@@ -186,7 +211,7 @@ public class MovieService {
                         saveResults.add(movieTrailerRepository.returnSaveOrUpdateMovieTrailer(trailer));
                     } catch (Exception e) {
                         saveResults.add(MovieTrailerDto.fromEntity(trailer, false, "영화 예고편 정보를 저장하는 중 오류가 발생했습니다."));
-                        log.error(String.format("[%s] 영화 예고편 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", site.getKrName(), e.getMessage(), UtilString.stringify(trailer)));
+                        log.error(String.format("[%s] 영화 예고편 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", movieName, e.getMessage(), UtilString.stringify(trailer)));
                     }
                 }
                 resDto.setMovieTrailerDtoList(saveResults);

@@ -3,15 +3,13 @@ package com.clone.rottentomato.domain.movie.component.dto;
 import com.clone.rottentomato.common.component.dto.ResponseDto;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.util.UtilDate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @Builder
 public class MovieDto extends ResponseDto {
@@ -29,11 +27,17 @@ public class MovieDto extends ResponseDto {
         this.releaseDate = releaseDate;
     }
 
-
     // 응답값으로 사용시, 성공 실패 여부만 담은 객체 반환
     private MovieDto(boolean success, String resultMsg){
         this.setResult(success, resultMsg);
     }
+
+    // 응답값으로 사용시, 영화 이름, 성공 실패 여부만 담은 객체 반환
+    private MovieDto(String movieName, boolean success, String resultMsg){
+        this.name = movieName;
+        this.setResult(success, resultMsg);
+    }
+
 
     public static MovieDto fromEntity(Movie entity){
         if(Objects.isNull(entity)) return null;
@@ -51,5 +55,9 @@ public class MovieDto extends ResponseDto {
     // todo 이거 공통으로 뺄수 있는지 확인, fromResultMsg
     public static MovieDto fromResult(boolean isSuccess, String resultMsg){
         return new MovieDto(isSuccess, resultMsg);
+    }
+
+    public static MovieDto fromResult(String movieName, boolean isSuccess, String resultMsg){
+        return new MovieDto(movieName, isSuccess, resultMsg);
     }
 }
