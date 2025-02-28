@@ -18,10 +18,10 @@ import static com.clone.rottentomato.crawling.constant.CrawlingUrlConst.CRAWLING
 @Getter
 @RequiredArgsConstructor
 public enum CrawlingSite implements EnumType {
-    NAMU_WIKI("나무위키", NAMU_WIKI_SEARCH_URL)
+    NAVER("네이버", NAVER_MOVIE_SEARCH_URL)
     ;
     private final String krName;
-    private final String searchUrl;
+    private final String movieSearchUrl;
 
 
     @Override
@@ -48,11 +48,11 @@ public enum CrawlingSite implements EnumType {
 
     }
 
-    /** 크롤링 사이트 + suffixUrl */
-    public String getSearchFullUrl(String suffixUrl){
+    /** 크롤링 영화 검색 사이트 + suffixUrl */
+    public String getMovieSearchFullUrl(String suffixUrl){
         if(StringUtils.isBlank(suffixUrl)) return StringUtils.EMPTY;
         if(suffixUrl.startsWith("/")) suffixUrl = suffixUrl.substring(1);
-        String concatUrl = searchUrl + suffixUrl;
+        String concatUrl = movieSearchUrl + suffixUrl;
         if(UtilString.isUrlForm(concatUrl)) return concatUrl;
         throw new CommonException(getErrorMsg(), CommonError.FORMAL_ERROR);
     }
