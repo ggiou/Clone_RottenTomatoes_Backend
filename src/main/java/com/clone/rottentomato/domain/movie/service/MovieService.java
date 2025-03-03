@@ -20,7 +20,7 @@ import com.clone.rottentomato.util.UtilString;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -117,7 +117,7 @@ public class MovieService {
                 try {
                     // 1-2. 검색 결과 창이 유효한지 확인 (네이버 영화 영역이 존재해야, 영화 정보 탐색 가능)
                     naverDataElement = webElementService.getByMultipleClassNames("sc_new", "cs_common_module", "case_empasis", "_au_movie_content_wrap");
-                }catch (NoSuchElementException e){
+                }catch (NoSuchElementException|TimeoutException e){
                     throw new MovieException("잘못된 요청입니다. 영화 검색 결과 값이 존재하지 않습니다.");
                 }
             } catch (MovieException e) {
@@ -200,10 +200,10 @@ public class MovieService {
             // 가져온 정보를 기준으로 저장을 위한 dto 생성
             MovieDto movieDto = MovieDto.forSave(movieTitle, posterUrl, releaseDate.replaceAll("\\.", "-").replaceFirst("-$", StringUtils.EMPTY));
             MovieDetailDto movieDetailDto = MovieDetailDto.forSave(story, actorNames, directorNames);
-            List<CategoryInfoDto> categoryInfoDtos = Arrays.stream(categoryStr.split(",")).map(CategoryInfoDto::forSave).toList();
+            List<CategoryInfoDto> categoryInfoDtos = Arrays.stream(categoryStr.split("[,/]")).map(CategoryInfoDto::forSave).toList();
 
             // 3. 네이버 크롤링이 성공했다면 만들어진 객체를, 성공리스트에 add
-            movieInfoDto = new MovieInfoDto(movieDto, movieDetailDto, movieTrailerDtos, categoryInfoDtos, categoryStr);
+            movieInfoDto = new MovieInfoDto(movieDto, movieDetailDto, movieTrailerDtos, categoryInfoDtos, categoryStr.replaceAll("/", ","));
             successList.add(movieInfoDto);
         }
         // 데이터를 다 가져온 창은 닫기
@@ -267,7 +267,7 @@ public class MovieService {
                 movie = movieCustomRepository.saveOrUpdateMovie(movie);
                 resDto.setMovieDto(MovieDto.fromEntity(movie, true,"영화 정보 저장에 성공했습니다."));
             } catch (Exception e) {
-                resDto.setMovieDto(MovieDto.fromResult(false, "영화 기본 정보를 저장하는 중 오류가 발생했습니다."));
+                resDto.setMovieDto(MovieDto.fromEntity(movie, false, "영화 기본 정보를 저장하는 중 오류가 발생했습니다."));
                 log.error(String.format("[%s] 영화 기본 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", movieName, e.getMessage(),UtilString.stringify(movie)));
             }
 
