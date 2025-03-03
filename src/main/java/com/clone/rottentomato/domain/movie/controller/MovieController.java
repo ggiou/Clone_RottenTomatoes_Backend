@@ -1,6 +1,5 @@
 package com.clone.rottentomato.domain.movie.controller;
 
-import ch.qos.logback.core.status.ErrorStatus;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
 import com.clone.rottentomato.domain.movie.component.dto.MovieSaveRequest;
@@ -10,10 +9,7 @@ import com.clone.rottentomato.exception.MovieException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,8 +26,7 @@ public class MovieController {
         if(bindingResult.hasErrors()) {
             throw new CommonException(bindingResult.getAllErrors().get(0).getDefaultMessage(), CommonError.INVALID_REQUEST);
         }
-        CommonResponse response = CommonResponse.success("");
-        movieService.saveMovieProcess(request);
+        CommonResponse response = movieService.saveMovieProcess(request);;
         return response;
     }
 }

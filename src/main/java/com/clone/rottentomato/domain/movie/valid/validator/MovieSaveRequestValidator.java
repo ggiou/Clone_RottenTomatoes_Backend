@@ -32,18 +32,14 @@ public class MovieSaveRequestValidator implements ConstraintValidator<ValidMovie
         if(hasName) return true;
         if(hasSearchUrl){
             // 크롤링을 통해 데이터를 저장할 경우, 입력한 검색 url 이  대상 사이트의, 영화 검색 기본 url 이 포함되어 있어야한다.
-            if(req.getSearchUrl().contains(req.getCrawlingSite().getMovieSearchUrl())){
+            if(!req.getSearchUrl().contains(req.getCrawlingSite().getMovieSearchUrl()) || !UtilString.isUrlForm(req.getSearchUrl())){
                 CrawlingSite site = req.getCrawlingSite();
                 context.disableDefaultConstraintViolation();
                 context.buildConstraintViolationWithTemplate(String.format("\n입력하신 %s 는 잘못된 검색 요청 url 입니다.\n [%s]의 유효한 검색 url 형식은 \"%s\" 로 시작합니다.", req.getSearchUrl(), site.getKrName(), site.getMovieSearchUrl())).addConstraintViolation();
-
+                return false;
             }
 
-            if(UtilString.isUrlForm(req.getSearchUrl())) return true;
-            // 크롤링 대상 사이트가 적합한 url 이 아니라면 다른 문구로 안내
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(getErrorMessage(String.format("\n입력하신 %s 는 잘못된 검색 요청 url 입니다.", req.getSearchUrl()))).addConstraintViolation();
-            return false;
+            return true;
         }
 
         context.disableDefaultConstraintViolation();

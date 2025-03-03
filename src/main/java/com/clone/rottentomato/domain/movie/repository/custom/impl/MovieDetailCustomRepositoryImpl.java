@@ -46,7 +46,7 @@ public class MovieDetailCustomRepositoryImpl implements MovieDetailCustomReposit
         try {
             return MovieDetailDto.fromEntity(saveOrUpdateMovieDetail(entity), true,"영화 상세 정보 저장에 성공했습니다.");
         }catch (Exception e){
-            log.error("[returnSaveOrUpdateMovieDetail] :" + e.getMessage());
+            log.error("[returnSaveOrUpdateMovieDetail] :{}", e.getMessage());
             return MovieDetailDto.fromEntity(entity, false,String.format("영화 상세 정보 저장에 실패했습니다..\n[error] %s", e.getMessage()));
         }
     }
@@ -54,7 +54,9 @@ public class MovieDetailCustomRepositoryImpl implements MovieDetailCustomReposit
     private MovieDetail saveOrUpdate(Optional<MovieDetail> findDbEntity, MovieDetail requestEntity){
         // 이미 존재한다면, null 이 아닌 값만 업데이트
         if(findDbEntity.isPresent()) {
-            utilJpa.setNotEqualsProperties(findDbEntity.get(), requestEntity);
+            if(utilJpa.setNotEqualsProperties(findDbEntity.get(), requestEntity)){
+                return findDbEntity.get();
+            }
             return movieDetailRepository.save(findDbEntity.get());
         }
         return movieDetailRepository.save(requestEntity);

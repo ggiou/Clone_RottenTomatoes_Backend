@@ -5,18 +5,13 @@ import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.repository.MovieRepository;
 import com.clone.rottentomato.domain.movie.repository.custom.MovieCustomRepository;
 import com.clone.rottentomato.util.UtilJpa;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Repository
@@ -30,6 +25,7 @@ public class MovieCustomRepositoryImpl implements MovieCustomRepository {
     // ================================= 영화 기본정보 =================================
     /** 영화 기본정보 데이터가 없다면 저장, 있으면 업데이트
      * @return 저장한 movie 객체 단건 */
+    @Override
     public Movie saveOrUpdateMovie(Movie entity) {
         if(Objects.isNull(entity)) return null;
         if(!Objects.isNull(entity.getId())) {
@@ -76,7 +72,10 @@ public class MovieCustomRepositoryImpl implements MovieCustomRepository {
     private Movie saveOrUpdate(Optional<Movie> findDbEntity, Movie requestEntity){
         // 이미 존재한다면, null 이 아닌 값만 업데이트
         if(findDbEntity.isPresent()) {
-            utilJpa.setNotEqualsProperties(findDbEntity.get(), requestEntity);
+            // 영화 평점의 경우, 리뷰 점수를 통해 쌓이므로, 업데이트 되선 안된다. (모든 값이 동일해도 호출 x)
+            if(utilJpa.setNotEqualsProperties(findDbEntity.get(), requestEntity, Collections.singletonList("rating"))){
+                return findDbEntity.get();
+            }
             return movieRepository.save(findDbEntity.get());
         }
         return movieRepository.save(requestEntity);

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -35,9 +36,7 @@ public class MovieTrailerCustomRepositoryImpl implements MovieTrailerCustomRepos
         if(!Objects.isNull(entity.getMovie()) && !Objects.isNull(entity.getMovie().getId())) {
             if (!Objects.isNull(entity.getPlayUrl()) && entity.getDisplayOrder() > 0){
                 Optional<MovieTrailer> movieTrailerOptional = movieTrailerRepository.findByPlayUrl(entity.getPlayUrl());
-                if(movieTrailerOptional.isEmpty()) {
-                    movieTrailerRepository.save(entity);
-                }
+                return saveOrUpdate(movieTrailerOptional, entity);
             }
         }
         // 영화 상세정보는, 영화가 존재해야지만, 저장이 가능하다.
@@ -59,7 +58,9 @@ public class MovieTrailerCustomRepositoryImpl implements MovieTrailerCustomRepos
     private MovieTrailer saveOrUpdate(Optional<MovieTrailer> findDbEntity, MovieTrailer requestEntity){
         // 이미 존재한다면, null 이 아닌 값만 업데이트
         if(findDbEntity.isPresent()) {
-            utilJpa.setNotEqualsProperties(findDbEntity.get(), requestEntity);
+            if(utilJpa.setNotEqualsProperties(findDbEntity.get(), requestEntity)){
+                return findDbEntity.get();
+            }
             return movieTrailerRepository.save(findDbEntity.get());
         }
         return movieTrailerRepository.save(requestEntity);

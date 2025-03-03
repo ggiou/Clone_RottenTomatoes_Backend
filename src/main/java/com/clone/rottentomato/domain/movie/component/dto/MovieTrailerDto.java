@@ -36,6 +36,11 @@ public class MovieTrailerDto extends ResponseDto {
         this.setResult(success, resultMsg);
     }
 
+    /** 영화 예고편 저장을 위한 객체 */
+    public static MovieTrailerDto forSave(int displayOrder, String playUrl, String playName, String playTime){
+        return new MovieTrailerDto(null,displayOrder, playUrl, playName, playTime, null);
+    }
+
     public static MovieTrailerDto fromEntity(MovieTrailer entity){
         if(Objects.isNull(entity)) return null;
         return new MovieTrailerDto(entity.getId(), entity.getDisplayOrder(), entity.getPlayUrl(), entity.getPlayName(), entity.getPlayTime(), entity.getMovie().getId());

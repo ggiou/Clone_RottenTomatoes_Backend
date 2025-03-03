@@ -3,11 +3,7 @@ package com.clone.rottentomato.domain.movie.component.dto;
 import com.clone.rottentomato.common.valid.validation.ValidEnumType;
 import com.clone.rottentomato.crawling.constant.CrawlingSite;
 import com.clone.rottentomato.domain.movie.valid.validation.ValidMovieSaveRequest;
-import jakarta.validation.constraints.Positive;
 import lombok.Getter;
-import net.minidev.json.annotate.JsonIgnore;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Getter
 @ValidMovieSaveRequest

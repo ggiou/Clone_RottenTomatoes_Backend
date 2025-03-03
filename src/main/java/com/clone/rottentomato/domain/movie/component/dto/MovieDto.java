@@ -38,6 +38,10 @@ public class MovieDto extends ResponseDto {
         this.setResult(success, resultMsg);
     }
 
+    /** 영화 저장을 위한 객체 생성 */
+    public static MovieDto forSave(String name, String posterUrl, String releaseDate){
+        return new MovieDto(null, name, null, posterUrl, releaseDate);
+    }
 
     public static MovieDto fromEntity(Movie entity){
         if(Objects.isNull(entity)) return null;
