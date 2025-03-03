@@ -9,4 +9,5 @@ public interface MovieCustomRepository {
     // 영화 기본 정보 저장
     MovieDto returnSaveOrUpdateMovie(Movie entity);
     List<Movie> saveOrUpdateAllMovie(List<Movie> entityList);
+    Movie saveOrUpdateMovie(Movie entity);
 }

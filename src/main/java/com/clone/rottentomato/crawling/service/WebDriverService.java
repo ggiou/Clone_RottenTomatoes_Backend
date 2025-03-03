@@ -1,5 +1,6 @@
 package com.clone.rottentomato.crawling.service;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import static com.clone.rottentomato.common.constant.CommonConst.OS.*;
 import static com.clone.rottentomato.crawling.constant.CrawlingUrlConst.*;
@@ -42,6 +44,24 @@ public class WebDriverService {
     public WebDriver getChromeDriver() {
         if(driver == null) {
             initializeDriver(); // webDriver가 없다면 초기화하고 재설정
+        }
+        return driver;
+    }
+
+    /** Chrome WebDriver 인스턴스 반환 (없다면 새로운 webDriver 생성, WebDriverManager 를 통해 가져오는지)*/
+    public WebDriver getChromeDriver(boolean getByManger) {
+        if(driver == null) {
+            if(getByManger) {
+                // WebDriverManager를 활용하여 ChromeDriver 자동 다운로드 및 설정
+                WebDriverManager.chromedriver().setup();
+                // ChromeDriver 실행
+                ChromeOptions options = new ChromeOptions();
+                driver = new ChromeDriver(options);
+                log.info("WebDriverManager를 사용하여 ChromeDriver 설정 완료");
+            }else {
+                initializeDriver(); // webDriver가 없다면 초기화하고 재설정
+                log.info("114.0.5735.90 버전의 ChromeDriver 설정 완료");
+            }
         }
         return driver;
     }
@@ -140,5 +160,46 @@ public class WebDriverService {
             driver.quit();
             driver = null;
         }
+    }
+
+    /**
+     * 현재 실행 중인 창을 종료하는 메서드
+     * WebDriver 창을 종료
+     */
+    public void closePage() {
+        if (driver != null) {
+            driver.close();
+        }
+    }
+
+    /** 웹페이지를 가져오는 메서드 (세션 만료시 자동으로 드라이버를 새로 시작) */
+    private WebElementService getPageWithResetBySessionError(String url, WebElementService elementService) {
+        WebDriver d = getChromeDriver(true);
+        try {
+            d.get(url);  // 웹 페이지 요청
+        } catch (Exception e) {
+            if (e.getMessage().contains("invalid session id")) {
+                log.error("세션 만료 오류 발생. 새 드라이버 세션을 시작합니다.");
+                d = resetDriver();  // 새 드라이버 세션 시작
+                d.get(url);  // 새 드라이버로 페이지 요청
+            } else {
+                // 다른 예외 처리
+                log.error("페이지 로딩 중 오류 발생: ", e);
+                throw e;  // 예외 재던지기
+            }
+        }
+        // driver 을 상속받아, 해당 서비스 사용이 가능하니 페이지가 변경될 때마다 해당 페이지로 새로 elementService를 생성해줘야 한다
+        elementService = new WebElementService(d);
+        return elementService;
+    }
+
+    public WebElementService getPage(String url, WebElementService elementService) {
+        return getPageWithResetBySessionError(url, elementService);
+    }
+
+    /** 세션이 만료되었을 때 새 WebDriver 세션을 시작하는 메서드 */
+    public WebDriver resetDriver() {
+        quitDriver(); // 기존 드라이버 종료
+        return getChromeDriver(true); // 새 드라이버 생성 및 반환
     }
 }

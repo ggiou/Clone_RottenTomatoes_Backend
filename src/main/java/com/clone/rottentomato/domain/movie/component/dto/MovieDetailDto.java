@@ -14,9 +14,9 @@ public class MovieDetailDto extends ResponseDto {
     private List<String> actorNames;  // 영화 배우 이름들
     private List<String> directorNames;   // 영화 감독 이름들
 
-    private long movieId;  // 영화 pk
+    private Long movieId;  // 영화 pk
 
-    private MovieDetailDto(Long id, String story, List<String> actorNames, List<String> directorNames, long movieId){
+    private MovieDetailDto(Long id, String story, List<String> actorNames, List<String> directorNames, Long movieId){
         this.id = id;
         this.story = story;
         this.actorNames = actorNames;
@@ -27,6 +27,10 @@ public class MovieDetailDto extends ResponseDto {
     // 응답값으로 사용시, 성공 실패 여부만 담은 객체 반환
     private MovieDetailDto(boolean success, String resultMsg){
         this.setResult(success, resultMsg);
+    }
+
+    public static MovieDetailDto forSave(String story, List<String> actorNames, List<String> directorNames){
+        return new MovieDetailDto(null, story, actorNames, directorNames, null);
     }
 
     public static MovieDetailDto fromEntity(MovieDetail entity){

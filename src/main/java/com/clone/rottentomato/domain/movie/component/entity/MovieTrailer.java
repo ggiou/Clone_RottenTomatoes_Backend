@@ -18,18 +18,18 @@ public class MovieTrailer extends TimeStamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;    // 영화 예고편 id
     @Column(nullable = false)
-    @Max(value = 10, message = "영화 예고편은 최대 10개 까지 등록 가능합니다.")
+    @Max(value = 20, message = "영화 예고편은 최대 20개 까지 등록 가능합니다.")
     private int displayOrder;   // 예고편 노출 순서
     @Column(nullable = false, columnDefinition = "varchar(255) default ''")
     private String playUrl;     // 예고편 재생 url
     @Column(nullable = false)
     private String playName;    // 예고편 지정 이름
     @Column(nullable = false)
-    @Pattern(regexp = "(0[1-9]|[1-5][0-9]):(0[1-9]|[1-5][0-9])", message = "유효한 예고편 재생 시간이 아닙니다.(mm:ss)")
+    @Pattern(regexp = "(0[0-9]|[1-5][0-9]):(0[0-9]|[1-5][0-9])", message = "유효한 예고편 재생 시간이 아닙니다.(mm:ss)")
     private String playTime;    // 예고편 총 재생 시간 (mm:ss)
 
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "MOVIE_ID", nullable = false)
     private Movie movie;    // 영화 정보
 
@@ -47,6 +47,4 @@ public class MovieTrailer extends TimeStamped {
         if(Objects.isNull(movie)) throw new MovieException("영화 정보가 없습니다.", CommonError.DATE_FORMAL_ERROR);
         return new MovieTrailer(dto.getId(), dto.getDisplayOrder(), dto.getPlayUrl(), dto.getPlayName(), dto.getPlayTime(), movie);
     }
-
-
 }

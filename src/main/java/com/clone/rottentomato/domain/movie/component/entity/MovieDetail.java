@@ -27,11 +27,11 @@ public class MovieDetail extends TimeStamped {
     @Size(max = 1000, message = "영화 줄거리는 최대 1000자까지 입력 가능합니다.")
     private String story;   // 영화 줄거리
     @Column(columnDefinition = "varchar(500) default ''")
-    @Size(min = 500, message = "영화 배우 이름들은 최대 500자까지 입력 가능합니다.")
+    @Size(max = 500, message = "영화 배우 이름들은 최대 500자까지 입력 가능합니다.")
     @Convert(converter = CommaStringListConverter.class)
     private List<String> actorNames;  // 영화 배우 이름들
     @Column(columnDefinition = "varchar(500) default ''")
-    @Size(min = 500, message = "영화 감독 이름들은 최대 500자까지 입력 가능합니다.")
+    @Size(max = 500, message = "영화 감독 이름들은 최대 500자까지 입력 가능합니다.")
     @Convert(converter = CommaStringListConverter.class)
     private List<String> directorNames;   // 영화 감독 이름들
 
