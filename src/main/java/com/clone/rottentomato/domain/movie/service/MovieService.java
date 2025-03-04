@@ -154,14 +154,14 @@ public class MovieService {
             // 해당 탭으로 페이지 이동 (출연/제작진 탭으로 이동)
             getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화"+movieTitle+"출연진"));
             naverDataElement = webElementService.getByMultipleClassNames("cm_content_wrap","_actor_wrap");
-            // 감독 / 주연 배우 리스트 정보 요소
+            // 감독 / 주연 배우 리스트 정보 요소 (이름이 길 경우 ... 으로 반환되 이를 방지하기 위해 , 이미지 설명값으로 가져온다. = 이미지 설명값은 네이버에서 해당 대상 이름으로 지정되어있음)
             List<WebElement> movieMakersElements = webElementService.getListByClassName(naverDataElement, "cast_list");
             // 감독 이름
-            List<WebElement> directorNameElements = webElementService.getListByClassName(movieMakersElements.get(0), "name");
-            List<String> directorNames = directorNameElements.stream().map(WebElement::getText).toList();
+            List<WebElement> directorNameElements = webElementService.getListByTagName(movieMakersElements.get(0), "img");
+            List<String> directorNames = directorNameElements.stream().map(t->t.getAttribute("alt")).toList();
             // 주연 배우 이름
-            List<WebElement> actorNameElements = webElementService.getListByClassName(movieMakersElements.get(1), "name");
-            List<String> actorNames = actorNameElements.stream().map(WebElement::getText).toList();
+            List<WebElement> actorNameElements = webElementService.getListByTagName(movieMakersElements.get(1), "img");
+            List<String> actorNames = actorNameElements.stream().map(t->t.getAttribute("alt")).toList();
 
             // 2-3. 네이버 영화 포토 탭
             // 해당 탭으로 페이지 이동 (포토 탭으로 이동)

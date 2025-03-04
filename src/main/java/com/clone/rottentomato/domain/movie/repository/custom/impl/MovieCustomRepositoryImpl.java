@@ -71,14 +71,8 @@ public class MovieCustomRepositoryImpl implements MovieCustomRepository {
 
     private Movie saveOrUpdate(Optional<Movie> findDbEntity, Movie requestEntity){
         // 이미 존재한다면, null 이 아닌 값만 업데이트
-        if(findDbEntity.isPresent()) {
-            // 영화 평점의 경우, 리뷰 점수를 통해 쌓이므로, 업데이트 되선 안된다. (모든 값이 동일해도 호출 x)
-            if(utilJpa.setNotEqualsProperties(findDbEntity.get(), requestEntity, Collections.singletonList("rating"))){
-                return findDbEntity.get();
-            }
-            return movieRepository.save(findDbEntity.get());
-        }
-        return movieRepository.save(requestEntity);
+        // 영화 평점의 경우, 리뷰 점수를 통해 쌓이므로, 업데이트 되선 안된다. (모든 값이 동일해도 호출 x)
+        return findDbEntity.map(movie -> movieRepository.save(utilJpa.setNotEqualsProperties(movie, requestEntity, Collections.singletonList("rating")))).orElseGet(() -> movieRepository.save(requestEntity));
     }
 
 }
