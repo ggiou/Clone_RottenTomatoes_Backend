@@ -55,7 +55,7 @@ public class MovieTrailerCustomRepositoryImpl implements MovieTrailerCustomRepos
         }
     }
 
-    private MovieTrailer saveOrUpdate(Optional<MovieTrailer> findDbEntity, MovieTrailer requestEntity){
+    private MovieTrailer saveOrUpdate(Optional<MovieTrailer> findDbEntity, MovieTrailer requestEntity) {
         // 이미 존재한다면, null 이 아닌 값만 업데이트
         return findDbEntity.map(movieTrailer -> movieTrailerRepository.save(utilJpa.setNotEqualsProperties(movieTrailer, requestEntity))).orElseGet(() -> movieTrailerRepository.save(requestEntity));
     }

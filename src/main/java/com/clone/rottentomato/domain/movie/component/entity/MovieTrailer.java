@@ -30,7 +30,7 @@ public class MovieTrailer extends TimeStamped {
 
 
     @ManyToOne
-    @JoinColumn(name = "MOVIE_ID", nullable = false)
+    @JoinColumn(name = "MOVIE_ID", nullable = false, unique = false)
     private Movie movie;    // 영화 정보
 
     private MovieTrailer(Long id, int displayOrder, String playUrl, String playName, String playTime, Movie movie){
