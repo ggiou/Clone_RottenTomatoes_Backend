@@ -16,6 +16,8 @@ public class ReviewResponseDto {
     private String reviewContent;
     private String memberEmail;
     private String memberName;
+    private String movieName;
+    private String posterUrl;
 
 
     @Builder
@@ -25,6 +27,8 @@ public class ReviewResponseDto {
         this.reviewContent = review.getReviewContent();
         this.memberEmail = member.getMemberEmail();
         this.memberName = member.getMemberName();
+        this.movieName = movie.getName();
+        this.posterUrl = movie.getPosterUrl();
     }
 
 
@@ -32,6 +36,14 @@ public class ReviewResponseDto {
         return ReviewResponseDto.builder()
                 .review(review)
                 .member(member)
+                .review(review)
+                .movie(movie)
+                .build();
+    }
+
+
+    public static ReviewResponseDto update_from(Review review) {
+        return ReviewResponseDto.builder()
                 .review(review)
                 .build();
     }

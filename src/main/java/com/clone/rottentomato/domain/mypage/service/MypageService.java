@@ -27,8 +27,8 @@ public class MypageService {
 
     //  회원 정보 조회
     @Transactional(readOnly = true)
-    public ResponseEntity<MypageResponseDto> getMembers(String email) {
-        Optional<Member> find = memberRepository.findByMemberEmails(email);
+    public ResponseEntity<MypageResponseDto> getMembers(Member member) {
+        Optional<Member> find = memberRepository.findByMemberEmail(member.getMemberEmail());
         if(find.isEmpty()){
             throw new IllegalArgumentException("회원이 아닙니다.");
         }
