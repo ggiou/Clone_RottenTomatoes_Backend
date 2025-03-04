@@ -53,13 +53,7 @@ public class MovieDetailCustomRepositoryImpl implements MovieDetailCustomReposit
 
     private MovieDetail saveOrUpdate(Optional<MovieDetail> findDbEntity, MovieDetail requestEntity){
         // 이미 존재한다면, null 이 아닌 값만 업데이트
-        if(findDbEntity.isPresent()) {
-            if(utilJpa.setNotEqualsProperties(findDbEntity.get(), requestEntity)){
-                return findDbEntity.get();
-            }
-            return movieDetailRepository.save(findDbEntity.get());
-        }
-        return movieDetailRepository.save(requestEntity);
+        return findDbEntity.map(movieDetail -> movieDetailRepository.save(utilJpa.setNotEqualsProperties(movieDetail, requestEntity))).orElseGet(() -> movieDetailRepository.save(requestEntity));
     }
 
 }
