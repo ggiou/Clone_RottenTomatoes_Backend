@@ -3,6 +3,7 @@ package com.clone.rottentomato.domain.movie.controller;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
 import com.clone.rottentomato.domain.movie.component.dto.MovieSaveRequest;
+import com.clone.rottentomato.domain.movie.constant.MovieError;
 import com.clone.rottentomato.domain.movie.service.MovieService;
 import com.clone.rottentomato.exception.CommonException;
 import com.clone.rottentomato.exception.MovieException;
@@ -20,10 +21,13 @@ import java.util.Objects;
 public class MovieController {
     private final MovieService movieService;
 
-    /** 특정 영화의 전체 정보 반환 */
-    @GetMapping
-    public CommonResponse getMovie(){
-        return new CommonResponse();
+    /** 특정 영화의 전체 정보 반환 (상세보기) */
+    @GetMapping("{movieId}")
+    public CommonResponse getMovieInfo(@PathVariable final Long movieId) {
+        if(Objects.isNull(movieId) || movieId <= 0) {
+            throw new MovieException("잘못된 요청입니다.", MovieError.BAD_REQUEST_MOVIE_ID);
+        }
+        return movieService.getMovieInfo(movieId);
     }
 
     /** 영화 리스트 반환 */

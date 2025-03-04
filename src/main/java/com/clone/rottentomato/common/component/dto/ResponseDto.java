@@ -1,11 +1,14 @@
 package com.clone.rottentomato.common.component.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ResponseDto {
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String resultMsg;   // 응답 값으로 사용할때, 각 개별 메세지
     private boolean success = true;
 

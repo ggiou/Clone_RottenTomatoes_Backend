@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MovieTrailerRepository extends JpaRepository<MovieTrailer, Long> {
@@ -18,4 +19,6 @@ public interface MovieTrailerRepository extends JpaRepository<MovieTrailer, Long
             "ORDER BY mt.displayOrder DESC), 0)")
     int findLastDisplayOrderByMovie(@Param("movieName") String movieName);
 
+    /** 특정 영화 pk 의 예고편 모두를 displayOrder 오름차순으로 반환 */
+    List<MovieTrailer> findAllByMovieIdOrderByDisplayOrderAsc(Long movieId);
 }

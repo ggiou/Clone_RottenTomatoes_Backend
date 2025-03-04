@@ -14,6 +14,9 @@ public class MovieDetailDto extends ResponseDto {
     private List<String> actorNames;  // 영화 배우 이름들
     private List<String> directorNames;   // 영화 감독 이름들
 
+    private String actorNameStr;    // 영화 배우 이름 문자열
+    private String directorNameStr; // 영화 감독 이름 문자열
+
     private Long movieId;  // 영화 pk
 
     private MovieDetailDto(Long id, String story, List<String> actorNames, List<String> directorNames, Long movieId){
@@ -22,6 +25,8 @@ public class MovieDetailDto extends ResponseDto {
         this.actorNames = actorNames;
         this.directorNames = directorNames;
         this.movieId = movieId;
+        this.actorNameStr = String.join(", ", actorNames);
+        this.directorNameStr = String.join(", ", directorNames);
     }
 
     // 응답값으로 사용시, 성공 실패 여부만 담은 객체 반환

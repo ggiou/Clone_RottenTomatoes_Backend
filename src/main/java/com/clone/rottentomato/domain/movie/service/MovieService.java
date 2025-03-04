@@ -11,6 +11,7 @@ import com.clone.rottentomato.domain.movie.component.entity.CategoryInfo;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.component.entity.MovieDetail;
 import com.clone.rottentomato.domain.movie.component.entity.MovieTrailer;
+import com.clone.rottentomato.domain.movie.constant.MovieError;
 import com.clone.rottentomato.domain.movie.repository.*;
 import com.clone.rottentomato.domain.movie.repository.custom.*;
 import com.clone.rottentomato.exception.CommonException;
@@ -33,15 +34,39 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MovieService {
+    // repository
+    private final MovieRepository movieRepository;
     private final MovieCustomRepository movieCustomRepository;
+
+    private final MovieDetailRepository movieDetailRepository;
     private final MovieDetailCustomRepository movieDetailCustomRepository;
-    private final MovieTrailerCustomRepository movieTrailerCustomRepository;
+
     private final MovieTrailerRepository movieTrailerRepository;
+    private final MovieTrailerCustomRepository movieTrailerCustomRepository;
+
+    private final CategoryInfoRepository categoryInfoRepository;
     private final CategoryInfoCustomRepository categoryInfoCustomRepository;
     private final MovieCategoryCustomRepository movieCategoryCustomRepository;
 
+    // service
     private final WebDriverService webDriverService;
     private WebElementService webElementService;
+
+    /** 영화 pk를 통해 특정 영화의 상세 정보 반환 */
+    public CommonResponse getMovieInfo(Long movieId) {
+        // 영화 기본 정보
+        Optional<Movie> movie = movieRepository.findById(movieId);
+        if (movie.isEmpty()) {
+            return CommonResponse.fail("해당 영화 정보가 존재하지 않습니다.", MovieError.BAD_REQUEST_MOVIE_ID);
+        }
+        // 영화 상세 정보
+        Optional<MovieDetail> movieDetail = movieDetailRepository.findByMovieId(movieId);
+        List<MovieTrailer> movieTrailers = movieTrailerRepository.findAllByMovieIdOrderByDisplayOrderAsc(movieId);
+        List<CategoryInfo> movieCategories = categoryInfoRepository.findCategoryInfoForMovieId(movieId);
+
+        MovieInfoDto movieInfoDto = MovieInfoDto.fromEntity(movie.get(), movieDetail.orElse(null), movieTrailers, movieCategories);
+        return CommonResponse.success(String.format("[%s] 영화 상세 정보를 가져오는데 성공했습니다.", movie.get().getName()), movieInfoDto);
+    }
 
     /** 특정 영화 정보를 저장하는 총 process */
     @Transactional(noRollbackFor = JpaException.class)
@@ -143,8 +168,8 @@ public class MovieService {
             // 개봉일자, 카테고리(영화 장르)
             WebElement basicInfo = webElementService.getByMultipleClassNames(naverDataElement, "cm_info_box");
             List<WebElement> basicInfoElementList = webElementService.getListByClassName(basicInfo, "info_group");
-            // 개봉일자의 경우 - - 로 바뀌게.. 문자열 변경
-            String releaseDate = webElementService.getByTagName(basicInfoElementList.get(0), "dd").getText();
+            // 개봉일자의 경우 yyyy.mm.dd 로 넘어와 yyyy-mm-dd 로 변경되게 문자열 변경
+            String releaseDate = webElementService.getByTagName(basicInfoElementList.get(0), "dd").getText().replaceAll("\\.", "-").replaceFirst("-$", StringUtils.EMPTY);
             String categoryStr = webElementService.getByTagName(basicInfoElementList.get(2), "dd").getText().replaceAll(" ", StringUtils.EMPTY);
             // 영화 줄거리
             WebElement storyElement = webElementService.getByMultipleClassNames(naverDataElement, "intro_box","_content ");
@@ -198,7 +223,7 @@ public class MovieService {
             }
 
             // 가져온 정보를 기준으로 저장을 위한 dto 생성
-            MovieDto movieDto = MovieDto.forSave(movieTitle, posterUrl, releaseDate.replaceAll("\\.", "-").replaceFirst("-$", StringUtils.EMPTY));
+            MovieDto movieDto = MovieDto.forSave(movieTitle, posterUrl, releaseDate);
             MovieDetailDto movieDetailDto = MovieDetailDto.forSave(story, actorNames, directorNames);
             List<CategoryInfoDto> categoryInfoDtos = Arrays.stream(categoryStr.split("[,/]")).map(CategoryInfoDto::forSave).toList();
 

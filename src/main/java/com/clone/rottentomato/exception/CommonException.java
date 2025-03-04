@@ -25,7 +25,7 @@ public class CommonException extends RuntimeException {
 
     public CommonException(String message, CustomError errorStatus){
         super(message);
-        this.errorCode = getErrorCode();
+        this.errorCode = errorStatus.getResCode();
         this.errorStatus = errorStatus;
     }
 
