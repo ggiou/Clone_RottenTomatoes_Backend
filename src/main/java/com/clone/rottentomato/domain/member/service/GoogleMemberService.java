@@ -36,40 +36,6 @@ public class GoogleMemberService extends DefaultOAuth2UserService {
 
 
 
-    public String handleLogin(MemberRequestDto requestDto) {
-        String email = requestDto.getEmail();
-        // 1. 이메일 형식 검증
-        if (!memberService.isValidEmailFormat(email)) {
-            return "잘못된 이메일 형식입니다.";
-        }
-
-        // 2. 이메일 등록 여부 확인
-        Member member;
-        if (!memberService.isExistMember(email)) {
-            // 2-1. 이메일 미등록 상태, 새로운 계정 생성
-            String provider = memberService.isGoogleEmail(email) ? "GOOGLE" : "LOCAL";
-            member = memberService.registerMember(email, provider);
-        } else {
-            // 2-2. 등록된 계정 정보 가져오기
-            member = memberRepository.findByMemberEmail(email).stream().findFirst().orElse(null);
-        }
-
-        // 3. 이메일이 구글 계정 형식인지 확인
-        if ("GOOGLE".equalsIgnoreCase(member.getProvider())) {
-            return getGoogleAuthorizationUrl();
-        } else {
-            // authCode 생성 및 업데이트 (일반 사용자)
-            String newAuthCode = memberService.generateAuthCode();
-            member.updateAuthCode(newAuthCode);
-            memberRepository.save(member);
-
-            //인증코드 메일 발송 추가.
-
-            return "일반 로그인 진행: 인증 코드가 발급되었습니다."; // 필요 시 추가 응답 수정
-        }
-    }
-
-
     public String getGoogleAuthorizationUrl() {
         // 리다이렉트 URL 등 관련된 Google 인증 로직 구현
         return "https://accounts.google.com/o/oauth2/auth?" +

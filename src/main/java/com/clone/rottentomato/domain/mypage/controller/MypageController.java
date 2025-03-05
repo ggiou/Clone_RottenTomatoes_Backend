@@ -35,6 +35,6 @@ public class MypageController {
     public Page<MypageMovieResponseDto> getMovies(@RequestParam(value = "page")int page,
                                                   @RequestParam(value = "size")int size,
                                                   @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return mypageService.getMovies(page,size,userDetails.getMember());
+        return mypageService.getMovies(page,size);
     }
 }

@@ -1,9 +1,11 @@
 package com.clone.rottentomato.config;
 
 
+import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.domain.auth.JwtAuthenticationFilter;
 import com.clone.rottentomato.domain.auth.JwtUtil;
 import com.clone.rottentomato.domain.auth.service.UserDetailsServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,12 +39,19 @@ public class SecurityConfig {
 
                 //OAuth2.0  인증
                 .oauth2Login(oauth2 -> oauth2
+                        // 성공시 핸들러 처리
                         .successHandler(new OAuth2LoginSuccessHandler(jwtUtil))
+                        // 실패시 응답갑 리턴
                         .failureHandler((request, response, exception) -> {
+                            CommonResponse responseData = CommonResponse.error("구글로그인 실패");
                             log.error("OAuth Login Fail : ", exception);
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"로그인 실패\"}");
+                            response.setCharacterEncoding("UTF-8");
+
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            String jsonResponse = objectMapper.writeValueAsString(responseData);
+                            response.getWriter().write(jsonResponse);
                         })
                 )
                 //JWT 인증
@@ -55,24 +64,33 @@ public class SecurityConfig {
                                 "/h2-console/**", //h2-Console 이하 경로
                                 "/testpage.html", //테스트용 페이지
                                 "/member/login", //일반 로그인 컨트롤러
-                                "/member/check-member", //등록유무 확인 컨트롤러
+                                "/member/isExist", //등록유무 확인 컨트롤러
                                 "/member/login-code", //일반유저 보안코드 인증접속
                                 "/login.html",
                                 "/likes/{movie_id}/isLiked").permitAll() //로그인성공 페이지
-                        //인증경로
-/*                        .requestMatchers("/member/user-info", "/member/**").authenticated()*/
+                        //인증경로 ( 나머지 전부 인증 )
                         .anyRequest().authenticated()
                 )
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .logout(logout -> logout
-                        //Cookie 삭제
-                        .logoutUrl("/member/logout")
-                        .logoutSuccessHandler(((request, response, authentication) -> {
+                        .logoutUrl("/member/logout")  // 로그아웃 URL
+                        .invalidateHttpSession(true) // 세션 무효화
+                        .deleteCookies("JSESSIONID", "Authorization") // 쿠키 삭제
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            CommonResponse responseData = CommonResponse.success("LOGOUT_SUCCESS");
+
+                            // 로그아웃 성공 시 커스텀 응답 처리
                             response.setStatus(HttpServletResponse.SC_OK);
-                            response.getWriter().write("LOGOUT_SUCCESS");
-                            response.getWriter().flush();
-                        })));
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            String jsonResponse = objectMapper.writeValueAsString(responseData);
+                            response.getWriter().write(jsonResponse);
+                        })
+                );
+
 
         return http.build();
     }
