@@ -12,7 +12,7 @@ import java.util.Map;
 @AllArgsConstructor
 public enum MovieError implements CustomError {
     BAD_REQUEST_MOVIE_ID(400, "입력한 id는 유효한 영화 id가 아닙니다.", "BAD_REQUEST"),
-
+    BAD_REQUEST_SEARCH_VALUE(400, "입력한 값은 검색이 불가합니다.", "BAD_REQUEST")
     ;
 
     private int code;

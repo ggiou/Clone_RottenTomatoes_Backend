@@ -1,5 +1,6 @@
 package com.clone.rottentomato.util;
 
+import com.amazonaws.util.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 문자열 관련 유틸 클래스
@@ -76,5 +79,13 @@ public class UtilString {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /** List 문자열을 구분자 기준으로 하나의 문자열로 반환 */
+    public static String joinStrByDelimiter(List<String> stringList, String delimiter){
+        if(Objects.isNull(stringList)) return StringUtils.EMPTY;
+        stringList = stringList.stream().filter(StringUtils::isNotBlank).toList();
+        if(stringList.isEmpty()) return StringUtils.EMPTY;
+        return String.join(delimiter, stringList);
     }
 }
