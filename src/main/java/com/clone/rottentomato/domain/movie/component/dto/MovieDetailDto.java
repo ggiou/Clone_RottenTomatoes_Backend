@@ -1,8 +1,11 @@
 package com.clone.rottentomato.domain.movie.component.dto;
 
+import com.amazonaws.util.CollectionUtils;
 import com.clone.rottentomato.common.component.dto.ResponseDto;
 import com.clone.rottentomato.domain.movie.component.entity.MovieDetail;
+import com.clone.rottentomato.util.UtilString;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -25,8 +28,8 @@ public class MovieDetailDto extends ResponseDto {
         this.actorNames = actorNames;
         this.directorNames = directorNames;
         this.movieId = movieId;
-        this.actorNameStr = String.join(", ", actorNames);
-        this.directorNameStr = String.join(", ", directorNames);
+        this.actorNameStr = UtilString.joinStrByDelimiter(actorNames, ", ");
+        this.directorNameStr = UtilString.joinStrByDelimiter(directorNames, ", ");
     }
 
     // 응답값으로 사용시, 성공 실패 여부만 담은 객체 반환

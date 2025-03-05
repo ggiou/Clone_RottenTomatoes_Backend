@@ -1,5 +1,6 @@
 package com.clone.rottentomato.domain.movie.controller;
 
+import com.amazonaws.util.StringUtils;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
 import com.clone.rottentomato.domain.movie.component.dto.MovieSaveRequest;
@@ -9,6 +10,9 @@ import com.clone.rottentomato.exception.CommonException;
 import com.clone.rottentomato.exception.MovieException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,10 +46,20 @@ public class MovieController {
         return new CommonResponse();
     }
 
-    /** 영화 리스트 검색 반환 */
+    /** 영화 리스트 검색 반환
+     * @param searchValue : 검색할 문자열 값
+     * @param pageNo : n 번째 페이지 정보
+     * @param pageSize : 1페이지당 돌려줄 개수
+     * */
     @PostMapping("/search")
-    public CommonResponse getMovieSearchList(){
-        return new CommonResponse();
+    public CommonResponse getMovieSearchList(@RequestParam(value = "value", required = false) String searchValue,
+                                             @RequestParam(value = "pageNo", required = false, defaultValue = "0") int pageNo,
+                                             @RequestParam(value = "size", required = false, defaultValue = "10") int pageSize){
+        if(StringUtils.isNullOrEmpty(searchValue)){
+            throw new MovieException("검색을 위한 value의 pathValue가 없습니다. 검색이 불가합니다.", MovieError.BAD_REQUEST_SEARCH_VALUE);
+        }
+
+        return movieService.searchMovieList(searchValue, pageNo, pageSize);
     }
 
     /** 비디오 정보 저장 api */

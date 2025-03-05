@@ -7,10 +7,7 @@ import com.clone.rottentomato.crawling.constant.CrawlingSite;
 import com.clone.rottentomato.crawling.service.WebDriverService;
 import com.clone.rottentomato.crawling.service.WebElementService;
 import com.clone.rottentomato.domain.movie.component.dto.*;
-import com.clone.rottentomato.domain.movie.component.entity.CategoryInfo;
-import com.clone.rottentomato.domain.movie.component.entity.Movie;
-import com.clone.rottentomato.domain.movie.component.entity.MovieDetail;
-import com.clone.rottentomato.domain.movie.component.entity.MovieTrailer;
+import com.clone.rottentomato.domain.movie.component.entity.*;
 import com.clone.rottentomato.domain.movie.constant.MovieError;
 import com.clone.rottentomato.domain.movie.repository.*;
 import com.clone.rottentomato.domain.movie.repository.custom.*;
@@ -30,6 +27,8 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.clone.rottentomato.domain.movie.constant.ProducerType.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,9 +47,12 @@ public class MovieService {
     private final CategoryInfoCustomRepository categoryInfoCustomRepository;
     private final MovieCategoryCustomRepository movieCategoryCustomRepository;
 
+    private final ProducerCustomRepository ProducerCustomRepository;
+
     // service
     private final WebDriverService webDriverService;
     private WebElementService webElementService;
+
 
     /** 영화 pk를 통해 특정 영화의 상세 정보 반환 */
     public CommonResponse getMovieInfo(Long movieId) {
@@ -67,6 +69,24 @@ public class MovieService {
         MovieInfoDto movieInfoDto = MovieInfoDto.fromEntity(movie.get(), movieDetail.orElse(null), movieTrailers, movieCategories);
         return CommonResponse.success(String.format("[%s] 영화 상세 정보를 가져오는데 성공했습니다.", movie.get().getName()), movieInfoDto);
     }
+
+    public CommonResponse searchMovieList(String searchValue, int pageNo, int pageSize){
+        if(StringUtils.isBlank(searchValue)){
+            throw new MovieException("검색 할 내용이 없습니다. 검색 내용을 입력해주세요.", MovieError.BAD_REQUEST_SEARCH_VALUE);
+        }
+
+        List<SearchResponse.SearchMovieInfo> searchMovieInfos = new ArrayList<>();
+        Set<String> actors = new HashSet<>();
+        Set<String> directors = new HashSet<>();
+
+        List<MovieDetail> movieMakersContain = movieDetailRepository.findAllByActorOrDirectorNamesContaining(searchValue);
+        if (!movieMakersContain.isEmpty()){
+
+        }
+        return new CommonResponse();
+    }
+
+
 
     /** 특정 영화 정보를 저장하는 총 process */
     @Transactional(noRollbackFor = JpaException.class)
@@ -311,12 +331,25 @@ public class MovieService {
                 log.error(String.format("[%s] 영화 상세 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", movieName, e.getMessage(), UtilString.stringify(movieDetail)));
             }
 
-            // 3. 영화 카테고리 정보 저장
+            // 3. 영화 제작자 정보 저장
+            List<Producer> actors = reqDto.getMovieDetailDto().getActorNames().stream().map(t->Producer.of(t, ACTOR)).toList();
+            List<Producer> directors = reqDto.getMovieDetailDto().getDirectorNames().stream().map(t->Producer.of(t, DIRECTOR)).toList();
+            List<Producer> producers = new ArrayList<>(actors);
+            if(!producers.isEmpty() || !directors.isEmpty()) {
+                try {
+                    producers.addAll(directors);
+                    ProducerCustomRepository.saveProducer(producers);
+                } catch (Exception e) {
+                    log.error(String.format("[%s] 영화 제작자 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", movieName, e.getMessage(), UtilString.stringify(producers)));
+                }
+            }
+
+            // 4. 영화 카테고리 정보 저장
             List<CategoryInfo> categoryInfoList = reqDto.getCategoryList().stream().map(CategoryInfo::fromDto).toList();
             try {
-                // 3-1. 카테고리 정보가 없다면 저장해 정보 반환
+                // 4-1. 카테고리 정보가 없다면 저장해 정보 반환
                 List<CategoryInfo> savedCategories = categoryInfoCustomRepository.saveCategoryInfoList(categoryInfoList);
-                // 3-2. 영화 - 카테고리 연결 정보가 없다면 저장
+                // 4-2. 영화 - 카테고리 연결 정보가 없다면 저장
                 movieCategoryCustomRepository.saveMovieCategoryList(movie, savedCategories);
                 // 카테고리 정보와, 연결 정보가 정상적으로 수행됬다면, 요청으로 들어온 값 전체 정보가 정상 저장되니, 요청값으로 세팅
                 resDto.setCategoryList(reqDto.getCategoryList());
@@ -325,7 +358,7 @@ public class MovieService {
                 log.error(String.format("[%s] 영화 카테고리 정보를 저장하는데 오류가 발생했습니다.\n[error] : %s \n[객체 정보] : %s ", movieName, e.getMessage(), categoryInfoList));
             }
 
-            // 4. 영화 예고편 리스트 정보 저장
+            // 5. 영화 예고편 리스트 정보 저장
             final Movie movieSaved = movie;
             List<MovieTrailer> movieTrailers = reqDto.getMovieTrailerDtoList().stream().map(t->MovieTrailer.fromDto(t, movieSaved)).toList();
             if(!CollectionUtils.isEmpty(movieTrailers)){
@@ -345,7 +378,7 @@ public class MovieService {
             successList.add(resDto);
         }
 
-        // 4. 저장 여부 응답 값 반환
+        // 6. 저장 여부 응답 값 반환
         return MovieSaveResponse.of(successList, failList);
     }
 
