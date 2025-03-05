@@ -25,5 +25,10 @@ public class LikesController {
         return likesService.ok(movie_id,userDetails.getMember());
     }
 
+    @PostMapping("/{movie_id}/save")
+    public ResponseEntity<LikesResponseDto> save(@PathVariable Long movie_id,
+                                                 @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return likesService.save(movie_id,userDetails.getMember());
+    }
 
 }

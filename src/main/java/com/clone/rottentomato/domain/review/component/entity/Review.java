@@ -2,6 +2,7 @@ package com.clone.rottentomato.domain.review.component.entity;
 
 
 import com.clone.rottentomato.common.component.entity.TimeStamped;
+import com.clone.rottentomato.common.constant.SortType;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
@@ -29,22 +30,28 @@ public class Review extends TimeStamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MOVIE_ID",nullable = false)
     private Movie movie;
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private SortType sortType;
 
 
     @Builder
-    public Review(ReviewRequestDto reviewRequestDto, Member member, Movie movie) {
+    public Review(ReviewRequestDto reviewRequestDto, Member member, Movie movie,SortType sortType) {
         this.field = reviewRequestDto.getField();
         this.reviewContent = reviewRequestDto.getReviewContent();
         this.member = member;
         this.movie = movie;
+        this.sortType = reviewRequestDto.getSortType();
+        this.sortType = sortType;
     }
 
 
-    public static Review of(ReviewRequestDto reviewRequestDto, Member member, Movie movie) {
+    public static Review of(ReviewRequestDto reviewRequestDto, Member member, Movie movie, SortType sortType) {
         return Review.builder()
                 .reviewRequestDto(reviewRequestDto)
                 .member(member)
                 .movie(movie)
+                .sortType(sortType)
                 .build();
     }
 

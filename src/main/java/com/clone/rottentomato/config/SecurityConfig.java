@@ -58,7 +58,12 @@ public class SecurityConfig {
                                 "/member/check-member", //등록유무 확인 컨트롤러
                                 "/member/login-code", //일반유저 보안코드 인증접속
                                 "/login.html",
-                                "/likes/{movie_id}/isLiked").permitAll() //로그인성공 페이지
+                                "/likes/{movie_id}/isLiked",
+                                "/reviews",
+                                "{movie_id}/review",
+                                "/review/{review_id}",
+                                "/mypage/profiles",
+                                "/mypage/watch_list").permitAll() //로그인성공 페이지
                         //인증경로
 /*                        .requestMatchers("/member/user-info", "/member/**").authenticated()*/
                         .anyRequest().authenticated()

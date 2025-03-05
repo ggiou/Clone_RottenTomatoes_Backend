@@ -46,6 +46,22 @@ public class LikesService {
     }
 
 
+    public ResponseEntity<LikesResponseDto> save(Long movieId, Member member) {
+        Movie movie = getMovie(movieId);
+        Optional<Likes> likes = likesRepository.findByMovieAndMember(movie,member);
+        Member findMember = getMember(member.getMemberId());
+        if(likes.isPresent()) {
+            Likes findLikes = likes.get();
+            likesRepository.delete(findLikes);
+            int count = likesRepository.countByMovie(movie);
+            return ResponseEntity.ok(LikesResponseDto.of(HttpStatus.OK,false,count));
+        }
+        Likes newLikes = Likes.of(movie,findMember);
+        likesRepository.save(newLikes);
+        int count = likesRepository.countByMovie(movie);
+        return ResponseEntity.ok(LikesResponseDto.of(HttpStatus.OK,true,count));
+    }
+
 
 //          --              메서드             --
     private Movie getMovie(Long movieId) {
@@ -61,6 +77,7 @@ public class LikesService {
                 () -> new IllegalArgumentException("회원 게시물을 찾을 수 없습니다.")
         );
     }
+
 
 }
 
