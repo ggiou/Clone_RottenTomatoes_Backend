@@ -1,30 +1,19 @@
 package com.clone.rottentomato.domain.member.service;
 
 import com.clone.rottentomato.config.GoogleConfig;
-import com.clone.rottentomato.domain.member.component.dto.MemberRequestDto;
-import com.clone.rottentomato.domain.member.component.entity.GoogleMember;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
-
-import java.util.Collections;
 import java.util.Optional;
-import java.util.Map;
-import java.util.UUID;
-import java.util.regex.Pattern;
+
 
 @Service
 @Slf4j

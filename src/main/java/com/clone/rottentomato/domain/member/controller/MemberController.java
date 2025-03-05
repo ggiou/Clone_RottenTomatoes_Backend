@@ -1,27 +1,26 @@
 package com.clone.rottentomato.domain.member.controller;
 
 import com.clone.rottentomato.common.component.dto.CommonResponse;
-import com.clone.rottentomato.domain.auth.JwtAuthenticationFilter;
 import com.clone.rottentomato.domain.auth.JwtUtil;
 import com.clone.rottentomato.domain.member.component.dto.MemberRequestDto;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.service.EmailService;
 import com.clone.rottentomato.domain.member.service.GoogleMemberService;
 import com.clone.rottentomato.domain.member.service.MemberService;
+
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
-import java.io.IOException;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
