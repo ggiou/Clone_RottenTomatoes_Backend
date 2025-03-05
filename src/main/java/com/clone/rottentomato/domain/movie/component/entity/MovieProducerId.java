@@ -1,17 +1,26 @@
 package com.clone.rottentomato.domain.movie.component.entity;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 public class MovieProducerId implements Serializable{
     private Long movie;
     private Long producer;
 
-    public MovieProducerId() {}
 
     public MovieProducerId(Long movieId, Long producerId) {
         this.movie = movieId;
         this.producer = producerId;
+    }
+
+    public MovieProducerId(Movie movie, Producer producer) {
+        this.movie = movie.getId();
+        this.producer = producer.getId();
+    }
+
+    public static List<MovieProducerId> of(List<MovieProducer> movieProducers){
+        return movieProducers.stream().map(t->new MovieProducerId(t.getMovie(), t.getProducer())).toList();
     }
 
     @Override

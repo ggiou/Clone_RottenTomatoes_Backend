@@ -1,8 +1,10 @@
 package com.clone.rottentomato.domain.movie.controller;
 
+import com.amazonaws.util.CollectionUtils;
 import com.amazonaws.util.StringUtils;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
+import com.clone.rottentomato.domain.movie.component.dto.MovieFindRequest;
 import com.clone.rottentomato.domain.movie.component.dto.MovieSaveRequest;
 import com.clone.rottentomato.domain.movie.constant.MovieError;
 import com.clone.rottentomato.domain.movie.service.MovieService;
@@ -25,7 +27,9 @@ import java.util.Objects;
 public class MovieController {
     private final MovieService movieService;
 
-    /** 특정 영화의 전체 정보 반환 (상세보기) */
+    /** 특정 영화의 전체 정보 반환 (상세보기)
+     * @param movieId - pathValue, 영화 pk
+     * @return CommonResponse.Movie*/
     @GetMapping("{movieId}")
     public CommonResponse getMovieInfo(@PathVariable final Long movieId) {
         if(Objects.isNull(movieId) || movieId <= 0) {
@@ -34,10 +38,15 @@ public class MovieController {
         return movieService.getMovieInfo(movieId);
     }
 
-    /** 영화 리스트 반환 */
-    @GetMapping("/list")
-    public CommonResponse getMovieList(){
-        return new CommonResponse();
+    /** 영화 카테고리 리스트 반환 */
+    @GetMapping("/list/category")
+    public CommonResponse getMovieList(@RequestBody(required = false) final MovieFindRequest request, BindingResult bindingResult){
+        if(Objects.isNull(request)) throw new MovieException("입력한 정보가 없습니다. 영화 리스트 요청 정보를 입력해주세요.", CommonError.BAD_REQUEST);
+        if(bindingResult.hasErrors()) {
+            throw new CommonException(bindingResult.getAllErrors().get(0).getDefaultMessage(), CommonError.INVALID_REQUEST);
+        }
+
+        return movieService.getMovieListByCategory(request);
     }
 
     /** 특정 영화에 대한 추천 영화 리스트 반환 */
@@ -50,6 +59,7 @@ public class MovieController {
      * @param searchValue : 검색할 문자열 값
      * @param pageNo : n 번째 페이지 정보
      * @param pageSize : 1페이지당 돌려줄 개수
+     * @return CommonResponse.List<SearchResponse>
      * */
     @PostMapping("/search")
     public CommonResponse getMovieSearchList(@RequestParam(value = "value", required = false) String searchValue,
@@ -62,7 +72,9 @@ public class MovieController {
         return movieService.searchMovieList(searchValue, pageNo, pageSize);
     }
 
-    /** 비디오 정보 저장 api */
+    /** 비디오 정보 저장 api
+     * @param request - 비디오 정보 저장 request
+     * @return CommonResponse.List<MovieInfo> */
     @PostMapping("/save")
     public CommonResponse saveMovie(@RequestBody(required = false) @Valid List<MovieSaveRequest> request, BindingResult bindingResult){
         if(Objects.isNull(request)) throw new MovieException("입력한 정보가 없습니다. 영화 저장 요청 정보를 입력해주세요.", CommonError.BAD_REQUEST);

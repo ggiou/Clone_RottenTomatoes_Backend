@@ -1,25 +1,41 @@
 package com.clone.rottentomato.domain.movie.repository.custom.impl;
 
+import com.clone.rottentomato.common.component.dto.SortRequestDto;
 import com.clone.rottentomato.domain.movie.component.dto.MovieDto;
+import com.clone.rottentomato.domain.movie.component.dto.MovieFindRequest;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.repository.MovieRepository;
 import com.clone.rottentomato.domain.movie.repository.custom.MovieCustomRepository;
 import com.clone.rottentomato.util.UtilJpa;
+import com.clone.rottentomato.util.UtilNumber;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.clone.rottentomato.domain.movie.constant.MovieFindType.CATEGORY;
 
 @Slf4j
 @Repository
 @Transactional
 @RequiredArgsConstructor
 public class MovieCustomRepositoryImpl implements MovieCustomRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
     private final MovieRepository movieRepository;
     private final UtilJpa<Movie> utilJpa;
+    private final ObjectMapper mapper = new ObjectMapper();
 
 
     // ================================= 영화 기본정보 =================================
@@ -73,6 +89,32 @@ public class MovieCustomRepositoryImpl implements MovieCustomRepository {
         // 이미 존재한다면, null 이 아닌 값만 업데이트
         // 영화 평점의 경우, 리뷰 점수를 통해 쌓이므로, 업데이트 되선 안된다. (모든 값이 동일해도 호출 x)
         return findDbEntity.map(movie -> movieRepository.save(utilJpa.setNotEqualsProperties(movie, requestEntity, Collections.singletonList("rating")))).orElseGet(() -> movieRepository.save(requestEntity));
+    }
+
+    @Override
+    public List<MovieDto> findPageByCategory(Long categoryId, Pageable pageable) {
+        // JPQL 초기화
+        StringBuilder jpql = new StringBuilder();
+
+        jpql.append("SELECT new com.clone.rottentomato.domain.movie.component.dto.MovieDto(m.id, m.name, m.rating, m.posterUrl, m.releaseDate) ")
+                .append("FROM MovieCategory c INNER JOIN Movie m ON c.movie.id = m.id ")
+                .append("WHERE c.categoryInfo.id = :categoryPk ");
+
+        // 페이징을 위해 Pageable 객체에서 데이터를 가져옴
+        TypedQuery<MovieDto> query = entityManager.createQuery(jpql.toString(), MovieDto.class)
+                .setParameter("categoryPk", categoryId);
+
+        // 페이징 적용
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        // 결과 반환
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Movie> findPage(Pageable pageable) {
+        return null;
     }
 
 }

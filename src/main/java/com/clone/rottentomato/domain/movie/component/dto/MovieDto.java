@@ -3,9 +3,11 @@ package com.clone.rottentomato.domain.movie.component.dto;
 import com.clone.rottentomato.common.component.dto.ResponseDto;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.util.UtilDate;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Getter
@@ -27,6 +29,14 @@ public class MovieDto extends ResponseDto {
         this.releaseDate = releaseDate;
     }
 
+    private MovieDto(Long id, String name, BigDecimal rating, String posterUrl, LocalDateTime releaseDate){
+        this.id = id;
+        this.name = name;
+        this.rating = rating;
+        this.posterUrl = posterUrl;
+        this.releaseDate = UtilDate.toStr(releaseDate);
+    }
+
     // 응답값으로 사용시, 성공 실패 여부만 담은 객체 반환
     private MovieDto(boolean success, String resultMsg){
         this.setResult(success, resultMsg);
@@ -45,13 +55,13 @@ public class MovieDto extends ResponseDto {
 
     public static MovieDto fromEntity(Movie entity){
         if(Objects.isNull(entity)) return null;
-        String releaseDate = UtilDate.convertDate(entity.getReleaseDate());
+        String releaseDate = UtilDate.toStr(entity.getReleaseDate());
         return new MovieDto(entity.getId(), entity.getName(), entity.getRating(), entity.getPosterUrl(), releaseDate);
     }
 
     public static MovieDto fromEntity(Movie dto, boolean isSuccess,String resultMsg){
         if(Objects.isNull(dto)) return new MovieDto(false, resultMsg);
-        MovieDto resDto = new MovieDto(dto.getId(), dto.getName(), dto.getRating(), dto.getPosterUrl(), UtilDate.convertDate(dto.getReleaseDate()));
+        MovieDto resDto = new MovieDto(dto.getId(), dto.getName(), dto.getRating(), dto.getPosterUrl(), UtilDate.toStr(dto.getReleaseDate()));
         resDto.setResult(isSuccess, resultMsg);
         return resDto;
     }
