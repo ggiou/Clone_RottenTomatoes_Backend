@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.minidev.json.annotate.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -25,7 +24,7 @@ public class MovieInfoDto {
     private MovieDto movieDto;
     private MovieDetailDto movieDetailDto;
     private List<MovieTrailerDto> movieTrailerDtoList = new ArrayList<>();
-    private List<CategoryInfoDto> categoryList = new ArrayList<>();
+    private List<CategoryInfoDto> categoryInfoDtoList = new ArrayList<>();
     private String categoryStr;
 
     /** 영화 정보 dto 의 모든 엔티티를 통해 dto 로 변환해 생성*/

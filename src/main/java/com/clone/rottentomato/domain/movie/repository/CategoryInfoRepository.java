@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CategoryInfoRepository extends JpaRepository<CategoryInfo, Long> {
     /** 이름을 가진 카테고리 정보 리스트 검색*/
@@ -16,4 +17,6 @@ public interface CategoryInfoRepository extends JpaRepository<CategoryInfo, Long
             "INNER JOIN CategoryInfo c ON m.categoryInfo.id = c.id " +
             "WHERE m.movie.id =:movieId")
     List<CategoryInfo> findCategoryInfoForMovieId(Long movieId);
+
+    Optional<CategoryInfo> findByName(String name);
 }

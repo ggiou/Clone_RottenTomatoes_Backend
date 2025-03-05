@@ -78,15 +78,15 @@ public class UtilDate {
     /** LocalDateTime 을 기본 날짜 포맷의 문자열로 변환하는 함수 
      *  - isNullable = true 라면, 빈문자열로 반환
      * */
-    public static String convertDate(LocalDateTime dateTime, boolean isNullable){
+    public static String toStr(LocalDateTime dateTime, boolean isNullable){
         if(isNullable) return StringUtils.EMPTY;
         if(Objects.isNull(dateTime)) return StringUtils.EMPTY;  // 에러 코드로 변환
         return dateTime.format(DEFAULT_DATE_FORMATTER);
     }
 
     /** LocalDateTime 을 기본 날짜 포맷의 문자열로 변환하는 함수 */
-    public static String convertDate(LocalDateTime dateTime){
-        return convertDate(dateTime, false);
+    public static String toStr(LocalDateTime dateTime){
+        return toStr(dateTime, false);
     }
 
     /** 유효한 날짜 문자열인이 판단하는 함수 - SimpleDateFormat*/

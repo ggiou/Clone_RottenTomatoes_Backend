@@ -1,5 +1,6 @@
 package com.clone.rottentomato.domain.movie.component.dto;
 
+import com.clone.rottentomato.domain.movie.component.entity.MovieProducer;
 import com.clone.rottentomato.util.UtilString;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,8 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 public class SearchResponse {
     private List<SearchMovieInfo> searchMovieInfos; // 영화 검색 결과 리스트 (영화 제목 or 배우/감독의 이름이 포함될 경우)
-    private List<String> actors;    // 배우 이름 검색 결과
-    private List<String> directors; // 감독 이름 검색 결과
+    private List<MovieProducer> actors;    // 배우 이름 검색 결과
+    private List<MovieProducer> directors; // 감독 이름 검색 결과
     private String searchValue; // 검색 값
 
 

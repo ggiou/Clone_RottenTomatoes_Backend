@@ -1,7 +1,6 @@
 package com.clone.rottentomato.domain.movie.component.entity;
 
 import com.clone.rottentomato.common.component.entity.TimeStamped;
-import com.clone.rottentomato.common.converter.EnumTypeConverter;
 import com.clone.rottentomato.domain.movie.constant.ProducerType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -21,7 +20,6 @@ public class Producer extends TimeStamped {
     @Column(nullable = false)
     private String name;    // 이름
     @Column(nullable = false)
-    @Convert(converter = EnumTypeConverter.class)
     private ProducerType type; // 제작자 타입
 
     private Producer(String name, ProducerType type){
