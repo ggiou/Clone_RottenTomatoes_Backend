@@ -23,8 +23,8 @@ import java.util.Objects;
 public class MovieDetail extends TimeStamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;    // 영화 상세정보 id
-    @Column(columnDefinition = "varchar(1000) default ''")
-    @Size(max = 1000, message = "영화 줄거리는 최대 1000자까지 입력 가능합니다.")
+    @Column(columnDefinition = "varchar(3000) default ''")
+    @Size(max = 3000, message = "영화 줄거리는 최대 3000자까지 입력 가능합니다.")
     private String story;   // 영화 줄거리
     @Column(columnDefinition = "varchar(500) default ''")
     @Size(max = 500, message = "영화 배우 이름들은 최대 500자까지 입력 가능합니다.")

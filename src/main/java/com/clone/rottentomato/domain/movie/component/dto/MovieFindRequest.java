@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Sort;
 
 import java.util.Objects;
 
@@ -38,5 +39,9 @@ public class MovieFindRequest extends SortRequestDto {
             case RATING -> "rating";
             default -> "releaseDate";
         };
+    }
+
+    public Sort getSort(){
+        return isAsc() ? Sort.by(getSortTypeSql()).ascending() : Sort.by(getSortTypeSql()).descending();
     }
 }

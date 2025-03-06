@@ -1,9 +1,11 @@
 package com.clone.rottentomato.domain.movie.repository.custom.impl;
 
+import com.clone.rottentomato.common.constant.JpaError;
 import com.clone.rottentomato.domain.movie.component.entity.MovieProducer;
 import com.clone.rottentomato.domain.movie.component.entity.MovieProducerId;
 import com.clone.rottentomato.domain.movie.repository.MovieProducerRepository;
 import com.clone.rottentomato.domain.movie.repository.custom.MovieProducerCustomRepository;
+import com.clone.rottentomato.exception.JpaException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class MovieProducerCustomRepositoryImpl implements MovieProducerCustomRep
     public List<MovieProducer> saveMovieProducer(List<MovieProducer> entityList) {
         // db에 영화 - 제작자 연관관계가 저장된게 있는지 확인
         List<Long> movieIds = entityList.stream().map(t -> t.getMovie().getId()).collect(Collectors.toSet()).stream().toList();
+        if(movieIds.isEmpty()) throw new JpaException("영화 제작자를 저장하기에 잘못된 입력입니다.", JpaError.SAVE_ERROR);
         List<MovieProducer> movieProducers = movieProducerRepository.findAllByMovieIds(movieIds);
         // db에 없는 영화 제작자 정보만 저장
         if (movieProducers.isEmpty()) return movieProducerRepository.saveAll(entityList);

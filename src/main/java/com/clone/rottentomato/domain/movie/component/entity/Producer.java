@@ -20,16 +20,17 @@ public class Producer{
     @Column(nullable = false)
     private String name;    // 이름
     @Column(nullable = false)
-    private ProducerType type; // 제작자 타입
+    @Enumerated(EnumType.STRING)
+    private ProducerType roleType; // 제작자 역할 타입
 
     private Producer(String name, ProducerType type){
         this.name = name;
-        this.type = type;
+        this.roleType = type;
     }
 
-    public static Producer of(String name, ProducerType type){
-        if(StringUtils.isBlank(name) || Objects.isNull(type)) return null;
-        return new Producer(name, type);
+    public static Producer of(String name, ProducerType roleType){
+        if(StringUtils.isBlank(name) || Objects.isNull(roleType)) return null;
+        return new Producer(name, roleType);
     }
 
 }
