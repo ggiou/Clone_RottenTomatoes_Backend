@@ -389,7 +389,7 @@ public class MovieService {
             if(!producers.isEmpty() || !directors.isEmpty()) {
                 try {
                     producers.addAll(directors);
-                    producerCustomRepository.saveProducer(producers);
+                    producers = producerCustomRepository.saveProducer(producers);
                     final Movie targetMovie = movie;
                     List<MovieProducer> movieProducers = producers.stream().map(t->MovieProducer.of(targetMovie, t)).toList();
                     movieProducerCustomRepository.saveMovieProducer(movieProducers);

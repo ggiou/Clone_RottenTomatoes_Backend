@@ -13,7 +13,7 @@ import java.util.Objects;
 @Getter
 @Entity
 @NoArgsConstructor
-public class Producer extends TimeStamped {
+public class Producer{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;    // 영화 제작자 id

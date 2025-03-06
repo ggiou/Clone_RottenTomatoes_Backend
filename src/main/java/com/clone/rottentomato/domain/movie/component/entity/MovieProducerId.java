@@ -8,7 +8,7 @@ public class MovieProducerId implements Serializable{
     private Long movie;
     private Long producer;
 
-
+    public MovieProducerId(){}
     public MovieProducerId(Long movieId, Long producerId) {
         this.movie = movieId;
         this.producer = producerId;

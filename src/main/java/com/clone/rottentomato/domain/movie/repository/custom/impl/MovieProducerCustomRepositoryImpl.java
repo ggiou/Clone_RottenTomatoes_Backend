@@ -9,7 +9,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Transactional
@@ -18,17 +22,20 @@ import java.util.List;
 public class MovieProducerCustomRepositoryImpl implements MovieProducerCustomRepository {
     private final MovieProducerRepository movieProducerRepository;
 
-    /** 영화 - 제작자 정보 리스트가 없다면 저장, 있으면 업데이트
-     * @return 저장한 MovieProducer 리스트 */
+    /**
+     * 영화 - 제작자 정보 리스트가 없다면 저장, 있으면 업데이트
+     *
+     * @return 저장한 MovieProducer 리스트
+     */
     @Override
     public List<MovieProducer> saveMovieProducer(List<MovieProducer> entityList) {
         // db에 영화 - 제작자 연관관계가 저장된게 있는지 확인
-        List<MovieProducerId> ids = MovieProducerId.of(entityList);
-        List<MovieProducer> movieProducers = movieProducerRepository.findAllById(ids);
-
+        List<Long> movieIds = entityList.stream().map(t -> t.getMovie().getId()).collect(Collectors.toSet()).stream().toList();
+        List<MovieProducer> movieProducers = movieProducerRepository.findAllByMovieIds(movieIds);
         // db에 없는 영화 제작자 정보만 저장
-        List<MovieProducer> saveTargetList = entityList.stream().filter(s-> movieProducers.stream()
-                .noneMatch(t->t.getMovie().getId().equals(s.getMovie().getId()) && t.getProducer().getId().equals(s.getProducer().getId()))).toList();
+        if (movieProducers.isEmpty()) return movieProducerRepository.saveAll(entityList);
+        List<MovieProducer> saveTargetList = entityList.stream().filter(s -> movieProducers.stream()
+                .noneMatch(t -> t.getMovie().getId().equals(s.getMovie().getId()) && t.getProducer().getId().equals(s.getProducer().getId()))).toList();
         movieProducerRepository.saveAll(saveTargetList);
 
         // db에 저장된 정보를 list 반환
