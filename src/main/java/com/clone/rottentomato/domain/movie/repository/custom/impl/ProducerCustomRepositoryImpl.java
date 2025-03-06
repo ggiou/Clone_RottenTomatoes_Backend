@@ -17,7 +17,7 @@ import java.util.List;
 public class ProducerCustomRepositoryImpl implements ProducerCustomRepository {
     private final ProducerRepository producerRepository;
 
-    /** 카테고리 정보 리스트가 없다면 저장, 있으면 업데이트
+    /** 제작자 정보 리스트가 없다면 저장, 있으면 업데이트
      * @return 저장한 Producer 리스트 */
     @Override
     public List<Producer> saveProducer(List<Producer> entityList) {
@@ -26,6 +26,7 @@ public class ProducerCustomRepositoryImpl implements ProducerCustomRepository {
         List<Producer> producers = producerRepository.findByNames(names);
 
         // db에 없는 영화 제작자 정보만 저장
+        if(producers.isEmpty()) return producerRepository.saveAll(entityList);
         List<Producer> saveTargetList = entityList.stream().filter(s-> producers.stream()
                 .noneMatch(t->t.getName().equals(s.getName()) && t.getType().equals(s.getType()))).toList();
         producerRepository.saveAll(saveTargetList);
