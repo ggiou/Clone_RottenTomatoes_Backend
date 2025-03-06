@@ -3,6 +3,7 @@ package com.clone.rottentomato.domain.movie.service;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
 import com.clone.rottentomato.common.constant.CustomError;
+import com.clone.rottentomato.common.constant.SortType;
 import com.clone.rottentomato.crawling.constant.CrawlingSite;
 import com.clone.rottentomato.crawling.service.WebDriverService;
 import com.clone.rottentomato.crawling.service.WebElementService;
@@ -35,7 +36,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.clone.rottentomato.domain.movie.constant.ProducerType.*;
-import static com.clone.rottentomato.domain.movie.constant.MovieFindType.*;
+import static com.clone.rottentomato.common.constant.CommonConst.DATA_NAME.*;
 
 
 @Slf4j
@@ -63,8 +64,6 @@ public class MovieService {
     private final WebDriverService webDriverService;
     private WebElementService webElementService;
 
-    private final String findMapName = "findResponse";
-
 
     /** 영화 pk를 통해 특정 영화의 상세 정보 반환 */
     public CommonResponse getMovieInfo(Long movieId) {
@@ -74,7 +73,7 @@ public class MovieService {
         // 영화 기본 정보
         Optional<Movie> movie = movieRepository.findById(movieId);
         if (movie.isEmpty()) {
-            return CommonResponse.fail("해당 영화 정보가 존재하지 않습니다.", UtilMap.makeMap(findMapName));
+            return CommonResponse.fail("해당 영화 정보가 존재하지 않습니다.", UtilMap.makeMap(FIND_MAP_NAME));
         }
         // 영화 전체 정보 요소 값 검색
         Optional<MovieDetail> movieDetail = movieDetailRepository.findByMovieId(movieId);
@@ -82,38 +81,50 @@ public class MovieService {
         List<CategoryInfo> movieCategories = categoryInfoRepository.findCategoryInfoForMovieId(movieId);
 
         MovieInfoDto movieInfoDto = MovieInfoDto.fromEntity(movie.get(), movieDetail.orElse(null), movieTrailers, movieCategories);
-        return CommonResponse.success(String.format("[%s] 영화 상세 정보를 가져오는데 성공했습니다.", movie.get().getName()), UtilMap.makeMap(findMapName, movieInfoDto));
+        return CommonResponse.success(String.format("[%s] 영화 상세 정보를 가져오는데 성공했습니다.", movie.get().getName()), UtilMap.makeMap(FIND_MAP_NAME, movieInfoDto));
+    }
+
+    /** 영화 정렬기준과 요창 page에 따라 영화 리스트 반환  */
+    public List<MovieFindResponse> getMovieListBySort(List<MovieFindRequest> requestList){
+        if(Objects.isNull(requestList) || requestList.isEmpty()) throw new MovieException("영화 리스트 반환 요청 값이 없습니다.", MovieError.BAD_REQUEST_MOVIE_LIST_FIND);
+
+        List<MovieFindResponse> findResList = new ArrayList<>();
+        for(MovieFindRequest request : requestList){
+            // 정렬 기준으로 리스트 반환
+            if(Objects.isNull(request) || SortType.find(request.getSortType()) == null) continue;
+        }
+        return findResList;
     }
 
     /** 영화 카테고리에 따라 영화 리스트 반환  */
-    public CommonResponse getMovieListByCategory(MovieFindRequest request){
-        if(Objects.isNull(request)){
-            throw new MovieException("영화 리스트 반환 요청 값이 없습니다.", MovieError.BAD_REQUEST_MOVIE_LIST_FIND);
-        }
-        MovieFindResponse res = null;
-        String name = StringUtils.EMPTY;
-        Long pk = UtilNumber.returnLong(request.getFindValue());
-        Optional<CategoryInfo> categoryInfo;
-        if(!Objects.isNull(pk)){
-            categoryInfo = categoryInfoRepository.findById(pk);
-        }else{
-            categoryInfo = categoryInfoRepository.findByName(request.getFindValue());
-        }
+    public List<MovieFindResponse> getMovieListByCategory(List<MovieFindRequest> requestList){
+        if(Objects.isNull(requestList) || requestList.isEmpty()) throw new MovieException("카테고리별 영화 리스트 반환 요청 값이 없습니다.", MovieError.BAD_REQUEST_MOVIE_LIST_FIND);
 
-        // 해당 pk가 존재한다면
-        if(categoryInfo.isPresent()) {
-            CategoryInfo category = categoryInfo.get();
-            name = category.getName();
-            Sort sort = request.isAsc() ? Sort.by(request.getSortTypeSql()).ascending() : Sort.by(request.getSortTypeSql()).descending();
-            Pageable pageable = PageRequest.of(request.getPage(), request.getPageSize(), sort);
+        List<MovieFindResponse> findResList = new ArrayList<>();
+        for(MovieFindRequest request : requestList) {
+            if(Objects.isNull(request) || StringUtils.isBlank(request.getFindValue())) continue;
+            Long pk = UtilNumber.returnLong(request.getFindValue());
+            Optional<CategoryInfo> categoryInfo;
+            if (!Objects.isNull(pk)) {
+                categoryInfo = categoryInfoRepository.findById(pk);
+            } else {
+                categoryInfo = categoryInfoRepository.findByName(request.getFindValue());
+            }
 
-            // 카테고리별 영화 리스트 탐색
-            List<MovieDto> byCategory = movieCustomRepository.findPageByCategory(category.getId(), pageable);
-            if (!byCategory.isEmpty()) {
-                res = MovieFindResponse.of(name, byCategory);
+            // 해당 pk가 존재한다면
+            if (categoryInfo.isPresent()) {
+                CategoryInfo category = categoryInfo.get();
+                Sort sort = request.isAsc() ? Sort.by(request.getSortTypeSql()).ascending() : Sort.by(request.getSortTypeSql()).descending();
+                Pageable pageable = PageRequest.of(request.getPage(), request.getPageSize(), sort);
+
+                // 카테고리별 영화 리스트 탐색
+                List<MovieDto> byCategory = movieCustomRepository.findPageByCategory(category.getId(), pageable);
+                if (!byCategory.isEmpty()) {
+                    findResList.add(MovieFindResponse.of(category.getName(), byCategory));
+                }
             }
         }
-        return CommonResponse.success(String.format("%s 장르의 영화 리스트 요청에 성공했습니다.", name), UtilMap.makeMap(findMapName, res));
+        return findResList;
     }
 
 

@@ -34,4 +34,9 @@ public class CommonConst {
         // 현재 사용 중인 os
         public final static String RUNNING_OS = CommonService.setRunningOs();
     }
+
+    /** CommonResponse.data 의 공통 이름 */
+    public static class DATA_NAME{
+        public final static String FIND_MAP_NAME = "findResponse";
+    }
 }

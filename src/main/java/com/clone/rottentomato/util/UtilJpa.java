@@ -1,6 +1,8 @@
 package com.clone.rottentomato.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -45,5 +47,27 @@ public class UtilJpa<T> {
 
     public T setNotEqualsProperties(T entity, T request) {
         return setNotEqualsProperties(entity, request, null);
+    }
+
+    public String getOrderBySql(Pageable pageable, String as){
+        StringBuilder jpql = new StringBuilder();
+        jpql.append("ORDER BY ");
+        Iterator<Sort.Order> iterator = pageable.getSort().iterator();
+        
+        boolean isMultiSort = iterator.hasNext() && iterator.next() != null && iterator.hasNext();
+        // 다중 정렬일 경우
+        if(isMultiSort){
+            String sortClause = pageable.getSort().stream()
+                    .map(order -> String.format("%s.%s %s", as, order.getProperty(), (order.isAscending() ? "ASC" : "DESC")))
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse(""); // 여러 정렬 조건을 쉼표로 구분
+            jpql.append(sortClause);
+            return jpql.toString();
+        }
+
+        // 단일 정렬일 경우
+        Sort.Order order = pageable.getSort().iterator().next(); // 첫 번째 정렬 조건만 가져옴
+        jpql.append(String.format("%s.%s %s", as, order.getProperty(), (order.isAscending() ? "ASC" : "DESC")));
+        return jpql.toString();
     }
 }

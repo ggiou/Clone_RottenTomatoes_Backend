@@ -1,25 +1,24 @@
 package com.clone.rottentomato.domain.movie.controller;
 
-import com.amazonaws.util.CollectionUtils;
 import com.amazonaws.util.StringUtils;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
 import com.clone.rottentomato.domain.movie.component.dto.MovieFindRequest;
+import com.clone.rottentomato.domain.movie.component.dto.MovieFindResponse;
 import com.clone.rottentomato.domain.movie.component.dto.MovieSaveRequest;
 import com.clone.rottentomato.domain.movie.constant.MovieError;
 import com.clone.rottentomato.domain.movie.service.MovieService;
 import com.clone.rottentomato.exception.CommonException;
 import com.clone.rottentomato.exception.MovieException;
+import com.clone.rottentomato.util.UtilMap;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import static com.clone.rottentomato.common.constant.CommonConst.DATA_NAME.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,15 +37,27 @@ public class MovieController {
         return movieService.getMovieInfo(movieId);
     }
 
-    /** 영화 카테고리 리스트 반환 */
+    /** 카테고리별 영화 리스트 반환
+     * */
     @GetMapping("/list/category")
-    public CommonResponse getMovieList(@RequestBody(required = false) final MovieFindRequest request, BindingResult bindingResult){
-        if(Objects.isNull(request)) throw new MovieException("입력한 정보가 없습니다. 영화 리스트 요청 정보를 입력해주세요.", CommonError.BAD_REQUEST);
+    public CommonResponse getMovieListByCategory(@RequestBody(required = false) final List<MovieFindRequest> request, BindingResult bindingResult){
+        if(Objects.isNull(request) || request.isEmpty()) throw new MovieException("입력한 정보가 없습니다. 카테고리별 영화 리스트 요청 정보를 입력해주세요.", CommonError.BAD_REQUEST);
         if(bindingResult.hasErrors()) {
             throw new CommonException(bindingResult.getAllErrors().get(0).getDefaultMessage(), CommonError.INVALID_REQUEST);
         }
+        List<MovieFindResponse> findResponses = movieService.getMovieListByCategory(request);
+        if (findResponses.isEmpty()){
+            return CommonResponse.fail("카테고리별 영화 리스트 요청에 실패했습니다. 존재하는 카테고리 영화가 없습니다.", UtilMap.makeMap(FIND_MAP_NAME));
+        }
+        return CommonResponse.success("카테고리별 영화 리스트 요청에 성공했습니다.", UtilMap.makeMap(FIND_MAP_NAME, findResponses));
+    }
 
-        return movieService.getMovieListByCategory(request);
+    /** 영화 리스트 반환 (전체 영화에서, 정렬 기준으로 pageable 해 반환)*/
+    @GetMapping("/list")
+    public CommonResponse getMovieList(@RequestBody(required = false) final List<MovieFindRequest> request){
+        if(Objects.isNull(request) || request.isEmpty()) throw new MovieException("입력한 정보가 없습니다. 영화 리스트 요청 정보를 입력해주세요.", CommonError.BAD_REQUEST);
+        List<MovieFindResponse> findResponses = movieService.getMovieListBySort(request);
+        return CommonResponse.success("카테고리별 영화 리스트 요청에 성공했습니다.", UtilMap.makeMap(FIND_MAP_NAME));
     }
 
     /** 특정 영화에 대한 추천 영화 리스트 반환 */

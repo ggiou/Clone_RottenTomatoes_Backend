@@ -100,6 +100,11 @@ public class MovieCustomRepositoryImpl implements MovieCustomRepository {
                 .append("FROM MovieCategory c INNER JOIN Movie m ON c.movie.id = m.id ")
                 .append("WHERE c.categoryInfo.id = :categoryPk ");
 
+        // 정렬 적용
+        if (pageable.getSort().isSorted()) {
+            jpql.append(utilJpa.getOrderBySql(pageable, "m"));
+        }
+
         // 페이징을 위해 Pageable 객체에서 데이터를 가져옴
         TypedQuery<MovieDto> query = entityManager.createQuery(jpql.toString(), MovieDto.class)
                 .setParameter("categoryPk", categoryId);

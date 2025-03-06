@@ -1,7 +1,13 @@
 package com.clone.rottentomato.common.constant;
 
 import com.clone.rottentomato.common.handler.EnumType;
+import com.clone.rottentomato.crawling.constant.CrawlingSite;
+import com.clone.rottentomato.exception.CommonException;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public enum SortType implements EnumType {
@@ -22,5 +28,18 @@ public enum SortType implements EnumType {
     @Override
     public String getValue() {
         return null;
+    }
+
+    public static SortType find(SortType type){
+        if(Objects.isNull(type)) throw new IllegalArgumentException("입력된 정보가 없습니다.");
+        return find(type.name());
+    }
+
+    private static SortType find(final String site) {
+        Optional<SortType> sort = Arrays.stream(SortType.values())
+                .filter(t -> t.name().equals(site))
+                .findFirst();
+        // 정렬의 경우, 여러 곳에서 함께 사용하는 공통 클래스이므로 오류 대신, null 로 반환
+        return sort.orElse(null);
     }
 }
