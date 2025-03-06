@@ -180,6 +180,7 @@ public class WebDriverService {
         } catch (Exception e) {
             if (e.getMessage().contains("invalid session id")) {
                 log.error("세션 만료 오류 발생. 새 드라이버 세션을 시작합니다.");
+                d.quit();
                 d = resetDriver();  // 새 드라이버 세션 시작
                 d.get(url);  // 새 드라이버로 페이지 요청
             } else {
