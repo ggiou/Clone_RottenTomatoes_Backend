@@ -37,7 +37,8 @@ dependencies {
 
 
 	// db
-	runtimeOnly 'com.h2database:h2'
+//	runtimeOnly 'com.h2database:h2'
+
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 
@@ -65,7 +66,8 @@ dependencies {
 	//Email
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-
+	//Jackson
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
 
 	// valid
 	implementation 'org.springframework.boot:spring-boot-starter-validation'

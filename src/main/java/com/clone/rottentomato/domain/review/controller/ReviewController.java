@@ -1,7 +1,9 @@
 package com.clone.rottentomato.domain.review.controller;
 
 
+import com.clone.rottentomato.common.component.dto.SortRequestDto;
 import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
+import com.clone.rottentomato.domain.mypage.component.dto.MypageReviewResponseDto;
 import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
 import com.clone.rottentomato.domain.review.component.dto.ReviewResponseDto;
 import com.clone.rottentomato.domain.review.component.dto.SuccessResponse;
@@ -11,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +29,24 @@ public class ReviewController {
     public ResponseEntity<ReviewResponseDto>createReview(@PathVariable Long movie_id, @RequestBody ReviewRequestDto reviewRequestDto,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reviewService.createReview(movie_id,reviewRequestDto,userDetails.getMember());
+    }
+
+
+    //  리뷰 전체 조회
+    @GetMapping("/reviews")
+    public ResponseEntity<List<MypageReviewResponseDto>> getReviews(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                    @RequestParam(value = "page")int page,
+                                                                    @RequestParam(value = "size")int size,
+                                                                    @RequestBody SortRequestDto requestDto) {
+        return reviewService.getReviews(userDetails.getMember(),page,size,requestDto);
+    }
+
+
+    //  리뷰 상세 조회
+    @GetMapping("/review/{review_id}")
+    public ResponseEntity<?>getReview(@PathVariable Long review_id,
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return reviewService.getreview(review_id,userDetails.getMember());
     }
 
 
@@ -43,5 +65,6 @@ public class ReviewController {
                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reviewService.deleteReview(review_id,userDetails);
     }
+
 
 }

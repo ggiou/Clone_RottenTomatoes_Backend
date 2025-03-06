@@ -13,6 +13,7 @@ public class LikesResponseDto {
     private boolean isLiked;
     private int count;
 
+
     @Builder
     public LikesResponseDto(HttpStatus status, boolean isLiked, int count) {
         this.status = status;
@@ -28,4 +29,6 @@ public class LikesResponseDto {
                 .count(count)
                 .build();
     }
+
+
 }
