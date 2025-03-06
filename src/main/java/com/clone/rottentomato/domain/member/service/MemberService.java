@@ -1,7 +1,11 @@
 package com.clone.rottentomato.domain.member.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
+import com.clone.rottentomato.common.component.dto.CommonResponse;
+import com.clone.rottentomato.domain.auth.JwtUtil;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
+import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.dialect.BooleanDecoder;
@@ -18,6 +22,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final JwtUtil jwtUtil;
 
     //신규유저 등록 ( 일반)
     @Transactional
@@ -56,10 +61,12 @@ public class MemberService {
 
     //유저 등록 확인 (중복 방지)
     @Transactional(readOnly = true)
-    public Boolean isExistMember(String email){
+    public CommonResponse isExistMember(String email){
         Boolean result = false;
         result = memberRepository.findByMemberEmail(email).stream().findFirst().isPresent();
-        return result;
+        return result
+                ? CommonResponse.success("정보조회 확인", Boolean.TRUE)
+                : CommonResponse.success("회원정보 없음", Boolean.FALSE);
     }
 
     //유저정보 조회 - 이메일 검색
@@ -68,20 +75,25 @@ public class MemberService {
         return memberRepository.findByMemberEmail(email).stream().findFirst().orElse(null);
     }
 
-    @Transactional(readOnly = true)
-    public String getAuthCodeByEmail(String email) {
-        return memberRepository.findByMemberEmail(email)
-                .filter(member -> member.getAuthCode() != null)
-                .map(Member::getAuthCode)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일 또는 authCode가 없습니다."));
-    }
-
 
 
     //구글 메일  검증
     public boolean isGoogleEmail(String email) {
         return email.endsWith("@gmail.com"); // Gmail (Google 계정 형식)
     }
+
+    public String validateCode(String email, String code) {
+        Member member = findMemberByEmail(email);
+        if (member == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+        String authCode = member.getAuthCode();
+        if (!authCode.equalsIgnoreCase(code)) {
+            throw new RuntimeException("코드 인증 실패");
+        }
+        return jwtUtil.createToken(member.getMemberEmail());
+    }
+
 
     //이메일 형식 검증
     public boolean isValidEmailFormat(String email) {
@@ -94,6 +106,7 @@ public class MemberService {
     // 8자리 랜덤 코드 생성
     public String generateAuthCode() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
-
     }
+
+
 }

@@ -1,26 +1,26 @@
 package com.clone.rottentomato.domain.member.controller;
 
-import com.clone.rottentomato.domain.auth.JwtAuthenticationFilter;
+import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.domain.auth.JwtUtil;
 import com.clone.rottentomato.domain.member.component.dto.MemberRequestDto;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.service.EmailService;
 import com.clone.rottentomato.domain.member.service.GoogleMemberService;
 import com.clone.rottentomato.domain.member.service.MemberService;
+
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
-import java.io.IOException;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -32,7 +32,6 @@ import java.nio.charset.StandardCharsets;
 public class MemberController {
 
     private final JwtUtil jwtUtil;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;;
     private final MemberService memberService;
     private final GoogleMemberService googleMemberService;
     private final OAuth2AuthorizedClientService authorizedClientService;
@@ -48,84 +47,88 @@ public class MemberController {
     }
 
     //사용자 존제유무 확인
-    @PostMapping("/check-member")
-    public ResponseEntity<Boolean> checkMember(@RequestBody MemberRequestDto requestDto) {
-    String email = requestDto.getEmail();
-        return memberService.isExistMember(email) ? ResponseEntity.ok(true) : ResponseEntity.ok(false);
+    @PostMapping("/isExist")
+    public CommonResponse checkMember(@RequestBody MemberRequestDto requestDto) {
+        try {
+            String email = requestDto.getEmail();
+            if (email == null || email.trim().isEmpty()) {
+                return CommonResponse.fail("이메일이 유효하지 않습니다.");
+            }
+
+            return memberService.isExistMember(email);
+
+        }catch (Exception ex){
+            log.error("회원조회 오류 : {}", ex.getMessage());
+            return CommonResponse.error("회원조회 오류 발생 : " + ex.getMessage());
+        }
     }
 
+    //일반 로그인( 코드 생성 및 메일전달 )
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody MemberRequestDto requestDto) {
-        /*log.info("login :: --------------- Request information");
-        log.info("login :: email: {} ",  requestDto .getEmail());
-        log.info("login :: code: {} ",  requestDto .getAuthCode());*/
+    public CommonResponse login(@RequestBody MemberRequestDto requestDto) {
+        try {
+            // 1. 이메일 존재 확인 및 보안 코드 생성
+            Boolean isExistMember = (Boolean) memberService.isExistMember(requestDto.getEmail()).getData();
 
-        // 1. 이메일 존재 확인 및 보안 코드 생성
-       if(!memberService.isExistMember(requestDto.getEmail())){
-            memberService.registerMember(requestDto.getEmail(), "LOCAL");
-           log.info("login :: --------------- RegisterUser finished : TEST USER DATA INSERT");
+            if (!isExistMember) {
+                memberService.registerMember(requestDto.getEmail(), "LOCAL");
+                log.info("login :: --------------- RegisterUser finished : TEST USER DATA INSERT");
+            }
+            Member member = memberService.findMemberByEmail(requestDto.getEmail());
+            memberService.updateAuthCode(member);
+
+            log.info("login :: --------------- Update authCode finished");
+            log.info("updateAuthCode : {}", member.getAuthCode());
+
+            // 2. 이메일 전송
+            String loginUrl = String.format("http://localhost:8080/member/login-code?code=%s&email=%s", member.getAuthCode(), requestDto.getEmail());
+            String emailContent = String.format("로그인 링크: %s", loginUrl);
+
+            return emailService.sendEmail(requestDto.getEmail(), "로그인 코드", emailContent);
+        } catch (Exception ex) {
+            log.error("[일반]로그인 처리 중 오류 발생 : {}", ex.getMessage(), ex);
+            return CommonResponse.error("로그인 처리 중 오류 발생 : " + ex.getMessage());
         }
-        Member member = memberService.findMemberByEmail(requestDto.getEmail());
-        memberService.updateAuthCode(member);
-
-        log.info("login :: --------------- Update authCode finished");
-        log.info("updateAuthCode : {}" , member.getAuthCode());
-
-
-        // 2. 이메일 전송
-        String loginUrl = String.format("http://localhost:8080/member/login-code?code=%s&email=%s", member.getAuthCode(), requestDto.getEmail());
-        String emailContent = String.format("로그인 링크: %s", loginUrl);
-        /*log.info("login :: loginUrl: " + loginUrl + "");*/
-
-        emailService.sendEmail(requestDto.getEmail(), "로그인 코드", emailContent);
-        return ResponseEntity.ok().build();
     }
 
+    //인증로그인
     @GetMapping("/login-code")
-    public void loginWithCode(@RequestParam String code, @RequestParam String email, HttpServletResponse response) throws IOException {
-        /*log.info("loginWithCode : code:  {}" ,code );
-        log.info("loginWithCode : email:  {}" , email );*/
+    public CommonResponse loginWithCode(@RequestParam String code, @RequestParam String email, HttpServletResponse response) {
+        try {
+            // Service Layer로 로직 위임
+            String jwtToken = memberService.validateCode(email, code);
 
-        Member member = memberService.findMemberByEmail(email);
-        if(member == null) {
-            log.info("loginWithCode : member is null");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.sendRedirect("/error");
-            return;
-        }
-        String authCode = member.getAuthCode();
-        log.info("loginWithCode : authCode:  {}" , authCode );
-
-        if(authCode.equalsIgnoreCase(code)) {
-            String jwt = jwtUtil.createToken(member.getMemberEmail());
-            log.info("loginWithCode : jwt:  {}" , jwt );
-
-            // JWT를 URL 인코딩하여 쿠키에 저장
-            String encodedJwtToken = URLEncoder.encode(jwt, StandardCharsets.UTF_8);
-            log.info("encodedJwtToken: " + encodedJwtToken);
-
+            // JWT를 URL 인코딩 및 쿠키 설정만 수행
+            String encodedJwtToken = URLEncoder.encode(jwtToken, StandardCharsets.UTF_8);
             Cookie cookie = new Cookie("Authorization", encodedJwtToken);
-            cookie.setPath("/"); // 쿠키 경로 설정
-            cookie.setHttpOnly(true); // HttpOnly 설정
-            cookie.setMaxAge(3600); // 쿠키 유효 시간 설정 (1시간)
-
+            cookie.setPath("/");
+            cookie.setHttpOnly(true);
+            cookie.setMaxAge(3600);
             response.addCookie(cookie);
             response.setStatus(HttpServletResponse.SC_OK);
-            response.addHeader(JwtAuthenticationFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
-            response.sendRedirect("/testpage.html"); // 예시: 메인 페이지로 리다이렉트
-        }else{
+
+            return CommonResponse.success("LOGIN_SUCCESS");
+        } catch (RuntimeException ex) {
+            log.error("Unauthorized error: {}", ex.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.sendRedirect("/error");
+            return CommonResponse.error("코드 인증 실패: " + ex.getMessage(), HttpServletResponse.SC_UNAUTHORIZED);
+        } catch (Exception ex) {
+            // 기타 예외 처리
+            log.error("Internal server error: {}", ex.getMessage(), ex);
+            return CommonResponse.error("서버 오류: " + ex.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+
 
     }
 
+
+
     //현재 접속중인 유저 정보 호출
-    @GetMapping("/user-info")
-    public ResponseEntity<?> getUserInfo(Authentication authentication) {
+    @GetMapping("/info")
+    public CommonResponse getUserInfo(Authentication authentication) {
         try {
             if (authentication == null || !authentication.isAuthenticated()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증되지 않은 사용자입니다.");
+                return CommonResponse.error("인증되지 않은 사용자입니다." , HttpStatus.UNAUTHORIZED.value());
             }
 
             // UserDetails에서 사용자 정보 가져오기
@@ -134,47 +137,55 @@ public class MemberController {
             Member member = memberService.findMemberByEmail(email);
 
             if (member != null) {
-                return ResponseEntity.ok(member);
+                return CommonResponse.success("USER_INFO_SUCCESS" , member);
             } else {
-                return ResponseEntity.badRequest().body("해당 이메일의 회원 정보를 찾을 수 없습니다.");
+                return CommonResponse.error("해당 이메일의 회원 정보를 찾을 수 없습니다." , HttpStatus.BAD_REQUEST.value());
             }
         } catch (Exception e) {
             log.error("getUserInfo Error : {}", e.getMessage());
-            return ResponseEntity.internalServerError().body("서버 오류가 발생했습니다.");
+            return CommonResponse.error("서버 오류가 발생했습니다. : " + e.getMessage() , HttpStatus.INTERNAL_SERVER_ERROR.value());
+
         }
     }
 
 
 
-
-
-
-    //로그아웃 처리
+/*    //로그아웃 처리
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+    public CommonResponse logout(HttpServletRequest request, HttpServletResponse response) {
         try {
-            if(SecurityContextHolder.getContext().getAuthentication() instanceof OAuth2AuthenticationToken oauthtoken) {
-                authorizedClientService.removeAuthorizedClient(oauthtoken.getAuthorizedClientRegistrationId() , oauthtoken.getName());
+            // OAuth2 토큰 제거
+            if (SecurityContextHolder.getContext().getAuthentication() instanceof OAuth2AuthenticationToken oauthtoken) {
+                authorizedClientService.removeAuthorizedClient(
+                        oauthtoken.getAuthorizedClientRegistrationId(),
+                        oauthtoken.getName()
+                );
             }
+
+            // 세션 무효화 및 컨텍스트 제거
             request.getSession().invalidate();
             SecurityContextHolder.clearContext();
 
-            // ✅ JSESSIONID 쿠키 삭제
-            Cookie cookie = new Cookie("JSESSIONID", null);
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
-            cookie.setMaxAge(0);
-            response.addCookie(cookie);
+            // JSESSIONID 쿠키 삭제
+            Cookie sessionCookie = new Cookie("JSESSIONID", null);
+            sessionCookie.setPath("/");
+            sessionCookie.setHttpOnly(true);
+            sessionCookie.setMaxAge(0); // 즉시 만료
+            response.addCookie(sessionCookie);
 
+            // JWT Authorization 쿠키 삭제
             Cookie jwtCookie = new Cookie("Authorization", null);
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
-            cookie.setMaxAge(0);
+            jwtCookie.setPath("/"); // 쿠키 범위 설정
+            jwtCookie.setHttpOnly(true); // 보안 설정
+            jwtCookie.setMaxAge(0); // 쿠키 만료
             response.addCookie(jwtCookie);
 
-            return ResponseEntity.ok("LOGOUT_SUCCESS");
+            // 로그아웃 성공 응답
+            return CommonResponse.success("LOGOUT_SUCCESS");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("LOGOUT_FAILED");
+            log.error("LOGOUT_ERROR: {}", e.getMessage());
+            return CommonResponse.error("LOGOUT_ERROR: " + e.getMessage());
         }
-    }
+    }*/
+
 }
