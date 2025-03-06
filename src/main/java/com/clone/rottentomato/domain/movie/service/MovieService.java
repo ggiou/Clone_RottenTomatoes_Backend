@@ -210,7 +210,7 @@ public class MovieService {
             // 1. 데이터를 가져올 사이트 접속
             try {
                 // 1-1. 네이버 검색 결과 창 접속
-                getWebDriverSiteForMovieSave(crawlingReq, "정보");
+                getWebDriverSiteForMovieSave(crawlingReq, " 정보");
                 try {
                     // 1-2. 검색 결과 창이 유효한지 확인 (네이버 영화 영역이 존재해야, 영화 정보 탐색 가능)
                     naverDataElement = webElementService.getByMultipleClassNames("sc_new", "cs_common_module", "case_empasis", "_au_movie_content_wrap");
@@ -249,7 +249,7 @@ public class MovieService {
 
             // 2-2. 네이버 영화 출연/제작진 탭
             // 해당 탭으로 페이지 이동 (출연/제작진 탭으로 이동)
-            getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화"+movieTitle+"출연진"));
+            getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 "+movieTitle+" 출연진"));
             naverDataElement = webElementService.getByMultipleClassNames("cm_content_wrap","_actor_wrap");
             // 감독 / 주연 배우 리스트 정보 요소 (이름이 길 경우 ... 으로 반환되 이를 방지하기 위해 , 이미지 설명값으로 가져온다. = 이미지 설명값은 네이버에서 해당 대상 이름으로 지정되어있음)
             List<WebElement> movieMakersElements = webElementService.getListByClassName(naverDataElement, "cast_list");
@@ -262,7 +262,7 @@ public class MovieService {
 
             // 2-3. 네이버 영화 포토 탭
             // 해당 탭으로 페이지 이동 (포토 탭으로 이동)
-            getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화"+movieTitle+"포토"));
+            getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 "+movieTitle+" 포토"));
             naverDataElement = webElementService.getByClassName("sec_movie_photo");
             // 영화 포스터 정보 요소 (첫번째 포스터 url을 가져온다.)
             WebElement moviePosterElement = webElementService.getByMultipleClassNames(naverDataElement, "area_card","_image_base_poster");
@@ -270,7 +270,7 @@ public class MovieService {
             String posterUrl = webElementService.getByTagName(firstMoviePosterElement, "img").getAttribute("src");
 
             // 2-3. 네이버 무비클립 탭
-            getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화"+movieTitle+"예고편"));
+            getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 "+movieTitle+" 예고편"));
             naverDataElement = webElementService.getByMultipleClassNames("area_card", "_sec_movie_clip_trailer");
             WebElement moreWrapElement = webElementService.getByClassName(naverDataElement, "more_wrap");
             if(!Objects.isNull(moreWrapElement)){
