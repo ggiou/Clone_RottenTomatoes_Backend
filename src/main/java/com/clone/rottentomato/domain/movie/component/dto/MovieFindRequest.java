@@ -21,20 +21,22 @@ import static com.clone.rottentomato.common.constant.SortType.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MovieFindRequest extends SortRequestDto {
-    @NotBlank(message = "찾을 값은 필수 입니다.")
     private String findValue;   // 찾을 값
     private int page = 0;   // 페이지
     private int pageSize = 10;   // 페이지 크기
 
 
+    // JPQL에서는 엔티티 필드명을 사용해야 함, 엔티티 필드명에 맞게 변환
     public String getSortTypeSql() {
         // 영화 정렬 기본은 등록일 기준으로
         SortType sortType = Objects.isNull(getSortType()) ? SortType.RELEASE_DATE : getSortType();
-        if (RELEASE_DATE.equals(sortType)) return "releaseDate";
-        if (ORDER.equals(sortType)) return "id";
-        if (NAME.equals(sortType)) return "name";
-        if (REGISTER.equals(sortType)) return "regDate";
-        if (RATING.equals(sortType)) return "rating";
-        return "releaseDate";
+        return switch (sortType) {
+            case RELEASE_DATE -> "releaseDate";
+            case ORDER -> "id";
+            case NAME -> "name";
+            case REGISTER -> "regDate"; 
+            case RATING -> "rating";
+            default -> "releaseDate";
+        };
     }
 }

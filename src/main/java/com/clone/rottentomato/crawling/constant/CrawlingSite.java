@@ -45,7 +45,6 @@ public enum CrawlingSite implements EnumType {
                 .findFirst();
         if(channelType.isPresent()) return channelType.get();
         throw new CommonException(getErrorMsg(), CommonError.BAD_REQUEST);
-
     }
 
     /** 크롤링 영화 검색 사이트 + suffixUrl */
