@@ -1,8 +1,8 @@
 spring:
-  ## secret info yml
+  # secret info yml --------------------------------
   profiles:
     include: secret
-  ## h2
+  # h2 --------------------------------
   h2:
     console:
       enabled: true
@@ -12,7 +12,7 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-  # jpa setting
+  # jpa setting --------------------------------
   jpa:
     hibernate:
       ddl-auto: update
@@ -21,3 +21,9 @@ spring:
       hibernate:
       format_sql: true
       show_sql: true
+
+# logging --------------------------------
+logging:
+  level:
+    com.amazonaws.util.EC2MetadataUtils: ERROR
+    org.springframework.mail: DEBUG
