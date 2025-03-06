@@ -75,6 +75,19 @@ dependencies {
 	// aws
 	compileOnly 'org.springframework.cloud:spring-cloud-starter-aws:2.0.1.RELEASE'
 	implementation "com.amazonaws:aws-java-sdk-s3:1.12.395"
+
+    // crawling
+	implementation 'org.jsoup:jsoup:1.16.1'
+	implementation 'org.seleniumhq.selenium:selenium-java:4.21.0'
+	// 안쓰면 삭제 예정.. 일단 패키지 안에 넣어두기로
+	implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
+
+
+	//json
+	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+	implementation 'org.json:json:20160810'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
 }
 
 tasks.named('test') {

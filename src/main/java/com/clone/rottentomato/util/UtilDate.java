@@ -1,15 +1,21 @@
 package com.clone.rottentomato.util;
 
+import com.clone.rottentomato.common.constant.CommonError;
+import com.clone.rottentomato.exception.CommonException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Locale;
 import java.util.Objects;
 
-import static com.clone.rottentomato.common.constant.CommonConst.*;
+import static com.clone.rottentomato.common.constant.CommonConst.DATE.*;
 
+/** 날짜 관련 util 클래스 */
 public class UtilDate {
     final static DateTimeFormatter format_defaultDate = DateTimeFormatter.ofPattern(DEFAULT_DATE);
     final static DateTimeFormatter format_defaultDateTime = DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME);
@@ -56,13 +62,22 @@ public class UtilDate {
         }
     }
 
+    /** 날짜 문자열이 유효하다면 날짜로 변환, 없다면 throw */
+    public static LocalDateTime getLocalDateTime(String dateStr){
+        DateTimeFormatter parser = getParsingType(dateStr);
+        if(Objects.isNull(parser)) throw new CommonException("유효한 날짜 문자열이 아닙니다.", CommonError.DATE_FORMAL_ERROR);
+        if(parser.equals(format_defaultDate) || parser.equals(format_defaultDateTime)) return LocalDate.parse(dateStr, parser).atStartOfDay();
+        return LocalDateTime.parse(dateStr, parser);
+    }
+
     /** 날짜 문자열이 유효하다면 날짜로 변환, 없다면 now 반환 */
-    public static LocalDateTime getLocalDateTimeOrEls(String dateStr){
+    public static LocalDateTime getLocalDateTimeOrNow(String dateStr){
         DateTimeFormatter parser = getParsingType(dateStr);
         if(Objects.isNull(parser)) return LocalDateTime.now();
         if(parser.equals(format_defaultDate) || parser.equals(format_defaultDateTime)) return LocalDate.parse(dateStr, parser).atStartOfDay();
         return LocalDateTime.parse(dateStr, parser);
     }
+
 
     /** 날짜 문자열이 유효하다면 날짜로 변환, 없다면 설정한 default 값 반환 */
     public static LocalDateTime getLocalDateTimeOrEls(String dateStr, LocalDateTime defaultDateTime){
@@ -75,14 +90,27 @@ public class UtilDate {
     /** LocalDateTime 을 기본 날짜 포맷의 문자열로 변환하는 함수 
      *  - isNullable = true 라면, 빈문자열로 반환
      * */
-    public static String convertDate(LocalDateTime dateTime, boolean isNullable){
+    public static String toStr(LocalDateTime dateTime, boolean isNullable){
         if(isNullable) return StringUtils.EMPTY;
         if(Objects.isNull(dateTime)) return StringUtils.EMPTY;  // 에러 코드로 변환
         return dateTime.format(DEFAULT_DATE_FORMATTER);
     }
 
     /** LocalDateTime 을 기본 날짜 포맷의 문자열로 변환하는 함수 */
-    public static String convertDate(LocalDateTime dateTime){
-        return convertDate(dateTime, false);
+    public static String toStr(LocalDateTime dateTime){
+        return toStr(dateTime, false);
+    }
+
+    /** 유효한 날짜 문자열인이 판단하는 함수 - SimpleDateFormat*/
+    public static boolean isValidDate(String str, String format){
+        if(StringUtils.isBlank(str) || StringUtils.isBlank(format)) return false;
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format, Locale.KOREA);
+        dateFormat.setLenient(false);
+        try {
+            dateFormat.parse(str);
+            return true;
+        }catch (ParseException e){
+            return false;
+        }
     }
 }
