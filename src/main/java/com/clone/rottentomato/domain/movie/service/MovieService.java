@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -92,6 +93,15 @@ public class MovieService {
         for(MovieFindRequest request : requestList){
             // 정렬 기준으로 리스트 반환
             if(Objects.isNull(request) || SortType.find(request.getSortType()) == null) continue;
+            Sort sort = request.getSort();
+            Pageable pageable = PageRequest.of(request.getPage(), request.getPageSize(), sort);
+            // 카테고리별 영화 리스트 탐색
+            Page<MovieDto> bySort = movieRepository.findAllMovies(pageable);
+            if (!Objects.isNull(bySort) && !bySort.getContent().isEmpty()) {
+                List<MovieDto> content = bySort.getContent();
+                int totalCnt = movieRepository.countMovie();
+                findResList.add(MovieFindResponse.of(request.getSortStr(), totalCnt, content));
+            }
         }
         return findResList;
     }
@@ -114,13 +124,14 @@ public class MovieService {
             // 해당 pk가 존재한다면
             if (categoryInfo.isPresent()) {
                 CategoryInfo category = categoryInfo.get();
-                Sort sort = request.isAsc() ? Sort.by(request.getSortTypeSql()).ascending() : Sort.by(request.getSortTypeSql()).descending();
+                Sort sort = request.getSort();
                 Pageable pageable = PageRequest.of(request.getPage(), request.getPageSize(), sort);
 
                 // 카테고리별 영화 리스트 탐색
                 List<MovieDto> byCategory = movieCustomRepository.findPageByCategory(category.getId(), pageable);
                 if (!byCategory.isEmpty()) {
-                    findResList.add(MovieFindResponse.of(category.getName(), byCategory));
+                    int totalCnt =  movieRepository.countMovieByCategory(category.getId());
+                    findResList.add(MovieFindResponse.of(category.getName(), totalCnt, byCategory));
                 }
             }
         }
@@ -261,7 +272,14 @@ public class MovieService {
             // 2-2. 네이버 영화 출연/제작진 탭
             // 해당 탭으로 페이지 이동 (출연/제작진 탭으로 이동)
             getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 "+movieTitle+" 출연진"));
-            naverDataElement = webElementService.getByMultipleClassNames("cm_content_wrap","_actor_wrap");
+            try {
+                naverDataElement = webElementService.getByMultipleClassNames("cm_content_wrap", "_actor_wrap");
+            } catch (NoSuchElementException|TimeoutException e){
+                MovieDto failDto = MovieDto.fromResult(crawlingReq.getName(),false, "[CrawlingSiteGet] 잘못된 요청입니다. 영화 제작진 정보가 존재하지 않습니다. [Error] "+e.getMessage());
+                movieInfoDto.setMovieDto(failDto);
+                failList.add(movieInfoDto);
+                continue;
+            }
             // 감독 / 주연 배우 리스트 정보 요소 (이름이 길 경우 ... 으로 반환되 이를 방지하기 위해 , 이미지 설명값으로 가져온다. = 이미지 설명값은 네이버에서 해당 대상 이름으로 지정되어있음)
             List<WebElement> movieMakersElements = webElementService.getListByClassName(naverDataElement, "cast_list");
             // 감독 이름
@@ -274,6 +292,22 @@ public class MovieService {
             // 2-3. 네이버 영화 포토 탭
             // 해당 탭으로 페이지 이동 (포토 탭으로 이동)
             getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 "+movieTitle+" 포토"));
+            try {
+                // 2-3-1. 검색 결과 창이 유효한지 확인 (네이버 영화 포스터 정보 영역이 존재해야함)
+                naverDataElement = webElementService.getByClassName("sec_movie_photo");
+            } catch (NoSuchElementException|TimeoutException e){
+                // 시리즈 물의 경우, 포토가 안나오는 경우가 있다. 한번더 이동
+                getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 "+movieTitle+"1 포토"));
+                try {
+                    naverDataElement = webElementService.getByClassName("sec_movie_photo");
+                    movieTitle +="1";
+                }catch (NoSuchElementException|TimeoutException e2){
+                    MovieDto failDto = MovieDto.fromResult(crawlingReq.getName(),false, "[CrawlingSiteGet] 잘못된 요청입니다. 영화 포토 정보가 존재하지 않습니다. [Error] "+e.getMessage());
+                    movieInfoDto.setMovieDto(failDto);
+                    failList.add(movieInfoDto);
+                    continue;
+                }
+            }
             naverDataElement = webElementService.getByClassName("sec_movie_photo");
             // 영화 포스터 정보 요소 (첫번째 포스터 url을 가져온다.)
             WebElement moviePosterElement = webElementService.getByMultipleClassNames(naverDataElement, "area_card","_image_base_poster");

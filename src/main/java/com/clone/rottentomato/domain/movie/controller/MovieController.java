@@ -46,9 +46,7 @@ public class MovieController {
             throw new CommonException(bindingResult.getAllErrors().get(0).getDefaultMessage(), CommonError.INVALID_REQUEST);
         }
         List<MovieFindResponse> findResponses = movieService.getMovieListByCategory(request);
-        if (findResponses.isEmpty()){
-            return CommonResponse.fail("카테고리별 영화 리스트 요청에 실패했습니다. 존재하는 카테고리 영화가 없습니다.", UtilMap.makeMap(FIND_MAP_NAME));
-        }
+        if (findResponses.isEmpty()) return CommonResponse.fail("카테고리별 영화 리스트 요청에 실패했습니다. 존재하는 카테고리 영화가 없습니다.", UtilMap.makeMap(FIND_MAP_NAME));
         return CommonResponse.success("카테고리별 영화 리스트 요청에 성공했습니다.", UtilMap.makeMap(FIND_MAP_NAME, findResponses));
     }
 
@@ -57,8 +55,11 @@ public class MovieController {
     public CommonResponse getMovieList(@RequestBody(required = false) final List<MovieFindRequest> request){
         if(Objects.isNull(request) || request.isEmpty()) throw new MovieException("입력한 정보가 없습니다. 영화 리스트 요청 정보를 입력해주세요.", CommonError.BAD_REQUEST);
         List<MovieFindResponse> findResponses = movieService.getMovieListBySort(request);
-        return CommonResponse.success("카테고리별 영화 리스트 요청에 성공했습니다.", UtilMap.makeMap(FIND_MAP_NAME));
+        if(findResponses.isEmpty()) return CommonResponse.fail("영화 리스트 요청에 실패했습니다. 존재하는 영화가 없습니다.", UtilMap.makeMap(FIND_MAP_NAME));
+        return CommonResponse.success("영화 리스트 요청에 성공했습니다.", UtilMap.makeMap(FIND_MAP_NAME, findResponses));
     }
+
+
 
     /** 특정 영화에 대한 추천 영화 리스트 반환 */
     @GetMapping("/recommend")
@@ -82,6 +83,7 @@ public class MovieController {
 
         return movieService.searchMovieList(searchValue, pageNo, pageSize);
     }
+
 
     /** 비디오 정보 저장 api
      * @param request - 비디오 정보 저장 request

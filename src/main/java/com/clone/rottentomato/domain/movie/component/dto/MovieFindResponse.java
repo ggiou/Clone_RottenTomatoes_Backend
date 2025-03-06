@@ -12,9 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 public class MovieFindResponse {
     private String findValue;   // 검색 값
+    private int totalCnt = 0;   // 전체 데이터 개수
     private List<MovieDto> movieDtos;   // 영화 정보
 
-    public static MovieFindResponse of(String findValue, List<MovieDto> movieDtos){
-        return new MovieFindResponse(findValue, movieDtos);
+    public static MovieFindResponse of(String findValue, int totalCnt, List<MovieDto> movieDtos){
+        return new MovieFindResponse(findValue,totalCnt, movieDtos);
     }
 }

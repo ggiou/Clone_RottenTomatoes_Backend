@@ -6,6 +6,7 @@ import com.clone.rottentomato.common.fomatter.DefaultDateFormat;
 import com.clone.rottentomato.domain.movie.component.dto.MovieDto;
 import com.clone.rottentomato.exception.MovieException;
 import com.clone.rottentomato.util.UtilDate;
+import com.clone.rottentomato.util.UtilNumber;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -55,6 +56,6 @@ public class Movie extends TimeStamped {
         if(Objects.isNull(dto)) throw new MovieException("영화 정보가 없습니다.", CommonError.BAD_REQUEST);
         LocalDateTime releaseDate = UtilDate.getLocalDateTimeOrEls(dto.getReleaseDate(), null);
         if(Objects.isNull(releaseDate)) throw new MovieException("유효한 개봉일자가 아닙니다.", CommonError.DATE_FORMAL_ERROR);
-        return new Movie(dto.getId(), dto.getName(), dto.getRating(), dto.getPosterUrl(), releaseDate);
+        return new Movie(dto.getId(), dto.getName(), UtilNumber.returnBigDecimal(dto.getRating(), BigDecimal.valueOf(0)), dto.getPosterUrl(), releaseDate);
     }
 }

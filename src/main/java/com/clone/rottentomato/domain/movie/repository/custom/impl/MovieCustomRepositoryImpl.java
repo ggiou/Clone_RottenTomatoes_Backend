@@ -117,9 +117,4 @@ public class MovieCustomRepositoryImpl implements MovieCustomRepository {
         return query.getResultList();
     }
 
-    @Override
-    public List<Movie> findPage(Pageable pageable) {
-        return null;
-    }
-
 }
