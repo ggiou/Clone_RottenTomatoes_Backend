@@ -16,6 +16,9 @@ public enum SortType implements EnumType {
     , REGISTER("REGISTER", "등록일 기준")
     , RATING("RATING", "평점 기준")
     , RELEASE_DATE("RELEASE_DATE", "개봉일 기준")    // 영화에서 사용
+    // TODO 리뷰에서 사용하길래 추가했습니다. 알아서 고쳐서 쓰거나 삭제 부탁드려요
+    , HIGH("","")
+    , LOW("", "")
     ;
 
     private final String sortType;  // 정렬명
