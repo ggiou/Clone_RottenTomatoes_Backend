@@ -59,7 +59,9 @@ public class MovieService {
     private final MovieCategoryCustomRepository movieCategoryCustomRepository;
 
     private final ProducerCustomRepository producerCustomRepository;
+    private final ProducerRepository producerRepository;
     private final MovieProducerCustomRepository movieProducerCustomRepository;
+    private final MovieProducerRepository movieProducerRepository;
 
     // service
     private final WebDriverService webDriverService;
@@ -140,21 +142,29 @@ public class MovieService {
 
 
 
-    /** 검색 기능 - 입력값과 동일한 문자의 영화 정보 리스트 검색 후 반환*/
+    /** 검색 기능 - 입력값과 동일한 문자의 영화 정보 리스트(배우이름 포함) 검색 후 반환 */
     public CommonResponse searchMovieList(String searchValue, int pageNo, int pageSize){
         if(StringUtils.isBlank(searchValue)){
             throw new MovieException("검색 할 내용이 없습니다. 검색 내용을 입력해주세요.", MovieError.BAD_REQUEST_SEARCH_VALUE);
         }
 
         List<SearchResponse.SearchMovieInfo> searchMovieInfos = new ArrayList<>();
-        Set<String> actors = new HashSet<>();
-        Set<String> directors = new HashSet<>();
+        List<Producer> actors = new ArrayList<>();
+        List<Producer> directors = new ArrayList<>();
 
-        // 1. 검색 값과 동일한 이름의 영화 제작진이 있는지 탐색
-        List<MovieDetail> movieMakersContain = movieDetailRepository.findAllByActorOrDirectorNamesContaining(searchValue);
-        if (!movieMakersContain.isEmpty()){
-
+        // 1. 검색 값이 포함되는 이름의 영화 제작진이 있는지 탐색
+        List<Producer> searchContainProducers = producerRepository.findByNameLike(searchValue);
+        if (!searchContainProducers.isEmpty()){
+            searchContainProducers.forEach(t->{
+                if (t.getRoleType().equals(ACTOR)) {
+                    actors.add(t);
+                    return;
+                }
+                directors.add(t);
+            });
         }
+
+        List<Movie> searchContainMovies = new ArrayList<>();
         return new CommonResponse();
     }
 
