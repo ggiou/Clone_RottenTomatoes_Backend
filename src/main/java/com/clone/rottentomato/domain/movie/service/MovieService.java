@@ -2,7 +2,6 @@ package com.clone.rottentomato.domain.movie.service;
 
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
-import com.clone.rottentomato.common.constant.CustomError;
 import com.clone.rottentomato.common.constant.SortType;
 import com.clone.rottentomato.crawling.constant.CrawlingSite;
 import com.clone.rottentomato.crawling.service.WebDriverService;
@@ -10,7 +9,6 @@ import com.clone.rottentomato.crawling.service.WebElementService;
 import com.clone.rottentomato.domain.movie.component.dto.*;
 import com.clone.rottentomato.domain.movie.component.entity.*;
 import com.clone.rottentomato.domain.movie.constant.MovieError;
-import com.clone.rottentomato.domain.movie.constant.MovieFindType;
 import com.clone.rottentomato.domain.movie.repository.*;
 import com.clone.rottentomato.domain.movie.repository.custom.*;
 import com.clone.rottentomato.exception.CommonException;
@@ -19,7 +17,6 @@ import com.clone.rottentomato.exception.MovieException;
 import com.clone.rottentomato.util.UtilMap;
 import com.clone.rottentomato.util.UtilNumber;
 import com.clone.rottentomato.util.UtilString;
-import jdk.jshell.execution.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -143,29 +140,33 @@ public class MovieService {
 
 
     /** 검색 기능 - 입력값과 동일한 문자의 영화 정보 리스트(배우이름 포함) 검색 후 반환 */
-    public CommonResponse searchMovieList(String searchValue, int pageNo, int pageSize){
+    public SearchResponse searchMovieList(String searchValue, int pageNo, int pageSize){
         if(StringUtils.isBlank(searchValue)){
             throw new MovieException("검색 할 내용이 없습니다. 검색 내용을 입력해주세요.", MovieError.BAD_REQUEST_SEARCH_VALUE);
         }
-
-        List<SearchResponse.SearchMovieInfo> searchMovieInfos = new ArrayList<>();
-        List<Producer> actors = new ArrayList<>();
-        List<Producer> directors = new ArrayList<>();
-
-        // 1. 검색 값이 포함되는 이름의 영화 제작진이 있는지 탐색
-        List<Producer> searchContainProducers = producerRepository.findByNameLike(searchValue);
-        if (!searchContainProducers.isEmpty()){
-            searchContainProducers.forEach(t->{
-                if (t.getRoleType().equals(ACTOR)) {
-                    actors.add(t);
-                    return;
-                }
-                directors.add(t);
-            });
+        SearchResponse searchResponse = new SearchResponse();
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        try {
+            // 1. 검색 값이 포함되는 이름의 영화 제작진 탐색
+            searchResponse.setActors(producerRepository.findByNameLikeWithPageable(ACTOR, searchValue, pageable).getContent());
+            searchResponse.setDirectors(producerRepository.findByNameLikeWithPageable(DIRECTOR, searchValue, pageable).getContent());
+            searchResponse.setActorsTotalCnt(producerRepository.countByName(ACTOR, searchValue));
+            searchResponse.setDirectorsTotalCnt(producerRepository.countByName(DIRECTOR, searchValue));
+        }catch (Exception e){
+            searchResponse.setFail(String.format("%s 문자열이 포함된 영화 제작진을 검색하는 중 오류가 발생했습니다.\n[Error] %s", searchValue, e.getMessage()));
+            log.error("[searchMovieList.findProducer/Error] " + e);
         }
 
-        List<Movie> searchContainMovies = new ArrayList<>();
-        return new CommonResponse();
+        try {
+            // 2. 검색 값이 포함되는 영화 정보 탐색 // 오류 발생
+            searchResponse.setMovieInfos(movieCustomRepository.searchByNameContaining(searchValue, pageable));
+            searchResponse.setMovieInfosTotalCnt(movieCustomRepository.countByNameContaining(searchValue));
+        }catch (Exception e){
+            searchResponse.setFail(String.format("%s 문자열이 포함된 영화를 검색하는 중 오류가 발생했습니다.\n[Error] %s", searchValue, e.getMessage()));
+            log.error("[searchMovieList.findMovie -> Error] " + e);
+            e.printStackTrace();
+        }
+        return searchResponse;
     }
 
 

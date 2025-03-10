@@ -3,6 +3,7 @@ package com.clone.rottentomato.domain.movie.repository.custom.impl;
 import com.clone.rottentomato.common.component.dto.SortRequestDto;
 import com.clone.rottentomato.domain.movie.component.dto.MovieDto;
 import com.clone.rottentomato.domain.movie.component.dto.MovieFindRequest;
+import com.clone.rottentomato.domain.movie.component.dto.SearchMovieInfo;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.repository.MovieRepository;
 import com.clone.rottentomato.domain.movie.repository.custom.MovieCustomRepository;
@@ -11,6 +12,7 @@ import com.clone.rottentomato.util.UtilNumber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
@@ -115,6 +118,48 @@ public class MovieCustomRepositoryImpl implements MovieCustomRepository {
 
         // 결과 반환
         return query.getResultList();
+    }
+
+    @Override
+    public List<SearchMovieInfo> searchByNameContaining(String name, Pageable pageable) {
+        // JPQL 초기화
+        StringBuilder sql = new StringBuilder();
+
+        sql.append("SELECT m.id, m.name, m.rating, m.poster_url, m.release_date, md.actor_names, md.director_names")
+                .append("FROM movie m INNER JOIN movie_detail md ON m.id = md.movie.id ")
+                .append("WHERE m.name LIKE CONCAT('%', :name, '%') OR md.actor_names LIKE CONCAT('%', :name, '%') OR md.director_names LIKE CONCAT('%', :name, '%') ")
+                .append("ORDER BY CASE WHEN m.name LIKE CONCAT(:name, '%') OR md.actor_names LIKE CONCAT(:name, '%') OR md.director_names LIKE CONCAT(:name, '%') THEN 1 ")
+                .append("WHEN m.name LIKE CONCAT('%', :name, '%') OR md.actorNames LIKE CONCAT('%', :name, '%') OR md.directorNames LIKE CONCAT('%', :name, '%') THEN 2 ")
+                .append("ELSE 3 END, m.rating DESC, m.releaseDate DESC");
+
+        Query query = entityManager.createNativeQuery(sql.toString(), "SearchMovieInfoMapping");
+        query.setParameter("name", name);
+
+        // 페이징 적용
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        // 결과 반환
+        return query.getResultList();
+    }
+
+    @Override
+    public int countByNameContaining(String name) {
+        // 네이티브 SQL 쿼리 초기화
+        StringBuilder sql = new StringBuilder();
+
+        sql.append("SELECT COUNT(m.id) ")
+                .append("FROM movie m INNER JOIN movie_detail md ON m.id = md.movie_id ")  // 테이블 이름에 맞게 수정
+                .append("WHERE m.name LIKE CONCAT('%', :name, '%') ")
+                .append("OR md.actor_names LIKE CONCAT('%', :name, '%') ")
+                .append("OR md.director_names LIKE CONCAT('%', :name, '%')");
+
+        // 쿼리 실행
+        Query query = entityManager.createNativeQuery(sql.toString());
+        query.setParameter("name", name);
+
+        // 결과 반환
+        return ((Number) query.getSingleResult()).intValue();
     }
 
 }

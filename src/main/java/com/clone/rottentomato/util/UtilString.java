@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -87,5 +88,13 @@ public class UtilString {
         stringList = stringList.stream().filter(StringUtils::isNotBlank).toList();
         if(stringList.isEmpty()) return StringUtils.EMPTY;
         return String.join(delimiter, stringList);
+    }
+
+    /** 문자열을 구분자 기준으로 하나의 List 반환 */
+    public static List<String> makeListByDelimiter(String stringList, String delimiter){
+        if(Objects.isNull(stringList)) return new ArrayList<>();
+        stringList = stringList.replaceAll(" ", StringUtils.EMPTY);
+        if(StringUtils.isBlank(stringList)) return new ArrayList<>();
+        return List.of(stringList.split(delimiter));
     }
 }
