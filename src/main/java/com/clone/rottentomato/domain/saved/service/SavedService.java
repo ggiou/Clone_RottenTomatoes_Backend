@@ -1,13 +1,13 @@
-package com.clone.rottentomato.domain.likes.service;
+package com.clone.rottentomato.domain.saved.service;
 
 
-import com.clone.rottentomato.domain.likes.component.dto.LikesResponseDto;
-import com.clone.rottentomato.domain.likes.component.entity.Likes;
-import com.clone.rottentomato.domain.likes.repository.LikesRepository;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.repository.MovieRepository;
+import com.clone.rottentomato.domain.saved.component.dto.SavedResponseDto;
+import com.clone.rottentomato.domain.saved.component.entity.Saved;
+import com.clone.rottentomato.domain.saved.repository.SavedRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,28 +21,27 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class LikesService {
+public class SavedService {
 
-    private final LikesRepository likesRepository;
+    private final SavedRepository savedRepository;
     private final MovieRepository movieRepository;
     private final MemberRepository memberRepository;
 
 
-    //  좋아요
-    public ResponseEntity<LikesResponseDto> ok(Long movieId, Member member) {
+    public ResponseEntity<SavedResponseDto> save(Long movieId, Member member) {
         Movie movie = getMovie(movieId);
-        Optional<Likes> likes = likesRepository.findByMovieAndMember(movie,member);
+        Optional<Saved> save = savedRepository.findByMovieAndMember(movie,member);
         Member findMember = getMember(member.getMemberId());
-        if(likes.isPresent()) {
-            Likes findLikes = likes.get();
-            likesRepository.delete(findLikes);
-            int count = likesRepository.countByMovie(movie);
-            return ResponseEntity.ok(LikesResponseDto.of(HttpStatus.OK,false,count));
+        if(save.isPresent()) {
+            Saved findSave = save.get();
+            savedRepository.delete(findSave);
+            int count = savedRepository.countByMovie(movie);
+            return ResponseEntity.ok(SavedResponseDto.of(HttpStatus.OK,false,count));
         }
-        Likes newLikes = Likes.of(movie,findMember);
-        likesRepository.save(newLikes);
-        int count = likesRepository.countByMovie(movie);
-        return ResponseEntity.ok(LikesResponseDto.of(HttpStatus.OK,true,count));
+        Saved newSave = Saved.of(movie,findMember);
+        savedRepository.save(newSave);
+        int count = savedRepository.countByMovie(movie);
+        return ResponseEntity.ok(SavedResponseDto.of(HttpStatus.OK,true,count));
     }
 
 

@@ -62,9 +62,9 @@ public class SecurityConfig {
                                 "/reviews",
                                 "{movie_id}/review",
                                 "/review/{review_id}",
-                                "/mypage/profiles",
-                                "/mypage/watch_list",
-                                "/movie/**" //영화 관련 api
+                                "/mypage/**",
+                                "/movie/**",//영화 관련 api
+                                "/save/**"
                         ).permitAll()
                         //인증경로
 /*                        .requestMatchers("/member/user-info", "/member/**").authenticated()*/
@@ -88,8 +88,13 @@ public class SecurityConfig {
     @Bean // CORS 설정 유지
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:8080"));
-        configuration.setAllowedMethods(List.of("*")); // 모든 메서드 허용
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:8080",
+                "https://changyeongtest.shop",
+                "http://localhost:5173",
+                "http://localhost:3000"
+        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 모든 메서드 허용
         configuration.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
