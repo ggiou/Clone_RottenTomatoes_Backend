@@ -78,28 +78,14 @@ public class ReviewService {
 
     //  리뷰 상세 조회
     @Transactional(readOnly = true)
-    public ResponseEntity<?> getreview(Long reviewId, Member member) {
-//        Page<Review> reviewPage = reviewRepository.findByMemberEmail(pageable, member.getMemberEmail());
-//
-//        if (reviewPage.isEmpty()) {
-//            throw new IllegalArgumentException("작성된 리뷰가 없습니다.");
-//        }
-//
-//        List<ReviewDetailResponseDto> responseDtos = reviewPage.getContent().stream()
-//                .map(review -> ReviewDetailResponseDto.builder()
-//                        .reviewerName(review.getMember().getMemberName()) // 리뷰 작성자
-//                        .source(review.getMovie().getReleaseDate()) // 리뷰 출처
-//                        .profileImage(review.getProfileImage()) // 프로필 이미지 URL
-//                        .reviewSnippet(review.getReviewContent().length() > 100
-//                                ? review.getReviewContent().substring(0, 100) + "..."
-//                                : review.getReviewContent()) // 리뷰 요약 (100자까지)
-//                        .fullReviewUrl(review.getFullReviewUrl()) // 전체 리뷰 링크
-//                        .createdAt(review.getCreatedAt().toString()) // 작성 날짜
-//                        .build())
-//                .collect(Collectors.toList());
-//
-//        return ResponseEntity.ok(responseDtos);
-        return null;
+    public ResponseEntity<ReviewResponseDto> getreview(Long reviewId, Member member) {
+        Optional<Review> reviewOptional = reviewRepository.findByIdAndMember(reviewId,member);
+        if(reviewOptional.isPresent()) {
+            Review review = reviewOptional.get();
+            return ResponseEntity.ok(ReviewResponseDto.of(review,member,review.getMovie()));
+        }else{
+            throw new IllegalArgumentException("조회한 게시글이 없습니다.");
+        }
     }
 
 

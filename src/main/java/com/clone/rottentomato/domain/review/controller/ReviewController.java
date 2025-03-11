@@ -44,7 +44,7 @@ public class ReviewController {
 
     //  리뷰 상세 조회
     @GetMapping("/review/{review_id}")
-    public ResponseEntity<?>getReview(@PathVariable Long review_id,
+    public ResponseEntity<ReviewResponseDto>getReview(@PathVariable Long review_id,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reviewService.getreview(review_id,userDetails.getMember());
     }
