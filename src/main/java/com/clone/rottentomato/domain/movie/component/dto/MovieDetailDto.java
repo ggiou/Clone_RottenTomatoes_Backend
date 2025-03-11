@@ -14,22 +14,22 @@ import java.util.Objects;
 public class MovieDetailDto extends ResponseDto {
     private Long id;    // 영화 상세정보 id
     private String story;   // 영화 줄거리
-    private List<String> actorNames;  // 영화 배우 이름들
-    private List<String> directorNames;   // 영화 감독 이름들
+    private String actorNames;  // 영화 배우 이름들
+    private String directorNames;   // 영화 감독 이름들
 
-    private String actorNameStr;    // 영화 배우 이름 문자열
-    private String directorNameStr; // 영화 감독 이름 문자열
+    private List<String> actorNameList;    // 영화 배우 이름 list
+    private List<String> directorNameList; // 영화 감독 이름 list
 
     private Long movieId;  // 영화 pk
 
-    private MovieDetailDto(Long id, String story, List<String> actorNames, List<String> directorNames, Long movieId){
+    private MovieDetailDto(Long id, String story, String actorNames, String directorNames ,List<String> actorNamesList, List<String> directorNameList, Long movieId){
         this.id = id;
         this.story = story;
         this.actorNames = actorNames;
         this.directorNames = directorNames;
         this.movieId = movieId;
-        this.actorNameStr = UtilString.joinStrByDelimiter(actorNames, ", ");
-        this.directorNameStr = UtilString.joinStrByDelimiter(directorNames, ", ");
+        this.actorNameList = actorNamesList;
+        this.directorNameList = directorNameList;
     }
 
     // 응답값으로 사용시, 성공 실패 여부만 담은 객체 반환
@@ -37,18 +37,21 @@ public class MovieDetailDto extends ResponseDto {
         this.setResult(success, resultMsg);
     }
 
-    public static MovieDetailDto forSave(String story, List<String> actorNames, List<String> directorNames){
-        return new MovieDetailDto(null, story, actorNames, directorNames, null);
+    public static MovieDetailDto forSave(String story, String actorNames, String directorNames, List<String> actorNameList, List<String> directorNameList){
+        return new MovieDetailDto(null, story, actorNames, directorNames, actorNameList, directorNameList, null);
     }
 
     public static MovieDetailDto fromEntity(MovieDetail entity){
         if(Objects.isNull(entity)) return null;
-        return new MovieDetailDto(entity.getId(), entity.getStory(), entity.getActorNames(), entity.getDirectorNames(), entity.getMovie().getId());
+        List<String> actorNameList = UtilString.makeListByDelimiter(entity.getActorNames(), ",");
+        List<String> directNameList = UtilString.makeListByDelimiter(entity.getActorNames(), ",");
+        return new MovieDetailDto(entity.getId(), entity.getStory(), entity.getActorNames(), entity.getDirectorNames(), actorNameList, directNameList, entity.getMovie().getId());
     }
 
     public static MovieDetailDto fromEntity(MovieDetail entity, boolean isSuccess, String resultMsg){
         if(Objects.isNull(entity)) return new MovieDetailDto(false, resultMsg);
-        MovieDetailDto resDto = new MovieDetailDto(entity.getId(), entity.getStory(), entity.getActorNames(), entity.getDirectorNames(), entity.getMovie().getId());
+        MovieDetailDto resDto = MovieDetailDto.fromEntity(entity);
+        if(Objects.isNull(resDto)) return new MovieDetailDto(false, resultMsg);
         resDto.setResult(isSuccess, resultMsg);
         return resDto;
     }

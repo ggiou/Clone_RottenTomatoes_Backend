@@ -16,13 +16,12 @@ public interface ProducerRepository extends JpaRepository<Producer, Long> {
     @Query("SELECT p FROM Producer p WHERE p.name IN :names")
     List<Producer> findByNames(List<String> names);
 
-    @Query(" SELECT new com.clone.rottentomato.domain.movie.component.dto.ProducerDto(p.id, p.name, p.roleType, COUNT(mp))"
-        +" FROM Producer p LEFT JOIN MovieProducer mp ON mp.producer.id = p.id"
-        +" WHERE p.roleType =:role AND p.name LIKE CONCAT('%', :name, '%')"
+    @Query(" SELECT p FROM Producer p LEFT JOIN MovieProducer mp ON mp.producer.id = p.id"
+        +" WHERE p.roleType =:role AND REPLACE(p.name, ' ', '') LIKE CONCAT('%', :name, '%')"
         +" GROUP BY p.id"
-        +" ORDER BY CASE WHEN p.name LIKE :name || '%' THEN 1 WHEN p.name LIKE '%' || :name || '%' THEN 2 ELSE 3 END, COUNT(mp) DESC")
-    Page<ProducerDto> findByNameLikeWithPageable(@Param("role") ProducerType role, @Param("name") String name, Pageable pageable);
+        +" ORDER BY CASE WHEN p.name LIKE CONCAT(:name, '%') THEN 1 WHEN p.name LIKE CONCAT('%', :name, '%') THEN 2 ELSE 3 END, COUNT(mp) DESC")
+    Page<Producer> findByNameLikeWithPageable(@Param("role") ProducerType role, @Param("name") String name, Pageable pageable);
 
-    @Query("SELECT COUNT(DISTINCT p.id) FROM Producer p WHERE p.roleType =:role AND p.name LIKE CONCAT('%', :name, '%') ")
+    @Query("SELECT COUNT(DISTINCT p.id) FROM Producer p WHERE p.roleType =:role AND REPLACE(p.name, ' ', '') LIKE CONCAT('%',:name,'%') ")
     int countByName(@Param("role") ProducerType role, @Param("name") String name);
 }
