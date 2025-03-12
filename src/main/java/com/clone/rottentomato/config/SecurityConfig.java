@@ -1,9 +1,11 @@
 package com.clone.rottentomato.config;
 
 
+import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.domain.auth.JwtAuthenticationFilter;
 import com.clone.rottentomato.domain.auth.JwtUtil;
 import com.clone.rottentomato.domain.auth.service.UserDetailsServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,10 +77,14 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         //Cookie 삭제
                         .logoutUrl("/member/logout")
+                        .deleteCookies("JSESSIONID" , "Authorization")
                         .logoutSuccessHandler(((request, response, authentication) -> {
+                            CommonResponse responseBody = CommonResponse.success("LOGOUT_SUCCESS");
                             response.setStatus(HttpServletResponse.SC_OK);
-                            response.getWriter().write("LOGOUT_SUCCESS");
-                            response.getWriter().flush();
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            objectMapper.writeValue(response.getWriter(), responseBody);
                         })));
 
         return http.build();

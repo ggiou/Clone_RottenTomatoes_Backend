@@ -47,7 +47,7 @@ public class MemberController {
     }
 
     //사용자 존제유무 확인
-    @PostMapping("/isExist")
+    @PostMapping("/check-member")
     public CommonResponse checkMember(@RequestBody MemberRequestDto requestDto) {
         try {
             String email = requestDto.getEmail();
@@ -72,16 +72,16 @@ public class MemberController {
 
             if (!isExistMember) {
                 memberService.registerMember(requestDto.getEmail(), "LOCAL");
-                log.info("login :: --------------- RegisterUser finished : TEST USER DATA INSERT");
+                log.info("[Resist Member][Success] RegisterMember : MEMBER DATA INSERT");
             }
             Member member = memberService.findMemberByEmail(requestDto.getEmail());
             memberService.updateAuthCode(member);
 
-            log.info("login :: --------------- Update authCode finished");
+            log.info("[login][Info] login :: --------------- Update authCode finished");
             log.info("updateAuthCode : {}", member.getAuthCode());
 
             // 2. 이메일 전송
-            String loginUrl = String.format("http://localhost:8080/member/login-code?code=%s&email=%s", member.getAuthCode(), requestDto.getEmail());
+            String loginUrl = String.format("https://changyeongtest.shop/member/login-code?code=%s&email=%s", member.getAuthCode(), requestDto.getEmail());
             String emailContent = String.format("로그인 링크: %s", loginUrl);
 
             return emailService.sendEmail(requestDto.getEmail(), "로그인 코드", emailContent);
@@ -107,6 +107,11 @@ public class MemberController {
             response.addCookie(cookie);
             response.setStatus(HttpServletResponse.SC_OK);
 
+            //로그인 처리후 다시 코드 업데이트
+            Member member = memberService.findMemberByEmail(email);
+            memberService.updateAuthCode(member);
+
+            log.info("[login-code][Success] Code Login Success ");
             return CommonResponse.success("LOGIN_SUCCESS");
         } catch (RuntimeException ex) {
             log.error("Unauthorized error: {}", ex.getMessage());
