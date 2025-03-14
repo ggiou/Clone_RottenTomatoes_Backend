@@ -1,4 +1,4 @@
-package com.clone.rottentomato.domain.movie.component.entity;
+package com.clone.rottentomato.domain.movie.component.entity.id;
 
 import java.io.Serializable;
 import java.util.Objects;

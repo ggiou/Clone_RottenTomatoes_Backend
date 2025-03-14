@@ -355,7 +355,12 @@ public class MovieService {
             WebElement firstMoviePosterElement = webElementService.getByCssSelectore(moviePosterElement, ".item._item[data-col='1']");
             String posterUrl = webElementService.getByTagName(firstMoviePosterElement, "img").getAttribute("src");
 
-            // 2-3. 네이버 무비클립 탭
+            // 2-3. 유튜브 예고편 정보 크롤링
+            List<MovieTrailerDto> movieTrailerDtos = getMovieTrailerInfoOfYoutubeByCrawling(movieTitle);
+
+
+            /*
+            // 2-3. 네이버 무비클립 탭 -> 네이버 무비의 경우 ui 노출이 이상해 유튜버에서 크롤링해오기로 변경
             getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 "+movieTitle+" 예고편"));
             naverDataElement = webElementService.getByMultipleClassNames("area_card", "_sec_movie_clip_trailer");
             WebElement moreWrapElement = webElementService.getByClassName(naverDataElement, "more_wrap");
@@ -378,7 +383,7 @@ public class MovieService {
                 String playTime = webElementService.getByClassName(trailerElement, "play_time").getText();
                 disPlayOrder += 1;
                 movieTrailerDtos.add(MovieTrailerDto.forSave(disPlayOrder, playUrl, playName, playTime));
-            }
+            }*/
 
             // 가져온 정보를 기준으로 저장을 위한 dto 생성
             MovieDto movieDto = MovieDto.forSave(movieTitle, posterUrl, releaseDate);
@@ -392,6 +397,12 @@ public class MovieService {
         // 데이터를 다 가져온 창은 닫기
         webDriverService.closePage();
         return new MovieSaveResponse(successList, failList);
+    }
+
+    private List<MovieTrailerDto> getMovieTrailerInfoOfYoutubeByCrawling(String movieName){
+        // 영화 예고편 리스트
+        List<MovieTrailerDto> movieTrailerDtos = new ArrayList<>();
+        return movieTrailerDtos;
     }
 
     /** 영화 정보 저장을 위한 대상 사이트를 찾는 기능

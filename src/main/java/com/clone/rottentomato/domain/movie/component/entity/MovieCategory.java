@@ -1,5 +1,6 @@
 package com.clone.rottentomato.domain.movie.component.entity;
 
+import com.clone.rottentomato.domain.movie.component.entity.id.MovieCategoryId;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
