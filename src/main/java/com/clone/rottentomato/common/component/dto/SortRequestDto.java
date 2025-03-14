@@ -12,7 +12,7 @@ public class SortRequestDto {
     private boolean isAsc = false;      // 오름차/내림차 순 (default, desc)
 
     public String getIsAscSql(){
-        return isAsc ? " ASC" : " DESC";
+        return isAsc ? "ASC" : "DESC";
     }
 
     public String getSortStr(){

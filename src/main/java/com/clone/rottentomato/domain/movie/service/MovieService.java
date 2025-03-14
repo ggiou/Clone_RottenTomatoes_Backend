@@ -137,6 +137,13 @@ public class MovieService {
         return findResList;
     }
 
+    /** 특정 영화의 추천 영화 탐색 */
+    public List<MovieDto> searchRecommendMovieListByMovieId(Long movieId, int size){
+
+
+        List<MovieDto> recommendMovie = new ArrayList<>();
+        return recommendMovie;
+    }
 
 
     /** 검색 기능 - 입력값과 동일한 문자의 영화 정보 리스트(배우이름 포함) 검색 후 반환 */

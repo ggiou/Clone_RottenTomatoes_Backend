@@ -3,10 +3,7 @@ package com.clone.rottentomato.domain.movie.controller;
 import com.amazonaws.util.StringUtils;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
-import com.clone.rottentomato.domain.movie.component.dto.MovieFindRequest;
-import com.clone.rottentomato.domain.movie.component.dto.MovieFindResponse;
-import com.clone.rottentomato.domain.movie.component.dto.MovieSaveRequest;
-import com.clone.rottentomato.domain.movie.component.dto.SearchResponse;
+import com.clone.rottentomato.domain.movie.component.dto.*;
 import com.clone.rottentomato.domain.movie.constant.MovieError;
 import com.clone.rottentomato.domain.movie.service.MovieService;
 import com.clone.rottentomato.exception.CommonException;
@@ -52,7 +49,7 @@ public class MovieController {
     }
 
     /** 영화 리스트 반환 (전체 영화에서, 정렬 기준으로 pageable 해 반환)*/
-    @GetMapping("/list")
+    @PostMapping("/list")
     public CommonResponse getMovieList(@RequestBody(required = false) final List<MovieFindRequest> request){
         if(Objects.isNull(request) || request.isEmpty()) throw new MovieException("입력한 정보가 없습니다. 영화 리스트 요청 정보를 입력해주세요.", CommonError.BAD_REQUEST);
         List<MovieFindResponse> findResponses = movieService.getMovieListBySort(request);
@@ -64,7 +61,9 @@ public class MovieController {
 
     /** 특정 영화에 대한 추천 영화 리스트 반환 */
     @GetMapping("/recommend")
-    public CommonResponse getMovieRecommendList(){
+    public CommonResponse getMovieRecommendList(@RequestParam(value = "movieId") Long movieId, @RequestParam(value = "size", required = false, defaultValue = "10") int size){
+        if(Objects.isNull(movieId) || movieId <= 0) throw new MovieException("추천 영화 리스트를 반환 받으실 영화 id 값을 입력해주세요.", MovieError.BAD_REQUEST_MOVIE_ID);
+        List<MovieDto> recommendMovies = movieService.searchRecommendMovieListByMovieId(movieId, size);
         return new CommonResponse();
     }
 
