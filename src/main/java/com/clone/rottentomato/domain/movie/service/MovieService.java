@@ -32,6 +32,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.clone.rottentomato.domain.movie.constant.ProducerType.*;
 import static com.clone.rottentomato.common.constant.CommonConst.DATA_NAME.*;
@@ -151,27 +152,49 @@ public class MovieService {
         if(StringUtils.isBlank(searchValue)){
             throw new MovieException("검색 할 내용이 없습니다. 검색 내용을 입력해주세요.", MovieError.BAD_REQUEST_SEARCH_VALUE);
         }
-        SearchResponse searchResponse = new SearchResponse();
+        searchValue = searchValue.replaceAll(" ", StringUtils.EMPTY);
+        SearchResponse searchResponse = SearchResponse.fromSearchValue(searchValue);
         Pageable pageable = PageRequest.of(pageNo, pageSize);
+        int pageStartCnt = pageNo * pageSize;
         try {
-            // 1. 검색 값이 포함되는 이름의 영화 제작진 탐색
-            searchResponse.setActors(producerRepository.findByNameLikeWithPageable(ACTOR, searchValue, pageable).getContent());
-            searchResponse.setDirectors(producerRepository.findByNameLikeWithPageable(DIRECTOR, searchValue, pageable).getContent());
-            searchResponse.setActorsTotalCnt(producerRepository.countByName(ACTOR, searchValue));
-            searchResponse.setDirectorsTotalCnt(producerRepository.countByName(DIRECTOR, searchValue));
+            // 1-1. 검색 값이 포함되는 이름의 영화 제작진 탐색
+            int actorCnt = producerRepository.countByName(ACTOR, searchValue);
+            int directorCnt = producerRepository.countByName(DIRECTOR, searchValue);
+            List<Producer> actorList = pageStartCnt >= actorCnt ? new ArrayList<>() : producerRepository.findByNameLikeWithPageable(ACTOR, searchValue, pageable).getContent();
+            List<Producer> directorList = pageStartCnt >= directorCnt ? new ArrayList<>() :producerRepository.findByNameLikeWithPageable(DIRECTOR, searchValue, pageable).getContent();
+
+            // 1-2. index 처리와 함께 응답값 세팅
+            if(!actorList.isEmpty()) {
+                searchResponse.setActors(IntStream.range(0, actorList.size()).mapToObj(i -> {
+                    Producer actor = actorList.get(i); return ProducerDto.of(pageStartCnt + i + 1, actor);
+                }).collect(Collectors.toList()));
+            }
+            if(!directorList.isEmpty()){
+                searchResponse.setActors(IntStream.range(0, directorList.size()).mapToObj(i -> {
+                    Producer director = directorList.get(i); return ProducerDto.of(pageStartCnt + i + 1, director);
+                }).collect(Collectors.toList()));
+            }
+            searchResponse.setActorsTotalCnt(actorCnt);
+            searchResponse.setDirectorsTotalCnt(directorCnt);
         }catch (Exception e){
             searchResponse.setFail(String.format("%s 문자열이 포함된 영화 제작진을 검색하는 중 오류가 발생했습니다.\n[Error] %s", searchValue, e.getMessage()));
-            log.error("[searchMovieList.findProducer/Error] " + e);
+            log.error("[searchMovieList.findProducer -> Error] " + e);
         }
 
         try {
-            // 2. 검색 값이 포함되는 영화 정보 탐색 // 오류 발생
-            searchResponse.setMovieInfos(movieCustomRepository.searchByNameContaining(searchValue, pageable));
-            searchResponse.setMovieInfosTotalCnt(movieCustomRepository.countByNameContaining(searchValue));
+            // 2-1. 검색 값이 포함되는 영화 정보 탐색
+            int movieCnt = movieDetailRepository.countByNameContaining(searchValue);
+            List<MovieDetail> movieSearch = pageStartCnt >= movieCnt ? new ArrayList<>() : movieDetailRepository.searchByNameContaining(searchValue, pageable).getContent();
+            // 2-2. index 처리와 함께 응답값 세팅
+            if (!movieSearch.isEmpty()) {
+                searchResponse.setMovieInfos(IntStream.range(0, movieSearch.size()).mapToObj(i -> {
+                    MovieDetail movieDetail = movieSearch.get(i); return SearchMovieInfo.of(pageStartCnt + i + 1, movieSearch.get(i).getMovie(), movieDetail.getActorNames(), movieDetail.getDirectorNames());
+                }).collect(Collectors.toList()));
+            }
+            searchResponse.setMovieInfosTotalCnt(movieCnt);
         }catch (Exception e){
             searchResponse.setFail(String.format("%s 문자열이 포함된 영화를 검색하는 중 오류가 발생했습니다.\n[Error] %s", searchValue, e.getMessage()));
             log.error("[searchMovieList.findMovie -> Error] " + e);
-            e.printStackTrace();
         }
         return searchResponse;
     }
@@ -359,7 +382,7 @@ public class MovieService {
 
             // 가져온 정보를 기준으로 저장을 위한 dto 생성
             MovieDto movieDto = MovieDto.forSave(movieTitle, posterUrl, releaseDate);
-            MovieDetailDto movieDetailDto = MovieDetailDto.forSave(story, actorNames, directorNames);
+            MovieDetailDto movieDetailDto = MovieDetailDto.forSave(story, UtilString.joinStrByDelimiter(actorNames, ","), UtilString.joinStrByDelimiter(directorNames, ","), actorNames, directorNames);
             List<CategoryInfoDto> categoryInfoDtos = Arrays.stream(categoryStr.split("[,/]")).map(CategoryInfoDto::forSave).toList();
 
             // 3. 네이버 크롤링이 성공했다면 만들어진 객체를, 성공리스트에 add
@@ -446,8 +469,8 @@ public class MovieService {
             }
 
             // 3. 영화 제작자 정보 저장
-            List<Producer> actors = reqDto.getMovieDetailDto().getActorNames().stream().map(t->Producer.of(t, ACTOR)).toList();
-            List<Producer> directors = reqDto.getMovieDetailDto().getDirectorNames().stream().map(t->Producer.of(t, DIRECTOR)).toList();
+            List<Producer> actors = reqDto.getMovieDetailDto().getActorNameList().stream().map(t->Producer.of(t, ACTOR)).toList();
+            List<Producer> directors = reqDto.getMovieDetailDto().getDirectorNameList().stream().map(t->Producer.of(t, DIRECTOR)).toList();
             List<Producer> producers = new ArrayList<>(actors);
             if(!producers.isEmpty() || !directors.isEmpty()) {
                 try {

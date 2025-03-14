@@ -19,7 +19,4 @@ public interface MovieCustomRepository {
 
     /** 카테고리 pk or name이 장르에 속하는 영화를 찾아 카테고리 이름, 영화 dto로 반환 */
     List<MovieDto> findPageByCategory(Long categoryId, Pageable pageable);
-    List<SearchMovieInfo> searchByNameContaining(String name, Pageable pageable);
-    int countByNameContaining(String name);
-
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -23,5 +24,9 @@ public class SearchResponse extends ResponseDto {
 
     public static SearchResponse of(List<SearchMovieInfo> movieInfos, List<ProducerDto> actors, List<ProducerDto> directors, int movieInfosTotalCnt, int actorsTotalCnt, int directorsTotalCnt, String searchValue){
         return new SearchResponse(movieInfos, actors, directors, movieInfosTotalCnt, actorsTotalCnt, directorsTotalCnt, searchValue);
+    }
+
+    public static SearchResponse fromSearchValue(String searchValue){
+        return new SearchResponse(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), 0, 0, 0, searchValue);
     }
 }
