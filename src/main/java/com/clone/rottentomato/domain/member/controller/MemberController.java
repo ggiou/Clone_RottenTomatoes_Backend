@@ -71,7 +71,7 @@ public class MemberController {
             Boolean isExistMember = (Boolean) memberService.isExistMember(requestDto.getEmail()).getData();
 
             if (!isExistMember) {
-                memberService.registerMember(requestDto.getEmail(), "LOCAL");
+                memberService.registerMember(requestDto , "LOCAL");
                 log.info("[Resist Member][Success] RegisterMember : MEMBER DATA INSERT");
             }
             Member member = memberService.findMemberByEmail(requestDto.getEmail());

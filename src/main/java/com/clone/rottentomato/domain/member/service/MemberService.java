@@ -3,6 +3,7 @@ package com.clone.rottentomato.domain.member.service;
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.domain.auth.JwtUtil;
+import com.clone.rottentomato.domain.member.component.dto.MemberRequestDto;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import jakarta.security.auth.message.AuthException;
@@ -26,10 +27,12 @@ public class MemberService {
 
     //신규유저 등록 ( 일반)
     @Transactional
-    public Member registerMember(String email, String provider) {
+    public Member registerMember(MemberRequestDto requestDto, String provider) {
         Member newMember = new Member(
-                email,
-                email.split("@")[0], // 이메일의 아이디 부분을 이름으로 대체
+                requestDto.getEmail(),
+                requestDto.getMemberName() == null
+                        ? requestDto.getEmail().split("@")[0]
+                        : requestDto.getMemberName(), // 이메일의 아이디 부분을 이름으로 대체
                 provider,
                 generateAuthCode());
 
