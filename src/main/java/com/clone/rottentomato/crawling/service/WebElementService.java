@@ -54,7 +54,7 @@ public class WebElementService {
         return getPresenceElement(By.id(id));
     }
 
-    public WebElement getIndexElementById(String idName, int index) {
+    public WebElement getIndexById(int index, String idName) {
         List<WebElement> elementList = webDriver.findElements(By.id(idName));
         if(!CollectionUtils.isEmpty(elementList) && elementList.size() > index) return elementList.get(index);
         return null;
@@ -101,6 +101,12 @@ public class WebElementService {
         return getPresenceElement(By.cssSelector(selector));
     }
 
+    /** 특정 클래스들을 모두 포함하는 요소 리스트 찾기 */
+    public List<WebElement> getListByMultipleClassNames(String... classNames) {
+        String selector = "." + String.join(".", classNames);
+        return findElements(By.cssSelector(selector));
+    }
+
     /** 부모 요소 내에서 특정 클래스들을 모두 포함하는 자식 요소 찾기 */
     public WebElement getByMultipleClassNames(WebElement parentElement, String... classNames) {
         String selector = "." + String.join(".", classNames);
@@ -113,6 +119,11 @@ public class WebElementService {
         return findElements(parentElement, By.cssSelector(selector));
     }
 
+    public WebElement getIndexByMultipleClassNames(int index,  String... classNames) {
+        List<WebElement> elementList = getListByMultipleClassNames(classNames);
+        if(!CollectionUtils.isEmpty(elementList) && elementList.size() > index) return elementList.get(index);
+        return null;
+    }
 
 
     // ==================== TagName 기반 요소 찾기 ====================
@@ -191,6 +202,14 @@ public class WebElementService {
     private List<WebElement> findElements(WebElement element, By by) {
         try {
             return element.findElements(by);
+        }catch (NoSuchElementException e) {
+            return null;
+        }
+    }
+
+    private List<WebElement> findElements(By by) {
+        try {
+            return webDriver.findElements(by);
         }catch (NoSuchElementException e) {
             return null;
         }

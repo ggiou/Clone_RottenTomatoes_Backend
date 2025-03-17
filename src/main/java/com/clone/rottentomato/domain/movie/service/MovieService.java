@@ -380,29 +380,32 @@ public class MovieService {
                 WebElement playInfo = webElementService.getByTagName(areaInfoWrappedElement, "a");
                 // 영화 트레일러 검색 이름
                 String playName = playInfo.getText();
-                movieTrailerNames.add(String.format("%s %s", movieTitle, playName));
+                movieTrailerNames.add(playName);
             }
 
             // 3-2. 유튜브 예고편 정보 크롤링 (네이버 무비 클립 제목을 통한 크롤링)
             List<MovieTrailerDto> movieTrailerDtos = new ArrayList<>();
             int disPlayOrder = 0;
             for(String trailerName : movieTrailerNames){
-                getPage(CrawlingSite.YOUTUBE.getMovieSearchFullUrl(trailerName));
+                getPage(CrawlingSite.YOUTUBE.getMovieSearchFullUrl(String.format("%s %s", movieTitle, trailerName)));
                 try {
                     // 검색 결과의 첫번째 유튜브 영상 요소로 찾아 없다면 해당 예고편은 제외
-                    movieCrawlingDataElement = webElementService.getIndexElementById("dismissible", 0);
+                    movieCrawlingDataElement = webElementService.getIndexById(0,"dismissible");
+                    if(Objects.isNull(movieCrawlingDataElement)) continue;
                 } catch (NoSuchElementException|TimeoutException e){
                     MovieDto failDto = MovieDto.fromResult(crawlingReq.getName(),false, "[CrawlingSiteGet] 잘못된 요청입니다. 영화 예고편 정보가 존재하지 않습니다. [Error] "+e.getMessage());
                     movieInfoDto.setMovieDto(failDto);
                     failList.add(movieInfoDto);
                     continue;
                 }
-                MovieTrailerDto trailerinfo
                 // 트레일러 url, 이름, 재생 시간
-                String playUrl = playInfo.getAttribute("href");
-                String playName = playInfo.getText();
-                String playTime = webElementService.getByClassName(trailerElement, "play_time").getText();
-
+                WebElement trailerTitleElement = webElementService.getById(movieCrawlingDataElement, "video-title");
+                if(Objects.isNull(trailerTitleElement)) continue;
+                String playUrl = "https://www.youtube.com"+trailerTitleElement.getAttribute("href");
+                String playName = trailerTitleElement.getAttribute("title");
+                String playTime = webElementService.getByClassName(movieCrawlingDataElement, "badge-shape-wiz__text").getText();
+                // 재생 시간이 숫자 형식이 아니라면 = 쇼츠라면 넘기기
+                if(!UtilNumber.isNumeric(playTime.replaceAll(":", ""))) continue;
                 disPlayOrder += 1;
                 movieTrailerDtos.add(MovieTrailerDto.forSave(disPlayOrder, playUrl, playName, playTime));
             }
