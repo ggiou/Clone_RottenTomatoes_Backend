@@ -23,18 +23,21 @@ public class WebElementService {
     private WebDriver webDriver;
 
     /**
-     * 기본 생성자 - WebDriver를 기반으로 WebDriverWait을 설정 (기본 대기 시간: 10초)
+     * 기본 생성자 - WebDriver를 기반으로 WebDriverWait을 설정 (기본 대기 시간: 5초)
      */
     public WebElementService(WebDriver driver) {
         this.webDriver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
     }
 
     /**
      * 사용자 지정 대기 시간을 설정할 수 있는 생성자
      */
     public WebElementService(WebDriver driver, int waitSecond) {
+        this.webDriver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitSecond));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
     }
 
     // ==================== CSS Selector 기반 요소 찾기 ====================
@@ -54,9 +57,15 @@ public class WebElementService {
         return getPresenceElement(By.id(id));
     }
 
-    public WebElement getIndexById(int index, String idName) {
-        List<WebElement> elementList = webDriver.findElements(By.id(idName));
-        if(!CollectionUtils.isEmpty(elementList) && elementList.size() > index) return elementList.get(index);
+    public WebElement getIndexById(int index, String idValue) {
+        List<WebElement> elementList = getListById(idValue);
+        if(elementList.size() > index) return elementList.get(index);
+        return null;
+    }
+
+    public List<WebElement> getListById(String idValue) {
+        List<WebElement> elementList = webDriver.findElements(By.id(idValue));
+        if(!CollectionUtils.isEmpty(elementList)) return elementList;
         return null;
     }
 
