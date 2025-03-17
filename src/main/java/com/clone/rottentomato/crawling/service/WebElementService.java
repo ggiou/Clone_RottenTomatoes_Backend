@@ -6,8 +6,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -50,6 +52,12 @@ public class WebElementService {
     /** ID를 이용하여 요소 찾아서 반환 */
     public WebElement getById(String id) {
         return getPresenceElement(By.id(id));
+    }
+
+    public WebElement getIndexElementById(String idName, int index) {
+        List<WebElement> elementList = webDriver.findElements(By.id(idName));
+        if(!CollectionUtils.isEmpty(elementList) && elementList.size() > index) return elementList.get(index);
+        return null;
     }
 
     /**  부모 요소 내에서 ID를 이용하여 자식 요소 찾아 반환 */
