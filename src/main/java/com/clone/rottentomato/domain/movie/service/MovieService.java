@@ -170,7 +170,7 @@ public class MovieService {
                 }).collect(Collectors.toList()));
             }
             if(!directorList.isEmpty()){
-                searchResponse.setActors(IntStream.range(0, directorList.size()).mapToObj(i -> {
+                searchResponse.setDirectors(IntStream.range(0, directorList.size()).mapToObj(i -> {
                     Producer director = directorList.get(i); return ProducerDto.of(pageStartCnt + i + 1, director);
                 }).collect(Collectors.toList()));
             }
