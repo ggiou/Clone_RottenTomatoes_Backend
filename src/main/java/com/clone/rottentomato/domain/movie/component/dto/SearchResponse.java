@@ -1,42 +1,32 @@
 package com.clone.rottentomato.domain.movie.component.dto;
 
-import com.clone.rottentomato.domain.movie.component.entity.MovieProducer;
-import com.clone.rottentomato.util.UtilString;
+import com.clone.rottentomato.common.component.dto.ResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SearchResponse {
-    private List<SearchMovieInfo> searchMovieInfos; // 영화 검색 결과 리스트 (영화 제목 or 배우/감독의 이름이 포함될 경우)
-    private List<MovieProducer> actors;    // 배우 이름 검색 결과
-    private List<MovieProducer> directors; // 감독 이름 검색 결과
+public class SearchResponse extends ResponseDto {
+    private List<SearchMovieInfo> movieInfos; // 영화 검색 결과 리스트 (영화 제목 or 배우/감독의 이름이 포함될 경우)
+    private List<ProducerDto> actors;    // 배우 이름 검색 결과
+    private List<ProducerDto> directors; // 감독 이름 검색 결과
+    private int movieInfosTotalCnt; // 영화 검색 결과 총 개수
+    private int actorsTotalCnt; // 배우 검색 결과 총 개수
+    private int directorsTotalCnt;  // 감독 검색 결과 총 개수
     private String searchValue; // 검색 값
 
+    public static SearchResponse of(List<SearchMovieInfo> movieInfos, List<ProducerDto> actors, List<ProducerDto> directors, int movieInfosTotalCnt, int actorsTotalCnt, int directorsTotalCnt, String searchValue){
+        return new SearchResponse(movieInfos, actors, directors, movieInfosTotalCnt, actorsTotalCnt, directorsTotalCnt, searchValue);
+    }
 
-    @Getter
-    @NoArgsConstructor
-    public static class SearchMovieInfo{
-        private MovieDto movieDto;  // 영화 정보
-        private List<String> actorNames;    // 영화 배우 이름
-        private List<String> directorNames; // 영화 감독 이름
-        private String actorNamesStr;   // 영화 배우 이름 문자
-        private String directorNamesStr;    // 영화 감독 이름 문자
-
-        private SearchMovieInfo(MovieDto movie, List<String> actorNames, List<String> directorNames){
-            this.movieDto = movie;
-            this.actorNames = actorNames;
-            this.directorNames = directorNames;
-            this.actorNamesStr = UtilString.joinStrByDelimiter(actorNames, ", ");
-            this.directorNamesStr = UtilString.joinStrByDelimiter(directorNames, ", ");
-        }
-
-        public SearchMovieInfo of(MovieDto movie, List<String> actorNames, List<String> directorNames){
-            return new SearchMovieInfo(movie, actorNames, directorNames);
-        }
+    public static SearchResponse fromSearchValue(String searchValue){
+        return new SearchResponse(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), 0, 0, 0, searchValue);
     }
 }

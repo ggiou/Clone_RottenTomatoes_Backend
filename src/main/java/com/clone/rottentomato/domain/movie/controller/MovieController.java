@@ -3,9 +3,7 @@ package com.clone.rottentomato.domain.movie.controller;
 import com.amazonaws.util.StringUtils;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
-import com.clone.rottentomato.domain.movie.component.dto.MovieFindRequest;
-import com.clone.rottentomato.domain.movie.component.dto.MovieFindResponse;
-import com.clone.rottentomato.domain.movie.component.dto.MovieSaveRequest;
+import com.clone.rottentomato.domain.movie.component.dto.*;
 import com.clone.rottentomato.domain.movie.constant.MovieError;
 import com.clone.rottentomato.domain.movie.service.MovieService;
 import com.clone.rottentomato.exception.CommonException;
@@ -63,7 +61,9 @@ public class MovieController {
 
     /** 특정 영화에 대한 추천 영화 리스트 반환 */
     @GetMapping("/recommend")
-    public CommonResponse getMovieRecommendList(){
+    public CommonResponse getMovieRecommendList(@RequestParam(value = "movieId") Long movieId, @RequestParam(value = "size", required = false, defaultValue = "10") int size){
+        if(Objects.isNull(movieId) || movieId <= 0) throw new MovieException("추천 영화 리스트를 반환 받으실 영화 id 값을 입력해주세요.", MovieError.BAD_REQUEST_MOVIE_ID);
+        List<MovieDto> recommendMovies = movieService.searchRecommendMovieListByMovieId(movieId, size);
         return new CommonResponse();
     }
 
@@ -81,7 +81,11 @@ public class MovieController {
             throw new MovieException("검색을 위한 value의 pathValue가 없습니다. 검색이 불가합니다.", MovieError.BAD_REQUEST_SEARCH_VALUE);
         }
 
-        return movieService.searchMovieList(searchValue, pageNo, pageSize);
+        SearchResponse searchResponse = movieService.searchMovieList(searchValue, pageNo, pageSize);
+        if(!searchResponse.isSuccess()){
+            return CommonResponse.fail("검색 결과를 찾는데 일부 실패했습니다.", searchResponse);
+        }
+        return CommonResponse.success("검색 결과를 찾는데 성공했습니다.", searchResponse);
     }
 
 
@@ -94,7 +98,6 @@ public class MovieController {
         if(bindingResult.hasErrors()) {
             throw new CommonException(bindingResult.getAllErrors().get(0).getDefaultMessage(), CommonError.INVALID_REQUEST);
         }
-        CommonResponse response = movieService.saveMovieProcess(request);;
-        return response;
+        return movieService.saveMovieProcess(request);
     }
 }

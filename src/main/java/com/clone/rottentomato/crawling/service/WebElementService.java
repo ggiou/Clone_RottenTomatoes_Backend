@@ -6,8 +6,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -21,18 +23,21 @@ public class WebElementService {
     private WebDriver webDriver;
 
     /**
-     * 기본 생성자 - WebDriver를 기반으로 WebDriverWait을 설정 (기본 대기 시간: 10초)
+     * 기본 생성자 - WebDriver를 기반으로 WebDriverWait을 설정 (기본 대기 시간: 5초)
      */
     public WebElementService(WebDriver driver) {
         this.webDriver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
     }
 
     /**
      * 사용자 지정 대기 시간을 설정할 수 있는 생성자
      */
     public WebElementService(WebDriver driver, int waitSecond) {
+        this.webDriver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitSecond));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
     }
 
     // ==================== CSS Selector 기반 요소 찾기 ====================
@@ -50,6 +55,18 @@ public class WebElementService {
     /** ID를 이용하여 요소 찾아서 반환 */
     public WebElement getById(String id) {
         return getPresenceElement(By.id(id));
+    }
+
+    public WebElement getIndexById(int index, String idValue) {
+        List<WebElement> elementList = getListById(idValue);
+        if(elementList.size() > index) return elementList.get(index);
+        return null;
+    }
+
+    public List<WebElement> getListById(String idValue) {
+        List<WebElement> elementList = webDriver.findElements(By.id(idValue));
+        if(!CollectionUtils.isEmpty(elementList)) return elementList;
+        return null;
     }
 
     /**  부모 요소 내에서 ID를 이용하여 자식 요소 찾아 반환 */
@@ -93,6 +110,12 @@ public class WebElementService {
         return getPresenceElement(By.cssSelector(selector));
     }
 
+    /** 특정 클래스들을 모두 포함하는 요소 리스트 찾기 */
+    public List<WebElement> getListByMultipleClassNames(String... classNames) {
+        String selector = "." + String.join(".", classNames);
+        return findElements(By.cssSelector(selector));
+    }
+
     /** 부모 요소 내에서 특정 클래스들을 모두 포함하는 자식 요소 찾기 */
     public WebElement getByMultipleClassNames(WebElement parentElement, String... classNames) {
         String selector = "." + String.join(".", classNames);
@@ -105,6 +128,11 @@ public class WebElementService {
         return findElements(parentElement, By.cssSelector(selector));
     }
 
+    public WebElement getIndexByMultipleClassNames(int index,  String... classNames) {
+        List<WebElement> elementList = getListByMultipleClassNames(classNames);
+        if(!CollectionUtils.isEmpty(elementList) && elementList.size() > index) return elementList.get(index);
+        return null;
+    }
 
 
     // ==================== TagName 기반 요소 찾기 ====================
@@ -183,6 +211,14 @@ public class WebElementService {
     private List<WebElement> findElements(WebElement element, By by) {
         try {
             return element.findElements(by);
+        }catch (NoSuchElementException e) {
+            return null;
+        }
+    }
+
+    private List<WebElement> findElements(By by) {
+        try {
+            return webDriver.findElements(by);
         }catch (NoSuchElementException e) {
             return null;
         }
