@@ -73,7 +73,7 @@ public class MovieController {
      * @param pageSize : 1페이지당 돌려줄 개수
      * @return CommonResponse.List<SearchResponse>
      * */
-    @PostMapping("/search")
+    @GetMapping("/search")
     public CommonResponse getMovieSearchList(@RequestParam(value = "value", required = false) String searchValue,
                                              @RequestParam(value = "pageNo", required = false, defaultValue = "0") int pageNo,
                                              @RequestParam(value = "size", required = false, defaultValue = "10") int pageSize){
