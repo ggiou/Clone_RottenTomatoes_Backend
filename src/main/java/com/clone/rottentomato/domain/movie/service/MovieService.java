@@ -59,7 +59,8 @@ public class MovieService {
     private final ProducerCustomRepository producerCustomRepository;
     private final ProducerRepository producerRepository;
     private final MovieProducerCustomRepository movieProducerCustomRepository;
-    private final MovieProducerRepository movieProducerRepository;
+    
+    private final RecommendMovieRepository recommendMovieRepository;
 
     // service
     private final WebDriverService webDriverService;
@@ -140,8 +141,12 @@ public class MovieService {
 
     /** 특정 영화의 추천 영화 탐색 */
     public List<MovieDto> searchRecommendMovieListByMovieId(Long movieId, int size){
-
-
+        // 1. 입력한 id의 영화가 존재하는 지 확인
+        Optional<Movie> targetMovieOpt = movieRepository.findById(movieId);
+        if(targetMovieOpt.isEmpty()) throw new MovieException("해당 id의 영화 정보가 없습니다.", MovieError.BAD_REQUEST_MOVIE_ID);
+        Movie targetMovie = targetMovieOpt.get();
+                
+        List<Movie> savedRecommendMovie = recommendMovieRepository.findRecommendMovieByMovie(targetMovie);
         List<MovieDto> recommendMovie = new ArrayList<>();
         return recommendMovie;
     }
@@ -584,5 +589,4 @@ public class MovieService {
         // 6. 저장 여부 응답 값 반환
         return MovieSaveResponse.of(successList, failList);
     }
-
 }

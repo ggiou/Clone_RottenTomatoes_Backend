@@ -4,6 +4,7 @@ import com.amazonaws.util.StringUtils;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
 import com.clone.rottentomato.domain.movie.component.dto.*;
+import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.constant.MovieError;
 import com.clone.rottentomato.domain.movie.service.MovieService;
 import com.clone.rottentomato.exception.CommonException;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+
 import static com.clone.rottentomato.common.constant.CommonConst.DATA_NAME.*;
 
 @RestController
