@@ -1,12 +1,11 @@
 package com.clone.rottentomato.domain.saved.controller;
 
 
+import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
-import com.clone.rottentomato.domain.saved.component.dto.SavedResponseDto;
 import com.clone.rottentomato.domain.saved.service.SavedService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +19,9 @@ public class SavedController {
 
 
     @PostMapping("/{movie_id}/save")
-    public ResponseEntity<SavedResponseDto> save(@PathVariable Long movie_id,
-                                                 @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 int isStatus) {
+    public CommonResponse save(@PathVariable Long movie_id,
+                               @AuthenticationPrincipal UserDetailsImpl userDetails,
+                               int isStatus) {
         return savedService.save(movie_id,userDetails.getMember(),isStatus);
     }
 

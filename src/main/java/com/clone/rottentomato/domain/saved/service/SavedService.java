@@ -1,6 +1,7 @@
 package com.clone.rottentomato.domain.saved.service;
 
 
+import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
@@ -28,22 +29,29 @@ public class SavedService {
     private final MemberRepository memberRepository;
 
 
-    public ResponseEntity<SavedResponseDto> save(Long movieId, Member member,int isStatus) {
+    public CommonResponse save(Long movieId, Member member, int isStatus) {
         Movie movie = getMovie(movieId);
         Optional<Saved> save = savedRepository.findByIsStatusAndMovieAndMember(isStatus,movie,member);
         Member findMember = getMember(member.getMemberId());
+        log.info("findMember : {}", findMember);
         if(save.isPresent()) {
             Saved findSave = save.get();
             isStatus = 0;
             savedRepository.delete(findSave);
             int count = savedRepository.countByMovie(movie);
-            return ResponseEntity.ok(SavedResponseDto.of(HttpStatus.OK,false,count,isStatus));
+            log.info("findSave = {}",findSave);
+            log.info("count = {}",count);
+            log.info("----------------------- 취소하기 성공 --------------------");
+            return CommonResponse.success("취소",SavedResponseDto.of(HttpStatus.OK,false,count,isStatus));
         }
         Saved newSave = Saved.of(movie,findMember,isStatus);
         isStatus = 1;
         savedRepository.save(newSave);
         int count = savedRepository.countByMovie(movie);
-        return ResponseEntity.ok(SavedResponseDto.of(HttpStatus.OK,true,count,isStatus));
+        log.info("newSave = {}",newSave);
+        log.info("count = {}",count);
+        log.info("----------------------- 저장하기 성공 --------------------");
+        return CommonResponse.success("저장",SavedResponseDto.of(HttpStatus.OK,true,count,isStatus));
     }
 
 
