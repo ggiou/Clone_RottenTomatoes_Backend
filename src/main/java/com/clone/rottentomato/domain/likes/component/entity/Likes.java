@@ -1,6 +1,7 @@
 package com.clone.rottentomato.domain.likes.component.entity;
 
 
+import com.clone.rottentomato.domain.likes.component.dto.LikesRequestDto;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import jakarta.persistence.*;
@@ -15,6 +16,8 @@ import lombok.NoArgsConstructor;
 public class Likes {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column
+    private int isStatus;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBER_ID",nullable = false)
     private Member member;
@@ -24,16 +27,18 @@ public class Likes {
 
 
     @Builder
-    public Likes(Movie movie,Member member) {
+    public Likes(Movie movie, Member member, LikesRequestDto requestDto) {
         this.member = member;
+        this.isStatus = requestDto.getIsStatus();
         this.movie = movie;
     }
 
 
-    public static Likes of(Movie movie,Member member) {
+    public static Likes of(Movie movie,Member member,LikesRequestDto requestDto) {
         return Likes.builder()
                 .movie(movie)
                 .member(member)
+                .requestDto(requestDto)
                 .build();
     }
 }

@@ -10,23 +10,26 @@ import org.springframework.http.HttpStatus;
 @NoArgsConstructor
 public class SavedResponseDto {
     private HttpStatus status;
-    private boolean isLiked;
+    private boolean isSaved;
+    private int isStatus;
     private int count;
 
 
     @Builder
-    public SavedResponseDto(HttpStatus status, boolean isLiked, int count) {
+    public SavedResponseDto(HttpStatus status, boolean isSaved, int count, int isStatus) {
         this.status = status;
-        this.isLiked = isLiked;
+        this.isSaved = isSaved;
         this.count = count;
+        this.isStatus = isStatus;
     }
 
 
-    public static SavedResponseDto of(HttpStatus status, boolean isLiked, int count) {
+    public static SavedResponseDto of(HttpStatus status, boolean isSaved, int count,int isStatus) {
         return SavedResponseDto.builder()
                 .status(status)
-                .isLiked(isLiked)
+                .isSaved(isSaved)
                 .count(count)
+                .isStatus(isStatus)
                 .build();
     }
 
