@@ -1,6 +1,7 @@
 package com.clone.rottentomato.domain.review.service;
 
 
+import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.component.dto.SortRequestDto;
 import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
 import com.clone.rottentomato.domain.member.component.entity.Member;
@@ -38,16 +39,20 @@ public class ReviewService {
 
 
     //  리뷰 작성
-    public ResponseEntity<ReviewResponseDto> createReview(Long movieId, ReviewRequestDto reviewRequestDto, Member member) {
+    public CommonResponse createReview(Long movieId, ReviewRequestDto reviewRequestDto, Member member) {
         Movie movie = movieRepository.findById(movieId).orElseThrow(
                 () -> new IllegalArgumentException("Movie not found")
         );
         Optional<Review> review = reviewRepository.findTopByMemberAndMovieOrderByRegDateDesc(member,movie);
         if(review.isPresent()) {
+            log.info("------------------------------ 저장 예외 처리 -----------------------------------");
+            log.info("review = {}",review);
             throw new IllegalArgumentException("이미 리뷰를 등록하셨습니다.");
         }
         Review saveReview = reviewRepository.save(Review.of(reviewRequestDto, member, movie, reviewRequestDto.getSortType()));
-        return ResponseEntity.ok(ReviewResponseDto.of(saveReview,member,movie));
+        log.info("saveReview = {}",saveReview);
+        log.info("------------------------------ 저장 성공 -----------------------------------");
+        return CommonResponse.success("저장 성공",ReviewResponseDto.of(saveReview,member,movie));
     }
 
 
@@ -58,11 +63,10 @@ public class ReviewService {
         Pageable pageable = PageRequest.of(page, size,sort);
         // 리뷰 리스트 조회
         Page<Review> reviewPage = reviewRepository.findByAndMemberEmail(pageable, member.getMemberEmail());
-
         if (reviewPage.isEmpty()) {
+            log.info("------------------------------ Review 예외 처리 -----------------------------------");
             throw new IllegalArgumentException("작성된 리뷰가 없습니다.");
         }
-
         // 리뷰 정보를 DTO로 변환
         List<MypageReviewResponseDto> responseDtos = reviewPage.getContent().stream()
                 .map(review -> {
@@ -71,59 +75,55 @@ public class ReviewService {
                     return MypageReviewResponseDto.from(review, member, movie);
                 })
                 .collect(Collectors.toList());
-
+        log.info("responseDtos = {}",responseDtos);
+        log.info("--------------------------- 전체 조회 성공 -----------------------------");
         return ResponseEntity.ok(responseDtos);
     }
 
 
     //  리뷰 상세 조회
     @Transactional(readOnly = true)
-    public ResponseEntity<?> getreview(Long reviewId, Member member) {
-//        Page<Review> reviewPage = reviewRepository.findByMemberEmail(pageable, member.getMemberEmail());
-//
-//        if (reviewPage.isEmpty()) {
-//            throw new IllegalArgumentException("작성된 리뷰가 없습니다.");
-//        }
-//
-//        List<ReviewDetailResponseDto> responseDtos = reviewPage.getContent().stream()
-//                .map(review -> ReviewDetailResponseDto.builder()
-//                        .reviewerName(review.getMember().getMemberName()) // 리뷰 작성자
-//                        .source(review.getMovie().getReleaseDate()) // 리뷰 출처
-//                        .profileImage(review.getProfileImage()) // 프로필 이미지 URL
-//                        .reviewSnippet(review.getReviewContent().length() > 100
-//                                ? review.getReviewContent().substring(0, 100) + "..."
-//                                : review.getReviewContent()) // 리뷰 요약 (100자까지)
-//                        .fullReviewUrl(review.getFullReviewUrl()) // 전체 리뷰 링크
-//                        .createdAt(review.getCreatedAt().toString()) // 작성 날짜
-//                        .build())
-//                .collect(Collectors.toList());
-//
-//        return ResponseEntity.ok(responseDtos);
-        return null;
+    public CommonResponse getreview(Long reviewId, Member member) {
+        Optional<Review> reviewOptional = reviewRepository.findByIdAndMember(reviewId,member);
+        if(reviewOptional.isPresent()) {
+            Review review = reviewOptional.get();
+            log.info("reviewOptional = {}",reviewOptional);
+            log.info("--------------------------- 상세 조회 성공 -----------------------------");
+            return CommonResponse.success("상세 조회 성공",ReviewResponseDto.of(review,member,review.getMovie()));
+        }else{
+            log.info("------------------------------ 게시글을 찾지 못함 -----------------------------------");
+            throw new IllegalArgumentException("조회한 게시글이 없습니다.");
+        }
     }
 
 
     //  리뷰 수정
-    public ResponseEntity<ReviewResponseDto> updateReview(Long reviewId, UserDetailsImpl userDetails, ReviewRequestDto reviewRequestDto) {
+    public CommonResponse updateReview(Long reviewId, UserDetailsImpl userDetails, ReviewRequestDto reviewRequestDto) {
         Review review = getReview(reviewId);
         Optional<Review> esxit = reviewRepository.findByIdAndMember(reviewId,userDetails.getMember());
         if(esxit.isEmpty()){
-            throw new IllegalArgumentException("작성자만 수정 / 삭제가 가능합니다.");
+            log.info("------------------------------ 해당 사용자가 아니면 수정 예외 처리 -----------------------------------");
+            throw new IllegalArgumentException("작성자만 수정 가능합니다.");
         }
         review.update(reviewRequestDto);
-        return ResponseEntity.ok(ReviewResponseDto.update_from(review));
+        log.info("reviewRequestDto = {}",reviewRequestDto);
+        log.info("--------------------------- 수정 성공 -----------------------------");
+        return CommonResponse.success("수정 성공",ReviewResponseDto.update_from(review));
     }
 
 
     //  리뷰 삭제
-    public ResponseEntity<SuccessResponse> deleteReview(Long reviewId, UserDetailsImpl userDetails) {
+    public CommonResponse deleteReview(Long reviewId, UserDetailsImpl userDetails) {
         Review review = getReview(reviewId);
         Optional<Review> esxit = reviewRepository.findByIdAndMember(reviewId,userDetails.getMember());
         if(esxit.isEmpty()){
-            throw new IllegalArgumentException("작성자만 수정 / 삭제가 가능합니다.");
+            log.error("------------------------------ 해당 사용자가 아니면 삭제 예외 처리 -----------------------------------");
+            throw new IllegalArgumentException("작성자만 삭제가 가능합니다.");
         }
         reviewRepository.delete(review);
-        return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK,"삭제가 완료되었습니다."));
+        log.info("esxit = {}", esxit);
+        log.info("--------------------------- 삭제 성공 -----------------------------");
+        return CommonResponse.success("삭제 성공",SuccessResponse.of(HttpStatus.OK));
     }
 
 

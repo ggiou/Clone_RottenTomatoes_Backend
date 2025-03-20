@@ -1,14 +1,14 @@
-package com.clone.rottentomato.domain.likes.service;
+package com.clone.rottentomato.domain.saved.service;
 
 
 import com.clone.rottentomato.common.component.dto.CommonResponse;
-import com.clone.rottentomato.domain.likes.component.dto.LikesResponseDto;
-import com.clone.rottentomato.domain.likes.component.entity.Likes;
-import com.clone.rottentomato.domain.likes.repository.LikesRepository;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.repository.MovieRepository;
+import com.clone.rottentomato.domain.saved.component.dto.SavedResponseDto;
+import com.clone.rottentomato.domain.saved.component.entity.Saved;
+import com.clone.rottentomato.domain.saved.repository.SavedRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,37 +22,36 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class LikesService {
+public class SavedService {
 
-    private final LikesRepository likesRepository;
+    private final SavedRepository savedRepository;
     private final MovieRepository movieRepository;
     private final MemberRepository memberRepository;
 
 
-    //  좋아요
-    public CommonResponse ok(Long movieId, Member member, int isStatus) {
+    public CommonResponse save(Long movieId, Member member, int isStatus) {
         Movie movie = getMovie(movieId);
-        Optional<Likes> likes = likesRepository.findByIsStatusAndMovieAndMember(isStatus,movie,member);
+        Optional<Saved> save = savedRepository.findByIsStatusAndMovieAndMember(isStatus,movie,member);
         Member findMember = getMember(member.getMemberId());
-        log.info("findMember: {}", findMember);
-        if(likes.isPresent()) {
-            isStatus = 0;           //  상태 값
-            Likes findLikes = likes.get();
-            likesRepository.delete(findLikes);
-            int count = likesRepository.countByMovie(movie);
-            log.info("findLikes : {}", findLikes);
-            log.info("count : {}", count);
+        log.info("findMember : {}", findMember);
+        if(save.isPresent()) {
+            Saved findSave = save.get();
+            isStatus = 0;
+            savedRepository.delete(findSave);
+            int count = savedRepository.countByMovie(movie);
+            log.info("findSave = {}",findSave);
+            log.info("count = {}",count);
             log.info("----------------------- 취소하기 성공 --------------------");
-            return CommonResponse.success("취소",LikesResponseDto.of(HttpStatus.OK,false,count,isStatus));
+            return CommonResponse.success("취소",SavedResponseDto.of(HttpStatus.OK,false,count,isStatus));
         }
-        isStatus = 1;           //  상태 값;
-        Likes newLikes = Likes.of(movie,findMember, isStatus);
-        likesRepository.save(newLikes);
-        int count = likesRepository.countByMovie(movie);
-        log.info("newLikes:{}", newLikes);
-        log.info("count : {}", count);
-        log.info("----------------------- 좋아요 성공 --------------------");
-        return CommonResponse.success("좋아요",LikesResponseDto.of(HttpStatus.OK,true,count,isStatus));
+        Saved newSave = Saved.of(movie,findMember,isStatus);
+        isStatus = 1;
+        savedRepository.save(newSave);
+        int count = savedRepository.countByMovie(movie);
+        log.info("newSave = {}",newSave);
+        log.info("count = {}",count);
+        log.info("----------------------- 저장하기 성공 --------------------");
+        return CommonResponse.success("저장",SavedResponseDto.of(HttpStatus.OK,true,count,isStatus));
     }
 
 

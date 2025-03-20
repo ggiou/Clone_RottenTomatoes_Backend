@@ -26,7 +26,7 @@ public class EmailService {
     }
 
 
-    public CommonResponse sendEmail(String to, String subject, String content) {
+    public CommonResponse sendEmail(String to, String subject, String content , String testContent) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8"); // HTML 설정 및 인코딩 설정
@@ -36,7 +36,10 @@ public class EmailService {
             helper.setFrom(sender); // 발신자 설정 (중요)
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(content, true); // HTML 내용 설정
+
+            String fullContent = content + "<br/><br/>" + testContent; // HTML에서 줄바꿈 처리
+            helper.setText(fullContent, true); // HTML 내용 설정
+
 
             javaMailSender.send(message);
 

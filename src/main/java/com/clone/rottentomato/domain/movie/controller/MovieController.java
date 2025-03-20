@@ -40,7 +40,7 @@ public class MovieController {
 
     /** 카테고리별 영화 리스트 반환
      * */
-    @GetMapping("/list/category")
+    @PostMapping("/list/category")
     public CommonResponse getMovieListByCategory(@RequestBody(required = false) final List<MovieFindRequest> request, BindingResult bindingResult){
         if(Objects.isNull(request) || request.isEmpty()) throw new MovieException("입력한 정보가 없습니다. 카테고리별 영화 리스트 요청 정보를 입력해주세요.", CommonError.BAD_REQUEST);
         if(bindingResult.hasErrors()) {

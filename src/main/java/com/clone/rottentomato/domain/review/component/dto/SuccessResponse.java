@@ -9,18 +9,15 @@ import org.springframework.http.HttpStatus;
 @Setter
 public class SuccessResponse {
     private int status;
-    private String message;
 
     @Builder
-    private SuccessResponse(int status, String message) {
+    private SuccessResponse(int status) {
         this.status = status;
-        this.message = message;
     }
 
-    public static SuccessResponse of(HttpStatus status, String message){
+    public static SuccessResponse of(HttpStatus status){
         return SuccessResponse.builder()
                 .status(status.value())
-                .message(message)
                 .build();
 
     }

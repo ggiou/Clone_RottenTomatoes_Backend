@@ -3,9 +3,12 @@ package com.clone.rottentomato.domain.member.service;
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.domain.auth.JwtUtil;
+import com.clone.rottentomato.domain.member.component.dto.MemberRequestDto;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import jakarta.security.auth.message.AuthException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.dialect.BooleanDecoder;
@@ -26,10 +29,12 @@ public class MemberService {
 
     //신규유저 등록 ( 일반)
     @Transactional
-    public Member registerMember(String email, String provider) {
+    public Member registerMember(MemberRequestDto requestDto, String provider) {
         Member newMember = new Member(
-                email,
-                email.split("@")[0], // 이메일의 아이디 부분을 이름으로 대체
+                requestDto.getEmail(),
+                requestDto.getMemberName() == null
+                        ? requestDto.getEmail().split("@")[0]
+                        : requestDto.getMemberName(), // 이메일의 아이디 부분을 이름으로 대체
                 provider,
                 generateAuthCode());
 
@@ -92,6 +97,22 @@ public class MemberService {
             throw new RuntimeException("코드 인증 실패");
         }
         return jwtUtil.createToken(member.getMemberEmail());
+    }
+
+    public String testAuth(String email) {
+        Member member = findMemberByEmail(email);
+        if (member == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+        return jwtUtil.createToken(member.getMemberEmail());
+    }
+
+    public void cleadCookie(HttpServletResponse response){
+        Cookie clearCookie = new Cookie("Authorization", null);
+        clearCookie.setPath("/");
+        clearCookie.setHttpOnly(true);
+        clearCookie.setMaxAge(0); // 즉시 만료
+        response.addCookie(clearCookie);
     }
 
 

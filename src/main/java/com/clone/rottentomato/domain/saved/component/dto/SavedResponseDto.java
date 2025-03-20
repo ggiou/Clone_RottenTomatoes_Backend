@@ -1,4 +1,4 @@
-package com.clone.rottentomato.domain.likes.component.dto;
+package com.clone.rottentomato.domain.saved.component.dto;
 
 
 import lombok.Builder;
@@ -8,26 +8,26 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @NoArgsConstructor
-public class LikesResponseDto {
+public class SavedResponseDto {
     private HttpStatus status;
-    private boolean isLiked;
+    private boolean isSaved;
     private int isStatus;
     private int count;
 
 
     @Builder
-    public LikesResponseDto(HttpStatus status, boolean isLiked, int count, int isStatus) {
+    public SavedResponseDto(HttpStatus status, boolean isSaved, int count, int isStatus) {
         this.status = status;
-        this.isLiked = isLiked;
+        this.isSaved = isSaved;
         this.count = count;
         this.isStatus = isStatus;
     }
 
 
-    public static LikesResponseDto of(HttpStatus status, boolean isLiked, int count,int isStatus) {
-        return LikesResponseDto.builder()
+    public static SavedResponseDto of(HttpStatus status, boolean isSaved, int count,int isStatus) {
+        return SavedResponseDto.builder()
                 .status(status)
-                .isLiked(isLiked)
+                .isSaved(isSaved)
                 .count(count)
                 .isStatus(isStatus)
                 .build();

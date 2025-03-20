@@ -1,6 +1,7 @@
 package com.clone.rottentomato.domain.review.controller;
 
 
+import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.component.dto.SortRequestDto;
 import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
 import com.clone.rottentomato.domain.mypage.component.dto.MypageReviewResponseDto;
@@ -26,7 +27,7 @@ public class ReviewController {
 
     //  리뷰작성
     @PostMapping("/{movie_id}/review")
-    public ResponseEntity<ReviewResponseDto>createReview(@PathVariable Long movie_id, @RequestBody ReviewRequestDto reviewRequestDto,
+    public CommonResponse createReview(@PathVariable Long movie_id, @RequestBody ReviewRequestDto reviewRequestDto,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reviewService.createReview(movie_id,reviewRequestDto,userDetails.getMember());
     }
@@ -44,7 +45,7 @@ public class ReviewController {
 
     //  리뷰 상세 조회
     @GetMapping("/review/{review_id}")
-    public ResponseEntity<?>getReview(@PathVariable Long review_id,
+    public CommonResponse getReview(@PathVariable Long review_id,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reviewService.getreview(review_id,userDetails.getMember());
     }
@@ -52,7 +53,7 @@ public class ReviewController {
 
     //  리뷰 수정
     @PutMapping("/review/{review_id}")
-    public ResponseEntity<ReviewResponseDto>updateReview(@PathVariable Long review_id,
+    public CommonResponse updateReview(@PathVariable Long review_id,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails,
                                                          @RequestBody ReviewRequestDto reviewRequestDto) {
         return reviewService.updateReview(review_id,userDetails,reviewRequestDto);
@@ -61,7 +62,7 @@ public class ReviewController {
 
     //  리뷰 삭제
     @DeleteMapping("/review/{review_id}")
-    public ResponseEntity<SuccessResponse>deleteReview(@PathVariable Long review_id,
+    public CommonResponse deleteReview(@PathVariable Long review_id,
                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reviewService.deleteReview(review_id,userDetails);
     }

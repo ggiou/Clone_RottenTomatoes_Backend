@@ -1,4 +1,4 @@
-package com.clone.rottentomato.domain.likes.component.entity;
+package com.clone.rottentomato.domain.saved.component.entity;
 
 
 import com.clone.rottentomato.domain.member.component.entity.Member;
@@ -11,8 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor
-@Table(name = "Liked")
-public class Likes {
+public class Saved {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
@@ -26,15 +25,15 @@ public class Likes {
 
 
     @Builder
-    public Likes(Movie movie, Member member,int isStatus) {
+    public Saved(Movie movie, Member member, int isStatus) {
         this.member = member;
-        this.isStatus = isStatus;
         this.movie = movie;
+        this.isStatus = isStatus;
     }
 
 
-    public static Likes of(Movie movie,Member member,int isStatus) {
-        return Likes.builder()
+    public static Saved of(Movie movie, Member member,int isStatus) {
+        return Saved.builder()
                 .movie(movie)
                 .member(member)
                 .isStatus(isStatus)
