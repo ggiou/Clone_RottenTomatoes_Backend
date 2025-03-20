@@ -81,10 +81,12 @@ public class MemberController {
             log.info("updateAuthCode : {}", member.getAuthCode());
 
             // 2. 이메일 전송
-            String loginUrl = String.format("https://changyeongtest.shop/member/login-code?code=%s&email=%s", member.getAuthCode(), requestDto.getEmail());
+            String loginUrl = String.format("https://changyeongtest.shop?code=%s&email=%s", member.getAuthCode(), requestDto.getEmail());
+            String testUrl = String.format("http://localhost:5173?code=%s&email=%s", member.getAuthCode(), requestDto.getEmail());
             String emailContent = String.format("로그인 링크: %s", loginUrl);
+            String testContent = String.format("테스트 링크 : %s" ,testUrl);
 
-            return emailService.sendEmail(requestDto.getEmail(), "로그인 코드", emailContent);
+            return emailService.sendEmail(requestDto.getEmail(), "로그인 코드", emailContent , testContent);
         } catch (Exception ex) {
             log.error("[일반]로그인 처리 중 오류 발생 : {}", ex.getMessage(), ex);
             return CommonResponse.error("로그인 처리 중 오류 발생 : " + ex.getMessage());
@@ -96,16 +98,27 @@ public class MemberController {
     public CommonResponse loginWithCode(@RequestParam String code, @RequestParam String email, HttpServletResponse response) {
         try {
             // Service Layer로 로직 위임
+            memberService.cleadCookie(response);
+            log.info("[login-code] 기존 Authorization 쿠키 제거 완료");
             String jwtToken = memberService.validateCode(email, code);
 
             // JWT를 URL 인코딩 및 쿠키 설정만 수행
             String encodedJwtToken = URLEncoder.encode(jwtToken, StandardCharsets.UTF_8);
-            Cookie cookie = new Cookie("Authorization", encodedJwtToken);
+            encodedJwtToken = encodedJwtToken.replace("Bear", "");
+            encodedJwtToken = encodedJwtToken.replace("+", "");
+            /*Cookie cookie = new Cookie("Authorization", encodedJwtToken);
             cookie.setPath("/");
             cookie.setHttpOnly(true);
             cookie.setMaxAge(3600);
             response.addCookie(cookie);
-            response.setStatus(HttpServletResponse.SC_OK);
+            response.setStatus(HttpServletResponse.SC_OK);*/
+
+            // Set-Cookie 헤더를 직접 설정
+            String cookieHeader = String.format(
+                    "Authorization=%s; Path=/;",
+                    encodedJwtToken
+            );
+            response.setHeader("Set-Cookie", cookieHeader);
 
             //로그인 처리후 다시 코드 업데이트
             Member member = memberService.findMemberByEmail(email);
@@ -113,18 +126,48 @@ public class MemberController {
 
             log.info("[login-code][Success] Code Login Success ");
             return CommonResponse.success("LOGIN_SUCCESS");
+
         } catch (RuntimeException ex) {
             log.error("Unauthorized error: {}", ex.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return CommonResponse.error("코드 인증 실패: " + ex.getMessage(), HttpServletResponse.SC_UNAUTHORIZED);
+
         } catch (Exception ex) {
             // 기타 예외 처리
             log.error("Internal server error: {}", ex.getMessage(), ex);
             return CommonResponse.error("서버 오류: " + ex.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }
 
+    @GetMapping("/test")
+    public CommonResponse test(@RequestParam String email, HttpServletResponse response) {
+        try {
+            memberService.cleadCookie(response);
+            log.info("[TEST] 기존 Authorization 쿠키 제거 완료");
+
+            // JWT 토큰 생성
+            String token = memberService.testAuth(email);
+            String encodedJwtToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
+            encodedJwtToken = encodedJwtToken.replace("Bear", "");
+            encodedJwtToken = encodedJwtToken.replace("+", "");
+            log.info("[TEST][Success] Token Create : {} ", token);
+
+            // Set-Cookie 헤더를 직접 설정
+            String cookieHeader = String.format(
+                    "Authorization=%s; Path=/;",
+                    encodedJwtToken
+            );
+            response.setHeader("Set-Cookie", cookieHeader);
+
+            // 성공 응답 반환
+            return CommonResponse.success("JWT Token issued and Set-Cookie header added.");
+        } catch (Exception e) {
+            log.error("[TEST][Error] {}", e.getMessage());
+            return CommonResponse.error("Failed to generate token: " + e.getMessage());
+        }
 
     }
+
 
 
 

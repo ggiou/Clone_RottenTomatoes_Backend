@@ -29,7 +29,7 @@ public class JwtUtil {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long TOKEN_TIME = 60 * 60 * 1000L; // 1시간
+    private static final long TOKEN_TIME = 24 * 60 * 60 * 1000L; // 1일
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -44,12 +44,15 @@ public class JwtUtil {
 
     public String createToken(String email) {
         Date date = new Date();
+        Date expiration = new Date(date.getTime() + TOKEN_TIME); // 만료 시간 계산
+
+        log.info("Token created with expiration: {}", expiration);
 
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(email)
-                        .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                         .setIssuedAt(date)
+                        .setExpiration(expiration)
                         .signWith(key, signatureAlgorithm)
                         .compact();
     }
@@ -88,7 +91,11 @@ public class JwtUtil {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .setAllowedClockSkewSeconds(60)
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");

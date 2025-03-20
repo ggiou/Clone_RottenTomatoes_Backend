@@ -7,6 +7,8 @@ import com.clone.rottentomato.domain.member.component.dto.MemberRequestDto;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import jakarta.security.auth.message.AuthException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.dialect.BooleanDecoder;
@@ -95,6 +97,22 @@ public class MemberService {
             throw new RuntimeException("코드 인증 실패");
         }
         return jwtUtil.createToken(member.getMemberEmail());
+    }
+
+    public String testAuth(String email) {
+        Member member = findMemberByEmail(email);
+        if (member == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+        return jwtUtil.createToken(member.getMemberEmail());
+    }
+
+    public void cleadCookie(HttpServletResponse response){
+        Cookie clearCookie = new Cookie("Authorization", null);
+        clearCookie.setPath("/");
+        clearCookie.setHttpOnly(true);
+        clearCookie.setMaxAge(0); // 즉시 만료
+        response.addCookie(clearCookie);
     }
 
 

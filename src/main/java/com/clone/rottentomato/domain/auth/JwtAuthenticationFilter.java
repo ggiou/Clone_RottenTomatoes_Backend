@@ -73,6 +73,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        // 인증이 필요 없는 경로 설정
+        return path.equals("/member/test") ||
+                path.equals("/member/login") ||
+                path.startsWith("/public"); // 추가적으로 public 경로 제외 등 필요 시
+    }
+
+
     //예외발생 응답처리
     public void jwtExceptionHandler(HttpServletResponse response, String msg, int statusCode) {
         try {
