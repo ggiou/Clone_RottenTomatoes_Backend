@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -87,5 +88,50 @@ public class UtilString {
         stringList = stringList.stream().filter(StringUtils::isNotBlank).toList();
         if(stringList.isEmpty()) return StringUtils.EMPTY;
         return String.join(delimiter, stringList);
+    }
+
+    /** 문자열을 구분자 기준으로 하나의 List 반환 */
+    public static List<String> makeListByDelimiter(String stringList, String delimiter){
+        if(Objects.isNull(stringList)) return new ArrayList<>();
+        stringList = stringList.replaceAll(" ", StringUtils.EMPTY);
+        if(StringUtils.isBlank(stringList)) return new ArrayList<>();
+        return List.of(stringList.split(delimiter));
+    }
+
+    public static boolean isContain(String targetStr, String containStr){
+        if(StringUtils.isBlank(targetStr) || StringUtils.isBlank(containStr)) return false;
+        return targetStr.replaceAll(" ", "").contains(containStr.replaceAll(" ", ""));
+    }
+
+    public static String formatTime(String input) {
+        // 입력값이 null이거나 비어 있으면 무시
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+
+        input = input.replaceAll(" ", "");
+        String[] parts = input.split(":");
+
+        // "mm:ss" 형식이 아니면 무시
+        if (parts.length != 2) {
+            return null;
+        }
+
+        try {
+            int minutes = Integer.parseInt(parts[0]);
+            int seconds = Integer.parseInt(parts[1]);
+
+            // 분과 초의 범위를 검사 (0 <= mm < 60, 0 <= ss < 60)
+            if (minutes >= 60 || seconds >= 60) {
+                return null;
+            }
+
+            // mm이 10보다 작으면 앞에 0을 붙이고, 10 이상이면 그대로 둠
+            String formattedMinutes = (minutes < 10) ? "0" + minutes : String.valueOf(minutes);
+
+            return formattedMinutes + ":" + String.format("%02d", seconds);
+        } catch (NumberFormatException e) {
+            return null; // 숫자로 변환할 수 없는 경우 무시
+        }
     }
 }

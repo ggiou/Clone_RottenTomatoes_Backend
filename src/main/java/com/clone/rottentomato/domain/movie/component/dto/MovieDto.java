@@ -30,7 +30,7 @@ public class MovieDto extends ResponseDto {
         this.releaseDate = releaseDate;
     }
 
-    private MovieDto(Long id, String name, BigDecimal rating, String posterUrl, LocalDateTime releaseDate){
+    public MovieDto(Long id, String name, BigDecimal rating, String posterUrl, LocalDateTime releaseDate){
         this.id = id;
         this.name = name;
         this.rating = String.valueOf(rating);

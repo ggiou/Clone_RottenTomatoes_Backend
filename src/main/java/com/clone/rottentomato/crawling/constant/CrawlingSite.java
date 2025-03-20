@@ -19,6 +19,7 @@ import static com.clone.rottentomato.crawling.constant.CrawlingUrlConst.CRAWLING
 @RequiredArgsConstructor
 public enum CrawlingSite implements EnumType {
     NAVER("네이버", NAVER_MOVIE_SEARCH_URL)
+    , YOUTUBE("유튜브", YOUTUBE_SEARCH_URL)
     ;
     private final String krName;
     private final String movieSearchUrl;

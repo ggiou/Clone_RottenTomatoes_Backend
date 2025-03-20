@@ -7,6 +7,7 @@ import com.clone.rottentomato.domain.movie.component.entity.MovieDetail;
 import com.clone.rottentomato.domain.movie.component.entity.MovieTrailer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Objects;
 
@@ -15,6 +16,7 @@ import static com.clone.rottentomato.common.constant.CommonConst.DATE.HOUR_MINUT
 @Getter
 public class MovieTrailerDto extends ResponseDto {
     private Long id;            // 영화 예고편 id
+    @Setter
     private int displayOrder;   // 예고편 노출 순서
     private String playUrl;     // 영화 예고편 url
     private String playName;    // 영화 예고편 지정 이름
@@ -38,7 +40,7 @@ public class MovieTrailerDto extends ResponseDto {
 
     /** 영화 예고편 저장을 위한 객체 */
     public static MovieTrailerDto forSave(int displayOrder, String playUrl, String playName, String playTime){
-        return new MovieTrailerDto(null,displayOrder, playUrl, playName, playTime, null);
+        return new MovieTrailerDto(null, displayOrder, playUrl, playName, playTime, null);
     }
 
     public static MovieTrailerDto fromEntity(MovieTrailer entity){
