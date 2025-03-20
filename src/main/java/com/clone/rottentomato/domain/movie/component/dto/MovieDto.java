@@ -14,6 +14,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class MovieDto extends ResponseDto {
     private Long id;    // 영화 id
@@ -21,6 +22,8 @@ public class MovieDto extends ResponseDto {
     private String rating;  // 영화 평점 (리뷰 별점 기준 -> 0.0 ~ 5.0)
     private String posterUrl;   // 영화 포스터 url
     private String releaseDate;  // 개봉일
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private int rank;
 
     private MovieDto(Long id, String name, String rating, String posterUrl, String releaseDate){
         this.id = id;
@@ -36,6 +39,16 @@ public class MovieDto extends ResponseDto {
         this.rating = String.valueOf(rating);
         this.posterUrl = posterUrl;
         this.releaseDate = UtilDate.toStr(releaseDate);
+    }
+
+    //TODO 해당 방식 JPA MovieDto가 생성된다면 위도 동일방식으로 변경
+    public MovieDto(Movie movie, int rank){
+        this.id = movie.getId();
+        this.name = movie.getName();
+        this.rating = String.valueOf(movie.getRating());
+        this.posterUrl = movie.getPosterUrl();
+        this.releaseDate = UtilDate.toStr(movie.getReleaseDate());
+        this.rank = rank;
     }
 
     // 응답값으로 사용시, 성공 실패 여부만 담은 객체 반환

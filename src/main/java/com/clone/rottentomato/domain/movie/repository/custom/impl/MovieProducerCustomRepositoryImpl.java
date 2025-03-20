@@ -25,7 +25,7 @@ public class MovieProducerCustomRepositoryImpl implements MovieProducerCustomRep
     private final MovieProducerRepository movieProducerRepository;
 
     /**
-     * 영화 - 제작자 정보 리스트가 없다면 저장, 있으면 업데이트
+     * 영화 - 제작자 정보 리스트가 없다면 저장, 있으면 패스
      *
      * @return 저장한 MovieProducer 리스트
      */

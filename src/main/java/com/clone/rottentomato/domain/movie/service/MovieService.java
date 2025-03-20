@@ -61,6 +61,7 @@ public class MovieService {
     private final MovieProducerCustomRepository movieProducerCustomRepository;
     
     private final RecommendMovieRepository recommendMovieRepository;
+    private final RecommendMovieCustomRepository recommendMovieCustomRepository;
 
     // service
     private final WebDriverService webDriverService;
@@ -145,9 +146,22 @@ public class MovieService {
         Optional<Movie> targetMovieOpt = movieRepository.findById(movieId);
         if(targetMovieOpt.isEmpty()) throw new MovieException("해당 id의 영화 정보가 없습니다.", MovieError.BAD_REQUEST_MOVIE_ID);
         Movie targetMovie = targetMovieOpt.get();
-                
-        List<Movie> savedRecommendMovie = recommendMovieRepository.findRecommendMovieByMovie(targetMovie);
-        List<MovieDto> recommendMovie = new ArrayList<>();
+
+        // 2. db에 저장된 유효한 추천 영화가 존재하는지 확인  (추천 영화 탐색일이 당일 이전이라면 새로 탐색)
+        List<MovieDto> recommendMovie = recommendMovieRepository.findValidRecommendMovieByMovie(targetMovie);
+        // 3. 유효한 추천 영화가 존재하지 않다면, 추천 영화 알고리즘을 통해 저장
+        if (recommendMovie.isEmpty()){
+            List<Movie> calculationRecommend = calculationRecommendMovie(targetMovie);
+            List<RecommendMovie> saveOrUpdateRecommendMovie = recommendMovieCustomRepository.saveOrUpdateRecommendMovie(targetMovie, calculationRecommend);
+            //recommendMovie =
+        }
+        return recommendMovie;
+    }
+
+    /** 특정 영화의 추천 영화 등수를 계산하는 함수 */
+    private List<Movie> calculationRecommendMovie(Movie targetMovie){
+        List<Movie> recommendMovie = new ArrayList<>();
+
         return recommendMovie;
     }
 
