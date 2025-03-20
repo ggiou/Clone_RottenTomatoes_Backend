@@ -1,7 +1,6 @@
 package com.clone.rottentomato.domain.likes.component.entity;
 
 
-import com.clone.rottentomato.domain.likes.component.dto.LikesRequestDto;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import jakarta.persistence.*;
@@ -27,18 +26,18 @@ public class Likes {
 
 
     @Builder
-    public Likes(Movie movie, Member member, LikesRequestDto requestDto) {
+    public Likes(Movie movie, Member member,int isStatus) {
         this.member = member;
-        this.isStatus = requestDto.getIsStatus();
+        this.isStatus = isStatus;
         this.movie = movie;
     }
 
 
-    public static Likes of(Movie movie,Member member,LikesRequestDto requestDto) {
+    public static Likes of(Movie movie,Member member,int isStatus) {
         return Likes.builder()
                 .movie(movie)
                 .member(member)
-                .requestDto(requestDto)
+                .isStatus(isStatus)
                 .build();
     }
 }

@@ -3,7 +3,6 @@ package com.clone.rottentomato.domain.saved.component.entity;
 
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
-import com.clone.rottentomato.domain.saved.component.dto.SavedRequestDto;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,18 +25,18 @@ public class Saved {
 
 
     @Builder
-    public Saved(Movie movie, Member member, SavedRequestDto requestDto) {
+    public Saved(Movie movie, Member member, int isStatus) {
         this.member = member;
         this.movie = movie;
-        this.isStatus = requestDto.getIsStatus();
+        this.isStatus = isStatus;
     }
 
 
-    public static Saved of(Movie movie, Member member,SavedRequestDto requestDto) {
+    public static Saved of(Movie movie, Member member,int isStatus) {
         return Saved.builder()
                 .movie(movie)
                 .member(member)
-                .requestDto(requestDto)
+                .isStatus(isStatus)
                 .build();
     }
 }

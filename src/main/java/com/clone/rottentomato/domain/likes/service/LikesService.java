@@ -1,7 +1,6 @@
 package com.clone.rottentomato.domain.likes.service;
 
 
-import com.clone.rottentomato.domain.likes.component.dto.LikesRequestDto;
 import com.clone.rottentomato.domain.likes.component.dto.LikesResponseDto;
 import com.clone.rottentomato.domain.likes.component.entity.Likes;
 import com.clone.rottentomato.domain.likes.repository.LikesRepository;
@@ -30,20 +29,19 @@ public class LikesService {
 
 
     //  좋아요
-    public ResponseEntity<LikesResponseDto> ok(Long movieId, Member member, LikesRequestDto requestDto) {
-        int isStatus;
+    public ResponseEntity<LikesResponseDto> ok(Long movieId, Member member, int isStatus) {
         Movie movie = getMovie(movieId);
-        Optional<Likes> likes = likesRepository.findByMovieAndMember(movie,member);
+        Optional<Likes> likes = likesRepository.findByIsStatusAndMovieAndMember(isStatus,movie,member);
         Member findMember = getMember(member.getMemberId());
         if(likes.isPresent()) {
-            Likes findLikes = likes.get();
             isStatus = 0;           //  상태 값
+            Likes findLikes = likes.get();
             likesRepository.delete(findLikes);
             int count = likesRepository.countByMovie(movie);
             return ResponseEntity.ok(LikesResponseDto.of(HttpStatus.OK,false,count,isStatus));
         }
-        Likes newLikes = Likes.of(movie,findMember, requestDto);
         isStatus = 1;           //  상태 값;
+        Likes newLikes = Likes.of(movie,findMember, isStatus);
         likesRepository.save(newLikes);
         int count = likesRepository.countByMovie(movie);
         return ResponseEntity.ok(LikesResponseDto.of(HttpStatus.OK,true,count,isStatus));

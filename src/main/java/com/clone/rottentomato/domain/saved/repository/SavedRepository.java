@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,8 +16,8 @@ import java.util.Optional;
 @Repository
 public interface SavedRepository extends JpaRepository<Saved,Long> {
 
-    @Query("select s from Saved s where s.movie=:movie and s.member =:member")
-    Optional<Saved> findByMovieAndMember(Movie movie, Member member);
+    @Query("SELECT l FROM Likes l WHERE l.isStatus = :isStatus AND l.movie = :movie AND l.member = :member")
+    Optional<Saved> findByIsStatusAndMovieAndMember(@Param("isStatus") int isStatus, @Param("movie") Movie movie, @Param("member") Member member);
 
     int countByMovie(Movie movie);
 

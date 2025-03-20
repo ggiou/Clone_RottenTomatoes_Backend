@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,8 +16,8 @@ import java.util.Optional;
 @Repository
 public interface LikesRepository extends JpaRepository<Likes,Long> {
 
-    @Query("select l from Likes l where l.movie=:movie and l.member =:member")
-    Optional<Likes> findByMovieAndMember(Movie movie,Member member);
+    @Query("SELECT l FROM Likes l WHERE l.isStatus = :isStatus AND l.movie = :movie AND l.member = :member")
+    Optional<Likes> findByIsStatusAndMovieAndMember(@Param("isStatus") int isStatus, @Param("movie") Movie movie, @Param("member") Member member);
 
     int countByMovie(Movie movie);
 

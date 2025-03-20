@@ -2,7 +2,6 @@ package com.clone.rottentomato.domain.likes.controller;
 
 
 import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
-import com.clone.rottentomato.domain.likes.component.dto.LikesRequestDto;
 import com.clone.rottentomato.domain.likes.component.dto.LikesResponseDto;
 import com.clone.rottentomato.domain.likes.service.LikesService;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +22,8 @@ public class LikesController {
     @PostMapping("/{movie_id}/isLiked")
     public ResponseEntity<LikesResponseDto> ok(@PathVariable Long movie_id,
                                                @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                               @RequestBody LikesRequestDto requestDto) {
-        return likesService.ok(movie_id,userDetails.getMember(), requestDto);
+                                               int isStatus) {
+        return likesService.ok(movie_id,userDetails.getMember(),isStatus);
     }
 
 

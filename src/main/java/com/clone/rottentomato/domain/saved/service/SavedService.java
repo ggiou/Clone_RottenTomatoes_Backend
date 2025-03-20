@@ -5,7 +5,6 @@ import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.repository.MovieRepository;
-import com.clone.rottentomato.domain.saved.component.dto.SavedRequestDto;
 import com.clone.rottentomato.domain.saved.component.dto.SavedResponseDto;
 import com.clone.rottentomato.domain.saved.component.entity.Saved;
 import com.clone.rottentomato.domain.saved.repository.SavedRepository;
@@ -29,10 +28,9 @@ public class SavedService {
     private final MemberRepository memberRepository;
 
 
-    public ResponseEntity<SavedResponseDto> save(Long movieId, Member member, SavedRequestDto requestDto) {
-        int isStatus;
+    public ResponseEntity<SavedResponseDto> save(Long movieId, Member member,int isStatus) {
         Movie movie = getMovie(movieId);
-        Optional<Saved> save = savedRepository.findByMovieAndMember(movie,member);
+        Optional<Saved> save = savedRepository.findByIsStatusAndMovieAndMember(isStatus,movie,member);
         Member findMember = getMember(member.getMemberId());
         if(save.isPresent()) {
             Saved findSave = save.get();
@@ -41,7 +39,7 @@ public class SavedService {
             int count = savedRepository.countByMovie(movie);
             return ResponseEntity.ok(SavedResponseDto.of(HttpStatus.OK,false,count,isStatus));
         }
-        Saved newSave = Saved.of(movie,findMember,requestDto);
+        Saved newSave = Saved.of(movie,findMember,isStatus);
         isStatus = 1;
         savedRepository.save(newSave);
         int count = savedRepository.countByMovie(movie);
