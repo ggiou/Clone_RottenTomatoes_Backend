@@ -67,6 +67,12 @@ public class MovieDto extends ResponseDto {
         return new MovieDto(null, name, null, posterUrl, releaseDate);
     }
 
+    /** 영화 추천 반환을 위한 객체 생성 */
+    public static MovieDto forRecommend(Movie entity, int rank){
+        if(Objects.isNull(entity)) return null;
+        return new MovieDto(entity, rank);
+    }
+
     public static MovieDto fromEntity(Movie entity){
         if(Objects.isNull(entity)) return null;
         String releaseDate = UtilDate.toStr(entity.getReleaseDate());

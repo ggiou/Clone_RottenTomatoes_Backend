@@ -147,13 +147,15 @@ public class MovieService {
         if(targetMovieOpt.isEmpty()) throw new MovieException("해당 id의 영화 정보가 없습니다.", MovieError.BAD_REQUEST_MOVIE_ID);
         Movie targetMovie = targetMovieOpt.get();
 
-        // 2. db에 저장된 유효한 추천 영화가 존재하는지 확인  (추천 영화 탐색일이 당일 이전이라면 새로 탐색)
+        // 2. db에 저장된 유효한 추천 영화가 존재하는지 확인  (추천 영화 수정일(마지막 탐색일)이 오늘이 아니라면, 유효하지 x)
         List<MovieDto> recommendMovie = recommendMovieRepository.findValidRecommendMovieByMovie(targetMovie);
         // 3. 유효한 추천 영화가 존재하지 않다면, 추천 영화 알고리즘을 통해 저장
         if (recommendMovie.isEmpty()){
+            // 3-1. 추천 알고리즘을 통해 탐색
             List<Movie> calculationRecommend = calculationRecommendMovie(targetMovie);
+            // 3-2. 탐색 정보를 db에 저장 -> 응답 값 변환
             List<RecommendMovie> saveOrUpdateRecommendMovie = recommendMovieCustomRepository.saveOrUpdateRecommendMovie(targetMovie, calculationRecommend);
-            //recommendMovie =
+            recommendMovie = saveOrUpdateRecommendMovie.stream().map(t->MovieDto.forRecommend(t.getRecommendMovie(), t.getRank())).toList();
         }
         return recommendMovie;
     }
@@ -161,6 +163,7 @@ public class MovieService {
     /** 특정 영화의 추천 영화 등수를 계산하는 함수 */
     private List<Movie> calculationRecommendMovie(Movie targetMovie){
         List<Movie> recommendMovie = new ArrayList<>();
+        // 1. 해당 영화를
 
         return recommendMovie;
     }
