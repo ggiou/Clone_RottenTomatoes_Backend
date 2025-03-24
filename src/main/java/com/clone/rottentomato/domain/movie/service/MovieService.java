@@ -257,7 +257,6 @@ public class MovieService {
 
 
     /** 특정 영화 정보를 저장하는 총 process */
-    @Transactional(noRollbackFor = JpaException.class)
     public CommonResponse saveMovieProcess(List<MovieSaveRequest> request){
         // 0. 응답 값 세팅
         MovieSaveResponse processData = new MovieSaveResponse();    // 공통응답에 들어갈 영화 정보 저장 결과 객체
@@ -551,7 +550,8 @@ public class MovieService {
     }
 
     /** 영화 정보 전체를 db 에 저장 */
-    private MovieSaveResponse saveMovieInfo(List<MovieInfoDto> saveMovieInfos){
+    @Transactional
+    protected MovieSaveResponse saveMovieInfo(List<MovieInfoDto> saveMovieInfos){
         // 0. 응답 값 기본 세팅
         List<MovieInfoDto> successList = new ArrayList<>();
         List<MovieInfoDto> failList = new ArrayList<>();
