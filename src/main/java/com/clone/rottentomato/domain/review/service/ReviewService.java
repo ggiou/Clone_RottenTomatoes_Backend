@@ -49,7 +49,7 @@ public class ReviewService {
             log.info("review = {}",review);
             throw new IllegalArgumentException("이미 리뷰를 등록하셨습니다.");
         }
-        Review saveReview = reviewRepository.save(Review.of(reviewRequestDto, member, movie, reviewRequestDto.getSortType()));
+        Review saveReview = reviewRepository.save(Review.of(reviewRequestDto, member, movie));
         log.info("saveReview = {}",saveReview);
         log.info("------------------------------ 저장 성공 -----------------------------------");
         return CommonResponse.success("저장 성공",ReviewResponseDto.of(saveReview,member,movie));
