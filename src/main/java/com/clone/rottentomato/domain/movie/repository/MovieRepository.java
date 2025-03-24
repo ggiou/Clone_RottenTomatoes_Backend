@@ -3,9 +3,11 @@ package com.clone.rottentomato.domain.movie.repository;
 
 import com.clone.rottentomato.domain.movie.component.dto.MovieDto;
 import com.clone.rottentomato.domain.movie.component.dto.ProducerDto;
+import com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto;
 import com.clone.rottentomato.domain.movie.component.dto.SearchResponse;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.constant.ProducerType;
+import org.hibernate.query.spi.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,4 +38,21 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             "WHERE m.name LIKE CONCAT('%', :name, '%') OR md.actorNames LIKE CONCAT('%', :name, '%') OR md.directorNames LIKE CONCAT('%', :name, '%')")
     int countByNameContaining(@Param("name") String name);*/
 
+    // 해당 영화를 저장한 회원들이 저장한 다른 영화들, 여러번 저장된 순으로 size 개 가져오기 (pageable default 10)
+    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(s.movie, COUNT(s.movie))" +
+            " FROM Saved s" +
+            " WHERE s.movie !=:movie" +
+            " AND s.member.memberId  IN (SELECT s2.member.memberId FROM Saved s2 WHERE s2.movie =:movie)" +
+            " GROUP BY s.movie" +
+            " ORDER BY COUNT(s.movie) DESC")
+    List<RecommendMovieDto> findSavedMoviesByMembersWhoSavedThis(@Param("movie") Movie movie, Pageable pageable);
+
+    // 해당 영화를 좋아요한 회원들이 좋아요한 다른 영화들, 여러번 저장된 순으로 size 개 가져오기 (pageable default 10)
+    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(s.movie, COUNT(s.movie))" +
+            " FROM Likes s" +
+            " WHERE s.movie !=:movie" +
+            " AND s.member.memberId  IN (SELECT s2.member.memberId FROM Likes s2 WHERE s2.movie =:movie)" +
+            " GROUP BY s.movie" +
+            " ORDER BY COUNT(s.movie) DESC")
+    List<RecommendMovieDto> findLikedMoviesByMembersWhoLikedThis(@Param("movie") Movie movie, Pageable pageable);
 }

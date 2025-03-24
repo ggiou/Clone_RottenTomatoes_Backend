@@ -38,7 +38,7 @@ public class RecommendMovieCustomRepositoryImpl implements RecommendMovieCustomR
         if(Objects.isNull(movie) || CollectionUtils.isEmpty(recommendMovie)) return null;
         // 특정 영화의 추천 영화 전부 업데이트
         List<RecommendMovie> originRecommends = recommendMovieRepository.findAllByMovie(movie);
-        AtomicInteger rank = new AtomicInteger(1);
+        AtomicInteger recommendRank = new AtomicInteger(1);
         int originRecommendsSize = originRecommends.size();
         int recommendMovieSize = recommendMovie.size();
         // 추천 영화들이 없다면 저장
@@ -48,7 +48,7 @@ public class RecommendMovieCustomRepositoryImpl implements RecommendMovieCustomR
             // 영화 id가 존재하는 애들만 추천 리스트 가능
             List<RecommendMovie> saveList = recommendMovie.stream()
                     .filter(t-> !Objects.isNull(t.getId()))
-                    .map(t-> RecommendMovie.of(movie, t, rank.getAndIncrement())).toList();
+                    .map(t-> RecommendMovie.of(movie, t, recommendRank.getAndIncrement())).toList();
             return recommendMovieRepository.saveAll(saveList);
         }else{
             // 있다면 값만 업데이트

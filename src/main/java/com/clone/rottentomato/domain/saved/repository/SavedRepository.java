@@ -16,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface SavedRepository extends JpaRepository<Saved,Long> {
 
-    @Query("SELECT l FROM Likes l WHERE l.isStatus = :isStatus AND l.movie = :movie AND l.member = :member")
+    @Query("SELECT l FROM Saved l WHERE l.isStatus = :isStatus AND l.movie = :movie AND l.member = :member")
     Optional<Saved> findByIsStatusAndMovieAndMember(@Param("isStatus") int isStatus, @Param("movie") Movie movie, @Param("member") Member member);
 
     int countByMovie(Movie movie);

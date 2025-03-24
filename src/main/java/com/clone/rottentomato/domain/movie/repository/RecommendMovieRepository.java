@@ -1,6 +1,7 @@
 package com.clone.rottentomato.domain.movie.repository;
 
 import com.clone.rottentomato.domain.movie.component.dto.MovieDto;
+import com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.component.entity.RecommendMovie;
 import com.clone.rottentomato.domain.movie.component.entity.id.RecommendMovieId;
@@ -15,11 +16,11 @@ public interface RecommendMovieRepository extends JpaRepository<RecommendMovie, 
     // 당일날 탐색된 추천 영화가 아니라면 새로 탐색 필요
     // -> 스케줄러나 or 배치로 매일 새로운 추천 영화를 설정하기에는 scope 가 작은 클론 코딩이라 (매일 데이터를 탐색할 필요성 x)
     // 수정 날짜를 기준으로 당일보다 예전이라면, 특정 영화의 추천영화 api 를 호출할 때만 탐색하는 방식으로 채택 했습니다.
-    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.MovieDto(r.recommendMovie, r.rank) " +
+    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(r.recommendMovie, r.recommendRank) " +
             " FROM RecommendMovie r INNER JOIN Movie rm ON r.recommendMovie.id = rm.id" +
             " WHERE r.movie =: movie AND r.modDate >= current date" +
-            " ORDER BY r.rank ASC" )
-    List<MovieDto> findValidRecommendMovieByMovie(@Param("movie") Movie movie);
+            " ORDER BY r.recommendRank ASC" )
+    List<RecommendMovieDto> findValidRecommendMovieByMovie(@Param("movie") Movie movie);
 
     List<RecommendMovie> findAllByMovie(Movie movie);
 
