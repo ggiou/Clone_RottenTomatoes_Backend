@@ -20,7 +20,7 @@ public class Review extends TimeStamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long review_id;
     @Column(nullable = false)
-    private Integer field;
+    private Integer rating;
     @Column(nullable = false)
     @Size(max = 1000, message = "리뷰는 최대 1000자까지 입력 가능합니다.")
     private String reviewContent;
@@ -30,34 +30,22 @@ public class Review extends TimeStamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MOVIE_ID",nullable = false)
     private Movie movie;
-    @Column(nullable = false)
-    @Enumerated(value = EnumType.STRING)
-    private SortType sortType;
 
-
-    @Builder
-    public Review(ReviewRequestDto reviewRequestDto, Member member, Movie movie,SortType sortType) {
-        this.field = reviewRequestDto.getField();
-        this.reviewContent = reviewRequestDto.getReviewContent();
+    public Review(Member member, Movie movie, String reviewContent, Integer rating) {
         this.member = member;
         this.movie = movie;
-        this.sortType = reviewRequestDto.getSortType();
-        this.sortType = sortType;
+        this.reviewContent = reviewContent;
+        this.rating = rating;
     }
 
 
-    public static Review of(ReviewRequestDto reviewRequestDto, Member member, Movie movie, SortType sortType) {
-        return Review.builder()
-                .reviewRequestDto(reviewRequestDto)
-                .member(member)
-                .movie(movie)
-                .sortType(sortType)
-                .build();
+    public static Review of(ReviewRequestDto reviewRequestDto, Member member, Movie movie) {
+        return new Review(member, movie, reviewRequestDto.getReviewContent(), reviewRequestDto.getRating());
     }
 
 
     public void update(ReviewRequestDto reviewRequestDto) {
-        this.field = reviewRequestDto.getField();
+        this.rating = reviewRequestDto.getRating();
         this.reviewContent = reviewRequestDto.getReviewContent();
     }
 }

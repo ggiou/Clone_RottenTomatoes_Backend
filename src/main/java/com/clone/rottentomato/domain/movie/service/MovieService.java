@@ -59,7 +59,9 @@ public class MovieService {
     private final ProducerCustomRepository producerCustomRepository;
     private final ProducerRepository producerRepository;
     private final MovieProducerCustomRepository movieProducerCustomRepository;
-    private final MovieProducerRepository movieProducerRepository;
+    
+    private final RecommendMovieRepository recommendMovieRepository;
+    private final RecommendMovieCustomRepository recommendMovieCustomRepository;
 
     // service
     private final WebDriverService webDriverService;
@@ -139,12 +141,65 @@ public class MovieService {
     }
 
     /** 특정 영화의 추천 영화 탐색 */
-    public List<MovieDto> searchRecommendMovieListByMovieId(Long movieId, int size){
+    public List<RecommendMovieDto> searchRecommendMovieListByMovieId(Long movieId, int size){
+        // 1. 입력한 id의 영화가 존재하는 지 확인
+        Optional<Movie> targetMovieOpt = movieRepository.findById(movieId);
+        if(targetMovieOpt.isEmpty()) throw new MovieException("해당 id의 영화 정보가 없습니다.", MovieError.BAD_REQUEST_MOVIE_ID);
+        Movie targetMovie = targetMovieOpt.get();
 
-
-        List<MovieDto> recommendMovie = new ArrayList<>();
+        // 2. db에 저장된 유효한 추천 영화가 존재하는지 확인  (추천 영화 수정일(마지막 탐색일)이 오늘이 아니라면, 유효하지 x)
+        List<RecommendMovieDto> recommendMovie = recommendMovieRepository.findValidRecommendMovieByMovie(targetMovie);
+        // 3. 유효한 추천 영화가 존재하지 않다면, 추천 영화 알고리즘을 통해 저장
+        if (recommendMovie.isEmpty()){
+            // 3-1. 추천 알고리즘을 통해 탐색
+            List<Movie> calculationRecommend = calculationRecommendMovie(targetMovie);
+            // 3-2. 탐색 정보를 db에 저장 -> 응답 값 변환
+            List<RecommendMovie> saveOrUpdateRecommendMovie = recommendMovieCustomRepository.saveOrUpdateRecommendMovie(targetMovie, calculationRecommend);
+            recommendMovie = saveOrUpdateRecommendMovie.stream().map(t->RecommendMovieDto.forRecommend(t.getRecommendMovie(), t.getRecommendRank())).toList();
+        }
         return recommendMovie;
     }
+
+    /** 특정 영화의 추천 영화 등수를 계산하는 함수 */
+    private List<Movie> calculationRecommendMovie(Movie targetMovie){
+        List<Movie> recommendMovie = new ArrayList<>();
+
+        // 1. 해당 영화를 저장한 사람들이 저장한 영화 가져오기
+        List<RecommendMovieDto> savedScore = findSavedMoviesByMembersWhoSavedThis(targetMovie);
+
+        // 2. 해당 영화를 저장한 사람들이 좋아요한 영화 가져오기
+        List<RecommendMovieDto> likedScore = findLikedMoviesByMembersWhoLikedThis(targetMovie);
+
+        // 3. 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화 가져오기
+
+        // 4. 해당 영화의 장르에 따라 추가 점수 판단하기
+        // 4-1. 1,2, 3 영화의 개수가 10(한 영화의 추천영화는 최대 10개까지 저장)보다 작다면, 장르가 겹치며 평점이 높은순으로 부족한 개수만큼 가져오기
+        
+        // 4-2. 해당 영화와 장르가 겹치는 만큼 점수 주기
+
+        // 5. 점수별로 10등까지 등급을 내려, 추천영화 판단
+
+        return recommendMovie;
+    }
+
+    private List<RecommendMovieDto> findSavedMoviesByMembersWhoSavedThis(Movie movie, Pageable pageable){
+        return movieRepository.findSavedMoviesByMembersWhoSavedThis(movie, pageable);
+    }
+
+    // 해당 영화를 저장한 사람들이 저장한 다른 영화 개수 순위대로, (default 10)
+    private List<RecommendMovieDto> findSavedMoviesByMembersWhoSavedThis(Movie movie){
+        return findSavedMoviesByMembersWhoSavedThis(movie, PageRequest.of(0, 10));
+    }
+
+    private List<RecommendMovieDto> findLikedMoviesByMembersWhoLikedThis(Movie movie, Pageable pageable){
+        return movieRepository.findLikedMoviesByMembersWhoLikedThis(movie, pageable);
+    }
+
+    // 해당 영화를 저장한 사람들이 저장한 다른 영화 개수 순위대로, (default 10)
+    private List<RecommendMovieDto> findLikedMoviesByMembersWhoLikedThis(Movie movie){
+        return findLikedMoviesByMembersWhoLikedThis(movie, PageRequest.of(0, 10));
+    }
+
 
 
     /** 검색 기능 - 입력값과 동일한 문자의 영화 정보 리스트(배우이름 포함) 검색 후 반환 */
@@ -584,5 +639,4 @@ public class MovieService {
         // 6. 저장 여부 응답 값 반환
         return MovieSaveResponse.of(successList, failList);
     }
-
 }

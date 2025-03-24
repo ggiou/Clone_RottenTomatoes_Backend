@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReviewRequestDto{
-    private Integer field;
+    private Integer rating = 0;
     private String reviewContent;
     private SortType sortType;
 

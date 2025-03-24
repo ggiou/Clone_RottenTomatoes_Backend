@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReviewResponseDto {
     private Long id;
-    private Integer field;
+    private Integer rating;
     private String reviewContent;
     private String memberEmail;
     private String memberName;
@@ -23,7 +23,7 @@ public class ReviewResponseDto {
     @Builder
     public ReviewResponseDto(Review review, Member member, Movie movie) {
         this.id = review.getReview_id();
-        this.field = review.getField();
+        this.rating = review.getRating();
         this.reviewContent = review.getReviewContent();
         this.memberEmail = member.getMemberEmail();
         this.memberName = member.getMemberName();

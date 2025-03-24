@@ -4,7 +4,6 @@ import com.clone.rottentomato.common.component.dto.ResponseDto;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.util.UtilDate;
 import com.clone.rottentomato.util.UtilNumber;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import java.math.BigDecimal;
