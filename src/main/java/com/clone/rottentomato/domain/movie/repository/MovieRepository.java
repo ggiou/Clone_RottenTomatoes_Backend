@@ -29,7 +29,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     // 리뷰 작성 or 별점이 변경 될 때 해당 영화의 평균 평점 계산
     // (현재 평점 * 리뷰 개수 + 새로운 점수) / 리뷰개수 + 1
-    @Query("SELECT (m.rating * COUNT(r) + :reviewRating) / CONVERT(COUNT(r) + 1, DECIMAL(23, 1))" +
+    @Query("SELECT (m.rating * COUNT(r) + :reviewRating) / IFNULL(COUNT(r), 0) + 1" +
             " FROM Movie m LEFT JOIN Review r ON m.id = r.movie.id WHERE m =:movie")
     BigDecimal selectAvgRatingByAddReviewRating(@Param("movie") Movie movie, @Param("reviewRating") Integer reviewRating);
 
