@@ -58,4 +58,8 @@ public class Movie extends TimeStamped {
         if(Objects.isNull(releaseDate)) throw new MovieException("유효한 개봉일자가 아닙니다.", CommonError.DATE_FORMAL_ERROR);
         return new Movie(dto.getId(), dto.getName(), UtilNumber.returnBigDecimal(dto.getRating(), BigDecimal.valueOf(0)), dto.getPosterUrl(), releaseDate);
     }
+
+    public void changeRating(BigDecimal rating){
+        this.rating = rating;
+    }
 }

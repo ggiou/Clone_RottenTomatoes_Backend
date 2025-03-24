@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,7 @@ public class ReviewService {
             log.info("review = {}",review);
             throw new IllegalArgumentException("이미 리뷰를 등록하셨습니다.");
         }
+        movie.changeRating(movieRepository.selectAvgRatingByAddReviewRating(movie, reviewRequestDto.getRating()));
         Review saveReview = reviewRepository.save(Review.of(reviewRequestDto, member, movie));
         log.info("saveReview = {}",saveReview);
         log.info("------------------------------ 저장 성공 -----------------------------------");
@@ -106,6 +108,10 @@ public class ReviewService {
             throw new IllegalArgumentException("작성자만 수정 가능합니다.");
         }
         review.update(reviewRequestDto);
+        if(!Objects.equals(reviewRequestDto.getRating(), esxit.get().getRating())){
+            Movie reviewMovie = esxit.get().getMovie();
+            reviewMovie.changeRating(movieRepository.selectAvgRatingByAddReviewRating(reviewMovie, reviewRequestDto.getRating()));
+        }
         log.info("reviewRequestDto = {}",reviewRequestDto);
         log.info("--------------------------- 수정 성공 -----------------------------");
         return CommonResponse.success("수정 성공",ReviewResponseDto.update_from(review));
