@@ -50,4 +50,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             " GROUP BY s.movie" +
             " ORDER BY COUNT(s.movie) DESC")
     List<RecommendMovieDto> findLikedMoviesByMembersWhoLikedThis(@Param("movie") Movie movie, Pageable pageable);
+
+    // 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화들을 대상으로  내 높은 순으로 size 개 가져오기  (pageable default 10)
+    //@Query("")
+    //List<RecommendMovieDto> findReviewedMoviesByMembersWhoReviewThis(@Param("movie") Movie movie, Pageable pageable);
 }
