@@ -27,12 +27,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     @Query("SELECT COUNT(m) FROM Movie m INNER JOIN MovieCategory c ON m.id=c.movie.id WHERE c.categoryInfo.id =:categoryId")
     int countMovieByCategory(@Param("categoryId") Long categoryId);
 
-    // 리뷰 작성 or 별점이 변경 될 때 해당 영화의 평균 평점 계산
-    // (현재 평점 * 리뷰 개수 + 새로운 점수) / 리뷰개수 + 1
-    @Query("SELECT (m.rating * COUNT(r) + :reviewRating) / IFNULL(COUNT(r), 0) + 1" +
-            " FROM Movie m LEFT JOIN Review r ON m.id = r.movie.id WHERE m =:movie")
-    BigDecimal selectAvgRatingByAddReviewRating(@Param("movie") Movie movie, @Param("reviewRating") Integer reviewRating);
-
     // 해당 영화를 저장한 회원들이 저장한 다른 영화들, 여러번 저장된 순으로 size 개 가져오기 (pageable default 10)
     @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(s.movie, COUNT(s.movie))" +
             " FROM Saved s" +
@@ -51,7 +45,13 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             " ORDER BY COUNT(s.movie) DESC")
     List<RecommendMovieDto> findLikedMoviesByMembersWhoLikedThis(@Param("movie") Movie movie, Pageable pageable);
 
-    // 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화들을 대상으로  내 높은 순으로 size 개 가져오기  (pageable default 10)
-    //@Query("")
-    //List<RecommendMovieDto> findReviewedMoviesByMembersWhoReviewThis(@Param("movie") Movie movie, Pageable pageable);
+    // 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화들을 대상으로 내 높은 순으로 size 개 가져오기  (pageable default 10)
+    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(r.movie, COUNT(r.movie))" +
+            " FROM Review r " +
+            " WHERE r.movie != :movie" +
+            " AND r.member IN (SELECT r2.member  FROM Review r2 WHERE r2.movie =:movie)" +
+            " AND r.rating >= :#{#movie.rating}" +
+            " GROUP BY r.movie" +
+            " ORDER BY COUNT(r.movie)")
+    List<RecommendMovieDto> findReviewedMoviesByMembersWhoReviewThis(@Param("movie") Movie movie, Pageable pageable);
 }

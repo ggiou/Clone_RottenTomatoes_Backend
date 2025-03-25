@@ -4,6 +4,8 @@ package com.clone.rottentomato.domain.review.controller;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.component.dto.SortRequestDto;
 import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
+import com.clone.rottentomato.domain.member.component.entity.Member;
+import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import com.clone.rottentomato.domain.mypage.component.dto.MypageReviewResponseDto;
 import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
 import com.clone.rottentomato.domain.review.component.dto.ReviewResponseDto;
@@ -16,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,13 +26,15 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final MemberRepository memberRepository;
 
 
     //  리뷰작성
     @PostMapping("/{movie_id}/review")
     public CommonResponse createReview(@PathVariable Long movie_id, @RequestBody ReviewRequestDto reviewRequestDto,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return reviewService.createReview(movie_id,reviewRequestDto,userDetails.getMember());
+        Member n = memberRepository.findByMemberEmail(reviewRequestDto.getEmail()).get();
+        return reviewService.createReview(movie_id,reviewRequestDto,n);
     }
 
 
@@ -56,7 +61,8 @@ public class ReviewController {
     public CommonResponse updateReview(@PathVariable Long review_id,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails,
                                                          @RequestBody ReviewRequestDto reviewRequestDto) {
-        return reviewService.updateReview(review_id,userDetails,reviewRequestDto);
+        Member n = memberRepository.findByMemberEmail(reviewRequestDto.getEmail()).get();
+        return reviewService.updateReview(review_id,n,reviewRequestDto);
     }
 
 

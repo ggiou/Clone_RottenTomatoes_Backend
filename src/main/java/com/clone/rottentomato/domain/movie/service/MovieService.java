@@ -171,6 +171,7 @@ public class MovieService {
         List<RecommendMovieDto> likedScore = findLikedMoviesByMembersWhoLikedThis(targetMovie);
 
         // 3. 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화 가져오기
+        List<RecommendMovieDto> reviewedScore = findReviewedMoviesByMembersWhoReviewThis(targetMovie);
 
         // 4. 해당 영화의 장르에 따라 추가 점수 판단하기
         // 4-1. 1,2, 3 영화의 개수가 10(한 영화의 추천영화는 최대 10개까지 저장)보다 작다면, 장르가 겹치며 평점이 높은순으로 부족한 개수만큼 가져오기
@@ -198,6 +199,15 @@ public class MovieService {
     // 해당 영화를 저장한 사람들이 저장한 다른 영화 개수 순위대로, (default 10)
     private List<RecommendMovieDto> findLikedMoviesByMembersWhoLikedThis(Movie movie){
         return findLikedMoviesByMembersWhoLikedThis(movie, PageRequest.of(0, 10));
+    }
+
+    private List<RecommendMovieDto> findReviewedMoviesByMembersWhoReviewThis(Movie movie, Pageable pageable){
+        return movieRepository.findReviewedMoviesByMembersWhoReviewThis(movie, pageable);
+    }
+
+    // 해당 영화에 리뷰 별점을 남긴 사람들이 더 높은 별점을 남긴 다른 영화 개수 순위대로, (default 10)
+    private List<RecommendMovieDto> findReviewedMoviesByMembersWhoReviewThis(Movie movie){
+        return findReviewedMoviesByMembersWhoReviewThis(movie, PageRequest.of(0, 10));
     }
 
 
