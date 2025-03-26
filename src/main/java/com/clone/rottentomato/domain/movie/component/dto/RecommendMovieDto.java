@@ -37,4 +37,13 @@ public class RecommendMovieDto{
         if(Objects.isNull(entity)) return null;
         return new RecommendMovieDto(entity, recommendRank);
     }
+
+    public RecommendMovieDto returnAddScore(Long score){
+        addScore(score);
+        return this;
+    }
+
+    public void addScore(Long score){
+        this.score += score;
+    }
 }

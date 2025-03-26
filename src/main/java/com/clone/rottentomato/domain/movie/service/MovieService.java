@@ -163,19 +163,43 @@ public class MovieService {
     /** 특정 영화의 추천 영화 등수를 계산하는 함수 */
     private List<Movie> calculationRecommendMovie(Movie targetMovie){
         List<Movie> recommendMovie = new ArrayList<>();
+        Map<Long, RecommendMovieDto> calculationMap = new HashMap<>();
 
         // 1. 해당 영화를 저장한 사람들이 저장한 영화 가져오기
         List<RecommendMovieDto> savedScore = findSavedMoviesByMembersWhoSavedThis(targetMovie);
+        savedScore.forEach(t-> calculationMap.put(t.getMovie().getId(), t));
 
         // 2. 해당 영화를 저장한 사람들이 좋아요한 영화 가져오기
         List<RecommendMovieDto> likedScore = findLikedMoviesByMembersWhoLikedThis(targetMovie);
+        savedScore.forEach(t-> {
+            // 이미 존재한다면 점수만 + 해서 반환하기
+            RecommendMovieDto exist = calculationMap.get(t.getMovie().getId());
+            RecommendMovieDto putDto = Objects.isNull(exist) ? t : exist.returnAddScore(exist.getScore());
+            calculationMap.put(putDto.getScore(), putDto);
+        });
 
         // 3. 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화 가져오기
         List<RecommendMovieDto> reviewedScore = findReviewedMoviesByMembersWhoReviewThis(targetMovie);
+        reviewedScore.forEach(t-> {
+            // 이미 존재한다면 점수만 + 해서 반환하기
+            RecommendMovieDto exist = calculationMap.get(t.getMovie().getId());
+            RecommendMovieDto putDto = Objects.isNull(exist) ? t : exist.returnAddScore(exist.getScore());
+            calculationMap.put(putDto.getScore(), putDto);
+        });
 
         // 4. 해당 영화의 장르에 따라 추가 점수 판단하기
         // 4-1. 1,2, 3 영화의 개수가 10(한 영화의 추천영화는 최대 10개까지 저장)보다 작다면, 장르가 겹치며 평점이 높은순으로 부족한 개수만큼 가져오기
-        
+        if(calculationMap.size() < 10){
+            /*
+            * SELECT mc.movie_id, count(category_info_id)  FROM movie_category mc
+                WHERE mc.movie_id != 1
+                AND category_info_id IN (SELECT category_info_id  FROM movie_category mc2 WHERE mc2.movie_id = 1 )
+                GROUP BY mc.movie_id
+                ORDER BY COUNT(category_info_id) DESC
+                lIMIT 10;
+            */
+        }
+
         // 4-2. 해당 영화와 장르가 겹치는 만큼 점수 주기
 
         // 5. 점수별로 10등까지 등급을 내려, 추천영화 판단

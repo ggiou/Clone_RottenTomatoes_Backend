@@ -45,13 +45,13 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             " ORDER BY COUNT(s.movie) DESC")
     List<RecommendMovieDto> findLikedMoviesByMembersWhoLikedThis(@Param("movie") Movie movie, Pageable pageable);
 
-    // 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화들을 대상으로 내 높은 순으로 size 개 가져오기  (pageable default 10)
-    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(r.movie, COUNT(r.movie))" +
+    // 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화들을 대상으로 평점차를 더해 높은 순으로 size 개 가져오기  (pageable default 10)
+    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(r.movie, SUM(r.rating - :#{#movie.rating} + 1))" +
             " FROM Review r " +
             " WHERE r.movie != :movie" +
             " AND r.member IN (SELECT r2.member  FROM Review r2 WHERE r2.movie =:movie)" +
             " AND r.rating >= :#{#movie.rating}" +
             " GROUP BY r.movie" +
-            " ORDER BY COUNT(r.movie)")
+            " ORDER BY SUM(r.rating - :#{#movie.rating} + 1) DESC")
     List<RecommendMovieDto> findReviewedMoviesByMembersWhoReviewThis(@Param("movie") Movie movie, Pageable pageable);
 }
