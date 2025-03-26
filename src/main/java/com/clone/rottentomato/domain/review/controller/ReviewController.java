@@ -33,8 +33,7 @@ public class ReviewController {
     @PostMapping("/{movie_id}/review")
     public CommonResponse createReview(@PathVariable Long movie_id, @RequestBody ReviewRequestDto reviewRequestDto,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        Member n = memberRepository.findByMemberEmail(reviewRequestDto.getEmail()).get();
-        return reviewService.createReview(movie_id,reviewRequestDto,n);
+        return reviewService.createReview(movie_id,reviewRequestDto,userDetails.getMember());
     }
 
 
@@ -61,8 +60,7 @@ public class ReviewController {
     public CommonResponse updateReview(@PathVariable Long review_id,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails,
                                                          @RequestBody ReviewRequestDto reviewRequestDto) {
-        Member n = memberRepository.findByMemberEmail(reviewRequestDto.getEmail()).get();
-        return reviewService.updateReview(review_id,n,reviewRequestDto);
+        return reviewService.updateReview(review_id,userDetails.getMember(),reviewRequestDto);
     }
 
 
@@ -70,7 +68,7 @@ public class ReviewController {
     @DeleteMapping("/review/{review_id}")
     public CommonResponse deleteReview(@PathVariable Long review_id,
                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return reviewService.deleteReview(review_id,userDetails);
+        return reviewService.deleteReview(review_id,userDetails.getMember());
     }
 
 

@@ -55,7 +55,7 @@ public class ReviewService {
         }
         // 영화 평점 재 산정
         ReviewRatingDto rating = reviewRepository.selectReviewRatingInfoByMovie(movie);
-        double newRating = (rating.getReviewSum() + Double.valueOf(reviewRequestDto.getRating())) / rating.getReviewCnt()+ 1;
+        double newRating = (rating.getReviewSum() + Double.valueOf(reviewRequestDto.getRating())) / (rating.getReviewCnt()+ 1);
         movie.changeRating(new BigDecimal(newRating).setScale(1, RoundingMode.HALF_EVEN));
 
         Review saveReview = reviewRepository.save(Review.of(reviewRequestDto, member, movie));
@@ -129,9 +129,9 @@ public class ReviewService {
 
 
     //  리뷰 삭제
-    public CommonResponse deleteReview(Long reviewId, UserDetailsImpl userDetails) {
+    public CommonResponse deleteReview(Long reviewId, Member member) {
         Review review = getReview(reviewId);
-        Optional<Review> esxit = reviewRepository.findByIdAndMember(reviewId,userDetails.getMember());
+        Optional<Review> esxit = reviewRepository.findByIdAndMember(reviewId,member);
         if(esxit.isEmpty()){
             log.error("------------------------------ 해당 사용자가 아니면 삭제 예외 처리 -----------------------------------");
             throw new IllegalArgumentException("작성자만 삭제가 가능합니다.");
@@ -139,7 +139,7 @@ public class ReviewService {
         // 영화 평점 재 산정
         Movie reviewMovie = esxit.get().getMovie();
         ReviewRatingDto rating = reviewRepository.selectReviewRatingInfoByMovie(reviewMovie);
-        double newRating = (rating.getReviewSum() - Double.valueOf(esxit.get().getRating())) / rating.getReviewCnt() - 1;
+        double newRating = (rating.getReviewSum() - Double.valueOf(esxit.get().getRating())) / (rating.getReviewCnt() - 1);
         reviewMovie.changeRating(new BigDecimal(newRating).setScale(1, RoundingMode.HALF_EVEN));
 
         reviewRepository.delete(review);
