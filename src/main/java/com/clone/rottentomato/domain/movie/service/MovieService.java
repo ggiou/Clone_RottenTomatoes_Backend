@@ -175,7 +175,7 @@ public class MovieService {
             // 이미 존재한다면 점수만 + 해서 반환하기
             RecommendMovieDto exist = calculationMap.get(t.getMovie().getId());
             RecommendMovieDto putDto = Objects.isNull(exist) ? t : exist.returnAddScore(exist.getScore());
-            calculationMap.put(putDto.getScore(), putDto);
+            calculationMap.put(putDto.getMovie().getId(), putDto);
         });
 
         // 3. 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화 가져오기
@@ -184,20 +184,19 @@ public class MovieService {
             // 이미 존재한다면 점수만 + 해서 반환하기
             RecommendMovieDto exist = calculationMap.get(t.getMovie().getId());
             RecommendMovieDto putDto = Objects.isNull(exist) ? t : exist.returnAddScore(exist.getScore());
-            calculationMap.put(putDto.getScore(), putDto);
+            calculationMap.put(putDto.getMovie().getId(), putDto);
         });
 
         // 4. 해당 영화의 장르에 따라 추가 점수 판단하기
         // 4-1. 1,2, 3 영화의 개수가 10(한 영화의 추천영화는 최대 10개까지 저장)보다 작다면, 장르가 겹치며 평점이 높은순으로 부족한 개수만큼 가져오기
         if(calculationMap.size() < 10){
-            /*
-            * SELECT mc.movie_id, count(category_info_id)  FROM movie_category mc
-                WHERE mc.movie_id != 1
-                AND category_info_id IN (SELECT category_info_id  FROM movie_category mc2 WHERE mc2.movie_id = 1 )
-                GROUP BY mc.movie_id
-                ORDER BY COUNT(category_info_id) DESC
-                lIMIT 10;
-            */
+            List<RecommendMovieDto> categoryScore = findMoviesByMovieCategoryInclude(targetMovie, PageRequest.of(0, 10 - calculationMap.size()));
+            categoryScore.forEach(t-> {
+                // 이미 존재한다면 점수만 + 해서 반환하기
+                RecommendMovieDto exist = calculationMap.get(t.getMovie().getId());
+                RecommendMovieDto putDto = Objects.isNull(exist) ? t : exist.returnAddScore(exist.getScore());
+                calculationMap.put(putDto.getMovie().getId(), putDto);
+            });
         }
 
         // 4-2. 해당 영화와 장르가 겹치는 만큼 점수 주기
@@ -232,6 +231,11 @@ public class MovieService {
     // 해당 영화에 리뷰 별점을 남긴 사람들이 더 높은 별점을 남긴 다른 영화 개수 순위대로, (default 10)
     private List<RecommendMovieDto> findReviewedMoviesByMembersWhoReviewThis(Movie movie){
         return findReviewedMoviesByMembersWhoReviewThis(movie, PageRequest.of(0, 10));
+    }
+
+    // 해당 영화에 장르와 동일한 장르를 많이 가진 영화 * 평점 순위대로,
+    private List<RecommendMovieDto> findMoviesByMovieCategoryInclude(Movie movie, Pageable pageable){
+        return findReviewedMoviesByMembersWhoReviewThis(movie, pageable);
     }
 
 

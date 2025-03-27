@@ -28,30 +28,40 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     int countMovieByCategory(@Param("categoryId") Long categoryId);
 
     // 해당 영화를 저장한 회원들이 저장한 다른 영화들, 여러번 저장된 순으로 size 개 가져오기 (pageable default 10)
-    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(s.movie, COUNT(s.movie))" +
+    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(s.movie, COUNT(s.movie.id))" +
             " FROM Saved s" +
-            " WHERE s.movie !=:movie" +
-            " AND s.member.memberId  IN (SELECT s2.member.memberId FROM Saved s2 WHERE s2.movie =:movie)" +
-            " GROUP BY s.movie" +
+            " WHERE s.movie.id != :#{#movie.id}" +
+            " AND s.member.memberId  IN (SELECT s2.member.memberId FROM Saved s2 WHERE s2.movie.id = :#{#movie.id})" +
+            " GROUP BY s.movie.id" +
             " ORDER BY COUNT(s.movie) DESC")
     List<RecommendMovieDto> findSavedMoviesByMembersWhoSavedThis(@Param("movie") Movie movie, Pageable pageable);
 
     // 해당 영화를 좋아요한 회원들이 좋아요한 다른 영화들, 여러번 저장된 순으로 size 개 가져오기 (pageable default 10)
-    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(s.movie, COUNT(s.movie))" +
+    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(s.movie, COUNT(s.movie.id))" +
             " FROM Likes s" +
-            " WHERE s.movie !=:movie" +
-            " AND s.member.memberId  IN (SELECT s2.member.memberId FROM Likes s2 WHERE s2.movie =:movie)" +
-            " GROUP BY s.movie" +
+            " WHERE s.movie.id != :#{#movie.id}" +
+            " AND s.member.memberId  IN (SELECT s2.member.memberId FROM Likes s2 WHERE s2.movie.id = :#{#movie.id})" +
+            " GROUP BY s.movie.id" +
             " ORDER BY COUNT(s.movie) DESC")
     List<RecommendMovieDto> findLikedMoviesByMembersWhoLikedThis(@Param("movie") Movie movie, Pageable pageable);
 
     // 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화들을 대상으로 평점차를 더해 높은 순으로 size 개 가져오기  (pageable default 10)
     @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(r.movie, SUM(r.rating - :#{#movie.rating} + 1))" +
             " FROM Review r " +
-            " WHERE r.movie != :movie" +
-            " AND r.member IN (SELECT r2.member  FROM Review r2 WHERE r2.movie =:movie)" +
+            " WHERE r.movie.id != :#{#movie.id}" +
+            " AND r.member IN (SELECT r2.member  FROM Review r2 WHERE r2.movie.id = :#{#movie.id})" +
             " AND r.rating >= :#{#movie.rating}" +
-            " GROUP BY r.movie" +
+            " GROUP BY r.movie.id" +
             " ORDER BY SUM(r.rating - :#{#movie.rating} + 1) DESC")
     List<RecommendMovieDto> findReviewedMoviesByMembersWhoReviewThis(@Param("movie") Movie movie, Pageable pageable);
+
+    // 해당 영화와 동일한 장르를 여러개 가지면서, (동일 장르 개수 * 영화 평점) 높은 순으로 size개 가져오기
+    // (점수 : 카테고리 개수 * 영화 평점 -> 영화 장르의 개수 한계와, 추천시 장르에 대한 점수 비중을 높이기 위해 이처럼 설정)
+    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(mc.movie, (COUNT(mc.categoryInfo.id) * mc.movie.rating))" +
+            " FROM MovieCategory mc" +
+            " WHERE mc.movie.id != :#{#movie.id}" +
+            " AND mc.categoryInfo.id IN (SELECT mc2.categoryInfo.id  FROM MovieCategory mc2 WHERE mc2.movie.id = :#{#movie.id} )" +
+            " GROUP BY mc.movie.id" +
+            " ORDER BY  (COUNT(mc.categoryInfo.id) * mc.movie.rating) DESC")
+    List<RecommendMovieDto> findMoviesByMovieCategoryInclude(@Param("movie") Movie movie, Pageable pageable);
 }
