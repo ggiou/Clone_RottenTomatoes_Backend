@@ -55,13 +55,15 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             " ORDER BY SUM(r.rating - :#{#movie.rating} + 1) DESC")
     List<RecommendMovieDto> findReviewedMoviesByMembersWhoReviewThis(@Param("movie") Movie movie, Pageable pageable);
 
-    // 해당 영화와 동일한 장르를 여러개 가지면서, (동일 장르 개수 * 영화 평점) 높은 순으로 size개 가져오기
+    // 해당 영화와 동일한 장르를 여러개 가지면서, (동일 장르 개수 * 영화 평점) 높은 순으로 size개 가져오기 (+ 제외할 영화일 경우 미포함 = 이미 추천된 영화 )
     // (점수 : 카테고리 개수 * 영화 평점 -> 영화 장르의 개수 한계와, 추천시 장르에 대한 점수 비중을 높이기 위해 이처럼 설정)
-    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(mc.movie, (COUNT(mc.categoryInfo.id) * mc.movie.rating))" +
+    @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(mc.movie, CAST((COUNT(mc.categoryInfo.id) * mc.movie.rating) AS long))" +
             " FROM MovieCategory mc" +
             " WHERE mc.movie.id != :#{#movie.id}" +
+            " AND mc.movie.id NOT IN :#{#excludesMovieIds == null or #excludesMovieIds.isEmpty() ? T(java.util.List).of(-1) : #excludesMovieIds}"+
             " AND mc.categoryInfo.id IN (SELECT mc2.categoryInfo.id  FROM MovieCategory mc2 WHERE mc2.movie.id = :#{#movie.id} )" +
             " GROUP BY mc.movie.id" +
             " ORDER BY  (COUNT(mc.categoryInfo.id) * mc.movie.rating) DESC")
-    List<RecommendMovieDto> findMoviesByMovieCategoryInclude(@Param("movie") Movie movie, Pageable pageable);
+    List<RecommendMovieDto> findMoviesByMovieCategoryInclude(@Param("movie") Movie movie, @Param("excludesMovieIds") List<Long> excludesMovieIds , Pageable pageable);
+
 }

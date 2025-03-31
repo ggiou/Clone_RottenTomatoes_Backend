@@ -9,6 +9,7 @@ import com.clone.rottentomato.domain.movie.constant.MovieError;
 import com.clone.rottentomato.domain.movie.service.MovieService;
 import com.clone.rottentomato.exception.CommonException;
 import com.clone.rottentomato.exception.MovieException;
+import com.clone.rottentomato.util.UtilDate;
 import com.clone.rottentomato.util.UtilMap;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +68,7 @@ public class MovieController {
     public CommonResponse getMovieRecommendList(@RequestParam(value = "movieId") Long movieId, @RequestParam(value = "size", required = false, defaultValue = "10") int size){
         if(Objects.isNull(movieId) || movieId <= 0) throw new MovieException("추천 영화 리스트를 반환 받으실 영화 id 값을 입력해주세요.", MovieError.BAD_REQUEST_MOVIE_ID);
         List<RecommendMovieDto> recommendMovies = movieService.searchRecommendMovieListByMovieId(movieId, size);
-        return new CommonResponse();
+        return CommonResponse.success("추천 영화 리스트 요청에 성공했습니다.", UtilMap.makeMap(FIND_MAP_NAME, recommendMovies));
     }
 
     /** 영화 리스트 검색 반환

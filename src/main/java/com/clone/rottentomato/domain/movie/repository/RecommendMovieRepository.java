@@ -18,9 +18,9 @@ public interface RecommendMovieRepository extends JpaRepository<RecommendMovie, 
     // 수정 날짜를 기준으로 당일보다 예전이라면, 특정 영화의 추천영화 api 를 호출할 때만 탐색하는 방식으로 채택 했습니다.
     @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.RecommendMovieDto(r.recommendMovie, r.recommendRank) " +
             " FROM RecommendMovie r INNER JOIN Movie rm ON r.recommendMovie.id = rm.id" +
-            " WHERE r.movie =: movie AND r.modDate >= current date" +
+            " WHERE r.movie.id =:movieId AND r.modDate >= current date" +
             " ORDER BY r.recommendRank ASC" )
-    List<RecommendMovieDto> findValidRecommendMovieByMovie(@Param("movie") Movie movie);
+    List<RecommendMovieDto> findValidRecommendMovieByMovie(@Param("movieId") Long movieId);
 
     List<RecommendMovie> findAllByMovie(Movie movie);
 

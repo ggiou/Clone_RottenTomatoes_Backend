@@ -1,6 +1,7 @@
 package com.clone.rottentomato.domain.movie.component.dto;
 
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
+import com.clone.rottentomato.domain.movie.component.entity.RecommendMovie;
 import com.clone.rottentomato.util.UtilDate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,10 +28,15 @@ public class RecommendMovieDto{
        this.recommendRank = recommendRank;
     }
 
+    public static RecommendMovieDto of(MovieDto movie, int recommendRank, Long score){
+        return new RecommendMovieDto(movie, recommendRank, score);
+    }
+
     public RecommendMovieDto(Movie movie, Long score){
         this.movie = MovieDto.fromEntity(movie);
         this.score = score;
     }
+
 
     /** 영화 추천 반환을 위한 객체 생성 */
     public static RecommendMovieDto forRecommend(Movie entity, int recommendRank){

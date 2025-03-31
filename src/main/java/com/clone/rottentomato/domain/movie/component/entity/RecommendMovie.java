@@ -21,7 +21,7 @@ public class RecommendMovie extends TimeStamped {
     @Id
     @ManyToOne
     @JoinColumn(name = "MOVIE_ID")
-    private Movie movie;    // 영화 id
+    private Movie movie;    // 기준 영화 id
 
     @Id
     @ManyToOne
