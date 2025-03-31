@@ -216,7 +216,7 @@ public class MovieService {
         List<RecommendMovieDto> categoryMatchScore = movieCategoryRepository.findMovieCategoryMatches(targetMovie.getId(), recommendMovieIds);
         categoryMatchScore.forEach(t->{
             RecommendMovieDto exist = calculationMap.get(t.getMovie().getId());
-            exist.setScore(exist.getScore() * t.getScore()); // 카테고리가 매칭되는 개수를 곱해, 최종적인 점수를 set 한다.
+            exist.setScore((exist.getScore() + 1) * t.getScore()); // 카테고리가 매칭되는 개수를 곱해, 최종적인 점수를 set 한다. (기존 점수가 0일 수도 있으니 +1 후 곱하기)
             calculationMap.put(exist.getMovie().getId(), exist);
         });
 
