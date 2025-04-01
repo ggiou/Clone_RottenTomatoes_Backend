@@ -40,11 +40,11 @@ public class MovieRecommendCustomRepositoryImpl implements MovieRecommendCustomR
         if(Objects.isNull(movie) || CollectionUtils.isEmpty(recommendMovie)) return null;
         // 특정 영화의 추천 영화 전부 업데이트
         List<MovieRecommend> originRecommends = movieRecommendRepository.findAllByMovie(movie);
-        AtomicInteger recommendRank = new AtomicInteger(1);
         int originRecommendsSize = originRecommends.size();
         int recommendMovieSize = recommendMovie.size();
         // 추천 영화들이 없다면 저장
         if(originRecommendsSize == 0) {
+            AtomicInteger recommendRank = new AtomicInteger(1);
             // 10개 이상이면 10개까지만 자르기 (추천 영화는 10개까지만 저장하기로 설정)
             if(recommendMovieSize > 10) recommendMovie = recommendMovie.subList(0, 9);
             // 영화 id가 존재하는 애들만 추천 리스트 가능
@@ -57,26 +57,18 @@ public class MovieRecommendCustomRepositoryImpl implements MovieRecommendCustomR
             List<MovieRecommend> returnRecommendMovies = new ArrayList<>();
             // 추천 영화를 10개 까지 고정
             for(int i=0; i<10; i++){
-                int newRank = i+1;
-
-                // 원래 추천 영화가 존재한다면,
-                if(originRecommendsSize > i){
-                    if(recommendMovieSize > i && !Objects.isNull(recommendMovie.get(i).getId())){
-                        // 새로 탐색된 추천 영화로 등록
-                        originRecommends.get(i).changeRecommendMovie(recommendMovie.get(i));
-                    }
-                    returnRecommendMovies.add(originRecommends.get(i));
+                MovieRecommend origin = originRecommends.get(i);
+                if(!Objects.isNull(origin)) {
+                    Movie newRecommend = recommendMovieSize > i ? recommendMovie.get(i) : origin.getRecommendMovie();
+                    origin.changeRecommendMovie(newRecommend);
                 }else{
-                    if(recommendMovieSize > i){
-                        // 해당 등수까지 존재하지 않고, 새로 탐색한 추천 정보가 있다면, 새로 저장
-                        returnRecommendMovies.add(movieRecommendRepository.save(MovieRecommend.of(movie, recommendMovie.get(i), newRank)));
-                    }else break;
+                    Movie newRecommend = recommendMovie.get(i);
+                    if(Objects.isNull(newRecommend)) break;
+                    origin = movieRecommendRepository.save(MovieRecommend.of(movie, newRecommend, i+1));
                 }
-                // 업데이트할 영화정보가 존재한다면
-                if (recommendMovieSize > i){
-                    originRecommends.get(i).changeRecommendMovie(recommendMovie.get(i));
-                }
+                returnRecommendMovies.add(origin);
             }
+
             return returnRecommendMovies;
         }
     }

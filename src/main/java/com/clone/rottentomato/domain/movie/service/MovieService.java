@@ -63,7 +63,7 @@ public class MovieService {
     private final MovieProducerCustomRepository movieProducerCustomRepository;
     
     private final MovieRecommendRepository movieRecommendRepository;
-    private final MovieRecommendCustomRepository recommendMovieCustomRepository;
+    private final MovieRecommendCustomRepository movieRecommendCustomRepository;
 
     // service
     private final WebDriverService webDriverService;
@@ -158,13 +158,14 @@ public class MovieService {
             // 3-2. 탐색 정보를 db에 저장
             try {
                 List<Movie> recommendMovieEntities = recommendMovie.stream().map(t->Movie.fromDto(t.getRecommendMovie())).toList();
-                List<MovieRecommend> savedList = recommendMovieCustomRepository.saveOrUpdateRecommendMovie(targetMovie, recommendMovieEntities);
+                List<MovieRecommend> savedList = movieRecommendCustomRepository.saveOrUpdateRecommendMovie(targetMovie, recommendMovieEntities);
                 // 저장된 개수가 추천영화 탐색한 개수가 동일하다면, 그대로 탐색결과 반환, 아니라면 저장된애를 응답 값으로 만들어 반환
                 if(savedList.size() != recommendMovie.size()) {
                     recommendMovie = savedList.stream().map(t -> RecommendMovieDto.forRecommend(t.getRecommendMovie(), t.getRecommendRank())).toList();
                 }
             }catch (Exception e){
                 log.info("[saveOrUpdateRecommendMovie] 추천 영화를 저장하는 중 오류가 발생했습니다.");
+                e.printStackTrace();
             }
         }
         return recommendMovie;

@@ -1,14 +1,10 @@
 package com.clone.rottentomato.domain.movie.component.entity;
 
-import com.clone.rottentomato.common.component.entity.TimeStamped;
 import com.clone.rottentomato.common.fomatter.DefaultDateTimeFormat;
-import com.clone.rottentomato.domain.movie.component.entity.id.MovieRecommendId;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -16,18 +12,21 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
-@IdClass(MovieRecommendId.class) // 복합 키 클래스 지정 (영화/카테고리 정보)
-// 영화에 대해 순위 unique 키 지정
-@Table(uniqueConstraints = {@UniqueConstraint(name = "unique_movie_rank", columnNames = {"MOVIE_ID", "RECOMMEND_RANK"})})
-public class MovieRecommend extends TimeStamped {
+// 영화에 대해 순위 & 추천 영화 unique 키 지정
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "unique_movie_rank", columnNames = {"MOVIE_ID", "RECOMMEND_RANK"}),
+        @UniqueConstraint(name = "unique_movie_recommend", columnNames = {"MOVIE_ID", "RECOMMEND_MOVIE_ID"})})
+public class MovieRecommend {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @ManyToOne
-    @JoinColumn(name = "MOVIE_ID")
+    @JoinColumn(name = "MOVIE_ID", nullable = false)
     private Movie movie;    // 기준 영화 id
 
-    @Id
     @ManyToOne
-    @JoinColumn(name = "RECOMMEND_MOVIE_ID")
+    @JoinColumn(name = "RECOMMEND_MOVIE_ID", nullable = false)
     private Movie recommendMovie;    // 추천 영화 id
 
     @Column(nullable = false)
@@ -35,10 +34,8 @@ public class MovieRecommend extends TimeStamped {
     private int recommendRank; //추천 등수
 
     @DefaultDateTimeFormat
-    @CreationTimestamp
-   // @UpdateTimestamp
     @Column(nullable = false, columnDefinition = "DATETIME(0)")
-    private LocalDateTime searchDate;
+    private LocalDateTime searchDate = LocalDateTime.now(); // 검색일자, 추천 영화는 검색일 기준으로 업데이트
 
     private MovieRecommend(Movie movie, Movie recommendMovie, int recommendRank){
         this.movie = movie;
@@ -52,5 +49,6 @@ public class MovieRecommend extends TimeStamped {
 
     public void changeRecommendMovie(Movie recommendMovie){
         this.recommendMovie = recommendMovie;
+        this.searchDate = LocalDateTime.now();
     }
 }
