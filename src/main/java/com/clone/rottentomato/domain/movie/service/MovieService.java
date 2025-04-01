@@ -18,7 +18,6 @@ import com.clone.rottentomato.util.UtilMap;
 import com.clone.rottentomato.util.UtilNumber;
 import com.clone.rottentomato.util.UtilString;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.TimeoutException;
@@ -63,8 +62,8 @@ public class MovieService {
     private final ProducerRepository producerRepository;
     private final MovieProducerCustomRepository movieProducerCustomRepository;
     
-    private final RecommendMovieRepository recommendMovieRepository;
-    private final RecommendMovieCustomRepository recommendMovieCustomRepository;
+    private final MovieRecommendRepository movieRecommendRepository;
+    private final MovieRecommendCustomRepository recommendMovieCustomRepository;
 
     // service
     private final WebDriverService webDriverService;
@@ -151,24 +150,21 @@ public class MovieService {
         Movie targetMovie = targetMovieOpt.get();
 
         // 2. db에 저장된 유효한 추천 영화가 존재하는지 확인  (추천 영화 수정일(마지막 탐색일)이 오늘이 아니라면, 유효하지 x)
-        List<RecommendMovieDto> recommendMovie = recommendMovieRepository.findValidRecommendMovieByMovie(targetMovie.getId());
+        List<RecommendMovieDto> recommendMovie = movieRecommendRepository.findValidRecommendMovieByMovie(targetMovie.getId());
         // 3. 유효한 추천 영화가 존재하지 않다면, 추천 영화 알고리즘을 통해 저장
         if (recommendMovie.isEmpty()){
             // 3-1. 추천 알고리즘을 통해 탐색
-            List<RecommendMovieDto> calculationRecommend = calculationRecommendMovie(targetMovie);
+            recommendMovie = calculationRecommendMovie(targetMovie);
             // 3-2. 탐색 정보를 db에 저장
-            List<Movie> recommendMovies = calculationRecommend.stream().map(t->Movie.fromDto(t.getMovie())).toList();
             try {
-                List<RecommendMovie> saveOrUpdateRecommendMovie = recommendMovieCustomRepository.saveOrUpdateRecommendMovie(targetMovie, recommendMovies);
+                List<Movie> recommendMovieEntities = recommendMovie.stream().map(t->Movie.fromDto(t.getRecommendMovie())).toList();
+                List<MovieRecommend> savedList = recommendMovieCustomRepository.saveOrUpdateRecommendMovie(targetMovie, recommendMovieEntities);
                 // 저장된 개수가 추천영화 탐색한 개수가 동일하다면, 그대로 탐색결과 반환, 아니라면 저장된애를 응답 값으로 만들어 반환
-                if(saveOrUpdateRecommendMovie.size() != calculationRecommend.size()) {
-                    recommendMovie = saveOrUpdateRecommendMovie.stream().map(t -> RecommendMovieDto.forRecommend(t.getRecommendMovie(), t.getRecommendRank())).toList();
-                }else {
-                    recommendMovie = calculationRecommend;
+                if(savedList.size() != recommendMovie.size()) {
+                    recommendMovie = savedList.stream().map(t -> RecommendMovieDto.forRecommend(t.getRecommendMovie(), t.getRecommendRank())).toList();
                 }
             }catch (Exception e){
                 log.info("[saveOrUpdateRecommendMovie] 추천 영화를 저장하는 중 오류가 발생했습니다.");
-                recommendMovie = calculationRecommend;
             }
         }
         return recommendMovie;
@@ -181,44 +177,35 @@ public class MovieService {
 
         // 1. 해당 영화를 저장한 사람들이 저장한 영화 가져오기
         List<RecommendMovieDto> savedScore = findSavedMoviesByMembersWhoSavedThis(targetMovie);
-        savedScore.forEach(t-> calculationMap.put(t.getMovie().getId(), t));
+        savedScore.forEach(t-> calculationMap.put(t.getRecommendMovie().getId(), RecommendMovieDto.makeNewObj(t)));
 
         // 2. 해당 영화를 저장한 사람들이 좋아요한 영화 가져오기
         List<RecommendMovieDto> likedScore = findLikedMoviesByMembersWhoLikedThis(targetMovie);
-        likedScore.forEach(t-> {
-            // 이미 존재한다면 점수만 + 해서 반환하기
-            RecommendMovieDto exist = calculationMap.get(t.getMovie().getId());
-            RecommendMovieDto putDto = Objects.isNull(exist) ? t : exist.returnAddScore(t.getScore());
-            calculationMap.put(putDto.getMovie().getId(), putDto);
-        });
+        // 이미 존재한다면 점수만 + 해서 반환하기
+        likedScore.forEach(t-> calculationMap.compute(t.getRecommendMovie().getId(), (k, v)
+                -> Objects.isNull(v) ? RecommendMovieDto.makeNewObj(t) : v.returnAddScore(t.getScore())));
 
         // 3. 해당 영화를 별점 준 사람들이, 해당 영화 별점보다 더 높거나 같은 점수를 준 영화 가져오기
         List<RecommendMovieDto> reviewedScore = findReviewedMoviesByMembersWhoReviewThis(targetMovie);
-        reviewedScore.forEach(t-> {
-            // 이미 존재한다면 점수만 + 해서 반환하기
-            RecommendMovieDto exist = calculationMap.get(t.getMovie().getId());
-            RecommendMovieDto putDto = Objects.isNull(exist) ? t : exist.returnAddScore(t.getScore());
-            calculationMap.put(putDto.getMovie().getId(), putDto);
-        });
+        reviewedScore.forEach(t-> calculationMap.compute(t.getRecommendMovie().getId(), (k, v)
+                -> Objects.isNull(v) ? RecommendMovieDto.makeNewObj(t) : v.returnAddScore(t.getScore())));
 
         // 4. 해당 영화의 장르에 따라 추가 점수 판단하기
         // 4-1. 1, 2, 3을 통해 계산한 영화의 개수가 10(한 영화의 추천영화는 최대 10개까지 저장)보다 작다면, 장르가 겹치며 평점이 높은순으로 부족한 개수만큼 가져오기
         if(calculationMap.size() < 10){
             // 이미 추천 영화에 계산된 영화들은 제외
-            List<Long> excludeList = calculationMap.values().stream().map(t->t.getMovie().getId()).toList();
+            List<Long> excludeList = calculationMap.values().stream().map(t->t.getRecommendMovie().getId()).toList();
             List<RecommendMovieDto> categoryScore = findMoviesByMovieCategoryInclude(targetMovie, excludeList, PageRequest.of(0, 10 - calculationMap.size()));
-            categoryScore.forEach(t-> calculationMap.put(t.getMovie().getId(), t));
+            categoryScore.forEach(t-> calculationMap.put(t.getRecommendMovie().getId(), RecommendMovieDto.makeNewObj(t)));
         }
 
         // 4-2. 해당 영화와 장르가 겹치는 만큼 점수 곱하기 (영화 장르에 비중 + ) -> 추후 너무 크다면 +로 변경
         // 계산된 추천영화들이 타겟 영화와 카테고리가 몇개 겹치는지 데이터 가져오기
         List<Long> recommendMovieIds = new ArrayList<>(calculationMap.keySet());
         List<RecommendMovieDto> categoryMatchScore = movieCategoryRepository.findMovieCategoryMatches(targetMovie.getId(), recommendMovieIds);
-        categoryMatchScore.forEach(t->{
-            RecommendMovieDto exist = calculationMap.get(t.getMovie().getId());
-            exist.setScore((exist.getScore() + 1) * t.getScore()); // 카테고리가 매칭되는 개수를 곱해, 최종적인 점수를 set 한다. (기존 점수가 0일 수도 있으니 +1 후 곱하기)
-            calculationMap.put(exist.getMovie().getId(), exist);
-        });
+        // 카테고리가 매칭되는 개수를 곱해, 최종적인 점수를 set 한다. (기존 점수가 0일 수도 있으니 +1 후 곱하기)
+        categoryMatchScore.forEach(t-> calculationMap.compute(t.getRecommendMovie().getId(), (k, v)
+                -> Objects.isNull(v) ? RecommendMovieDto.makeNewObj(t) : v.returnAddScore(1L).returnMultiplyScore(t.getScore())));
 
         // 5. 추천 점수별로 높은순으로 10등까지 등급을 내려, 추천영화 판단
         AtomicInteger rank = new AtomicInteger(1);
@@ -226,7 +213,7 @@ public class MovieService {
                 .sorted(Comparator.comparing(RecommendMovieDto::getScore).reversed())
                 .limit(10) // 추천 영화 정보는 최대 10개로 지정한다.
                 .peek(t->t.setRecommendRank(rank.getAndIncrement()))
-                .map(t-> RecommendMovieDto.of(t.getMovie(), t.getRecommendRank(), t.getScore()))
+                .map(t-> RecommendMovieDto.of(t.getRecommendMovie(), t.getRecommendRank(), t.getScore()))
                 .collect(Collectors.toList());
 
         return recommendMovies;

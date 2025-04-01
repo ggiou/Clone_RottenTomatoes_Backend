@@ -1,8 +1,6 @@
 package com.clone.rottentomato.domain.movie.component.dto;
 
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
-import com.clone.rottentomato.domain.movie.component.entity.RecommendMovie;
-import com.clone.rottentomato.util.UtilDate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
@@ -15,7 +13,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Builder
 public class RecommendMovieDto{
-    private MovieDto movie;
+    private MovieDto recommendMovie;
     @JsonIgnoreProperties(ignoreUnknown = true)
     private int recommendRank;  // 추천 등수
     @JsonIgnore
@@ -24,7 +22,7 @@ public class RecommendMovieDto{
 
     //TODO 해당 방식 JPA MovieDto가 생성된다면 위도 동일방식으로 변경
     public RecommendMovieDto(Movie movie, int recommendRank){
-       this.movie = MovieDto.fromEntity(movie);
+       this.recommendMovie = MovieDto.fromEntity(movie);
        this.recommendRank = recommendRank;
     }
 
@@ -33,8 +31,12 @@ public class RecommendMovieDto{
     }
 
     public RecommendMovieDto(Movie movie, Long score){
-        this.movie = MovieDto.fromEntity(movie);
+        this.recommendMovie = MovieDto.fromEntity(movie);
         this.score = score;
+    }
+
+    public static RecommendMovieDto makeNewObj(RecommendMovieDto orgDto){
+        return new RecommendMovieDto(orgDto.getRecommendMovie(), orgDto.getRecommendRank(), orgDto.getScore());
     }
 
 
@@ -45,11 +47,12 @@ public class RecommendMovieDto{
     }
 
     public RecommendMovieDto returnAddScore(Long score){
-        addScore(score);
+        this.score += score;
         return this;
     }
 
-    public void addScore(Long score){
-        this.score += score;
+    public RecommendMovieDto returnMultiplyScore(Long score){
+        this.score *= score;
+        return this;
     }
 }
