@@ -7,6 +7,7 @@ import com.clone.rottentomato.domain.review.component.entity.Review;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 @Getter
 @NoArgsConstructor
@@ -19,7 +20,6 @@ public class ReviewResponseDto {
     private String movieName;
     private String posterUrl;
 
-
     @Builder
     public ReviewResponseDto(Review review, Member member, Movie movie) {
         this.id = review.getReview_id();
@@ -30,7 +30,6 @@ public class ReviewResponseDto {
         this.movieName = movie.getName();
         this.posterUrl = movie.getPosterUrl();
     }
-
 
     public static ReviewResponseDto of(Review review,Member member, Movie movie) {
         return ReviewResponseDto.builder()
@@ -45,6 +44,8 @@ public class ReviewResponseDto {
     public static ReviewResponseDto update_from(Review review) {
         return ReviewResponseDto.builder()
                 .review(review)
+                .member(review.getMember())
+                .movie(review.getMovie())
                 .build();
     }
 }

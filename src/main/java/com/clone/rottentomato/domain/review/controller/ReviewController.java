@@ -4,6 +4,8 @@ package com.clone.rottentomato.domain.review.controller;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.component.dto.SortRequestDto;
 import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
+import com.clone.rottentomato.domain.member.component.entity.Member;
+import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import com.clone.rottentomato.domain.mypage.component.dto.MypageReviewResponseDto;
 import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
 import com.clone.rottentomato.domain.review.component.dto.ReviewResponseDto;
@@ -16,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final MemberRepository memberRepository;
 
 
     //  리뷰작성
@@ -56,7 +60,7 @@ public class ReviewController {
     public CommonResponse updateReview(@PathVariable Long review_id,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails,
                                                          @RequestBody ReviewRequestDto reviewRequestDto) {
-        return reviewService.updateReview(review_id,userDetails,reviewRequestDto);
+        return reviewService.updateReview(review_id,userDetails.getMember(),reviewRequestDto);
     }
 
 
@@ -64,7 +68,7 @@ public class ReviewController {
     @DeleteMapping("/review/{review_id}")
     public CommonResponse deleteReview(@PathVariable Long review_id,
                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return reviewService.deleteReview(review_id,userDetails);
+        return reviewService.deleteReview(review_id,userDetails.getMember());
     }
 
 
