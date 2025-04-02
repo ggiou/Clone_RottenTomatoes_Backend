@@ -1,18 +1,29 @@
 spring:
-  h2:
-    console:
-      enabled: true
-      path : /h2-console
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+  # secret info yml --------------------------------
+  profiles:
+    include: secret
+  # h2 --------------------------------
+#  h2:
+#    console:
+#      enabled: true
+#      path : /h2-console
+#  datasource:
+#    url: jdbc:h2:mem:testdb
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+  # jpa setting --------------------------------
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     #      ddl-auto: validate
     properties:
       hibernate:
       format_sql: true
       show_sql: true
+
+# logging --------------------------------
+logging:
+  level:
+    com.amazonaws.util.EC2MetadataUtils: ERROR
+    org.springframework.mail: DEBUG
