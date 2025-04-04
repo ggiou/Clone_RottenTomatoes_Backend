@@ -1,7 +1,7 @@
 package com.clone.rottentomato.domain.movie.repository;
 
 import com.clone.rottentomato.domain.movie.component.entity.MovieProducer;
-import com.clone.rottentomato.domain.movie.component.entity.MovieProducerId;
+import com.clone.rottentomato.domain.movie.component.entity.id.MovieProducerId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -66,8 +66,7 @@ public class MovieService {
     private final MovieRecommendCustomRepository movieRecommendCustomRepository;
 
     // service
-    private final WebDriverService webDriverService;
-    private WebElementService webElementService;
+    private final WebElementService webElementService;
 
 
     /** 영화 pk를 통해 특정 영화의 상세 정보 반환 */
@@ -319,6 +318,7 @@ public class MovieService {
         try {
             crawlingResponse = getMovieInfoByCrawling(request);
         }catch (Exception e){
+            log.error("[getMovieInfoByCrawling] 크롤링 과정에 오류가 발생했습니다. {}", e.getMessage());
             throw new CommonException(String.format("[saveMovieProcess.getMovieInfoByCrawling] 영화 정보를 크롤링 하는 과정에서 오류가 발생했습니다. \n %s",e.getMessage()));
         }
 
@@ -370,7 +370,6 @@ public class MovieService {
         // 0. 응답 값 세팅
         List<MovieInfoDto> successList = new ArrayList<>();
         List<MovieInfoDto> failList = new ArrayList<>();
-        webDriverService.quitDriver();
 
         for(MovieSaveRequest crawlingReq : requests) {
             MovieInfoDto movieInfoDto = new MovieInfoDto();
@@ -531,11 +530,11 @@ public class MovieService {
                 movieInfoDto.setMovieDto(failDto);
                 failList.add(movieInfoDto);
                 // 다음 크롤링 시 오류 발생 하지 않도록, 아예 드라이버 종료
-                webDriverService.quitDriver();
+                webElementService.quitDriver();
             }
         }
-        // 데이터를 다 가져온 창은 닫기
-        webDriverService.closePage();
+        // 데이터를 다 가져왔을 경우 드라이버 종료
+        webElementService.quitDriver();
         return new MovieSaveResponse(successList, failList);
     }
 
@@ -598,7 +597,7 @@ public class MovieService {
 
     /** 페이지 가져오기*/
     private void getPage(String url){
-        this.webElementService = webDriverService.getPage(url, this.webElementService);
+        this.webElementService.loadPage(url);
     }
 
     /** 영화 정보 전체를 db 에 저장 */
