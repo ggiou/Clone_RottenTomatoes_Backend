@@ -1,4 +1,8 @@
-package com.clone.rottentomato.domain.movie.component.entity;
+package com.clone.rottentomato.domain.movie.component.entity.id;
+
+import com.clone.rottentomato.domain.movie.component.entity.Movie;
+import com.clone.rottentomato.domain.movie.component.entity.MovieProducer;
+import com.clone.rottentomato.domain.movie.component.entity.Producer;
 
 import java.io.Serializable;
 import java.util.List;

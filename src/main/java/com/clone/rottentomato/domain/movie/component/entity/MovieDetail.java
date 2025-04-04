@@ -35,7 +35,7 @@ public class MovieDetail extends TimeStamped {
     //@Convert(converter = CommaStringListConverter.class)
     private String directorNames;   // 영화 감독 이름들
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "MOVIE_ID", nullable = false)
     private Movie movie;    // 영화 정보
 
