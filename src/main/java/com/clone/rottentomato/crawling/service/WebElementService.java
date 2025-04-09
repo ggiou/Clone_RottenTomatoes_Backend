@@ -52,7 +52,7 @@ public class WebElementService {
     /** webDriver 가져오기 -> 초기 세팅 함께.. */
     private void getDriver(){
         this.driver = webDriverService.getDriver();
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(5)); // default 5초
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10)); // default 10초
         wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body"))); // body 태그 존재 할 때 까지 대기
     }
 
@@ -116,6 +116,12 @@ public class WebElementService {
 
     public List<WebElement> getListById(String idValue) {
         List<WebElement> elementList = driver.findElements(By.id(idValue));
+        if(!CollectionUtils.isEmpty(elementList)) return elementList;
+        return null;
+    }
+
+    public List<WebElement> getListByIdWithWait(String idValue) {
+        List<WebElement> elementList = wait.until(ExpectedConditions.visibilityOfAllElements(driver.findElements(By.id(idValue))));
         if(!CollectionUtils.isEmpty(elementList)) return elementList;
         return null;
     }
