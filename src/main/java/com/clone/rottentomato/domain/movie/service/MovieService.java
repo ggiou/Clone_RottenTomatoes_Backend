@@ -540,12 +540,21 @@ public class MovieService {
 
     public MovieTrailerDto getMovieTrailerByYoutube(String searchName, String containName, int disPlayOrder) {
         getPage(CrawlingSite.YOUTUBE.getMovieSearchFullUrl(searchName));
-        // 검색 결과의 유튜브 영상 요소로 찾아 없다면(최대 5번 탐색) 해당 예고편은 제외
-        List<WebElement> youtubeTrailerList = webElementService.getListByIdWithWait("dismissible");
+
+        // 검색할 유튜브 영상 요소가 존재할때 까지 대기
+        List<WebElement> youtubeTrailerList;
+        try {
+            youtubeTrailerList = webElementService.getListByIdWithWait("dismissible");
+        } catch (Exception e){
+            log.error("[getMovieTrailerByYoutube] 유튜브 영상 크롤링 중 오류가 발생했습니다. {}\n error: {}", searchName, e.getMessage());
+            youtubeTrailerList = webElementService.getListById("dismissible");
+        }
+
         if (CollectionUtils.isEmpty(youtubeTrailerList)) return null;
         int searchNum = 0;
         String[] containNameArr = containName.split(" ");
 
+        // 검색 결과의 유튜브 영상 요소로 찾아 없다면(최대 5번 탐색) 해당 예고편은 제외
         for (WebElement trailer : youtubeTrailerList) {
             if (searchNum++ > 10) break; // (최대 10번 탐색)
             // 트레일러 url, 이름, 재생 시간

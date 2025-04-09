@@ -121,7 +121,8 @@ public class WebElementService {
     }
 
     public List<WebElement> getListByIdWithWait(String idValue) {
-        List<WebElement> elementList = wait.until(ExpectedConditions.visibilityOfAllElements(driver.findElements(By.id(idValue))));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(idValue)));
+        List<WebElement> elementList = driver.findElements(By.id(idValue));
         if(!CollectionUtils.isEmpty(elementList)) return elementList;
         return null;
     }
