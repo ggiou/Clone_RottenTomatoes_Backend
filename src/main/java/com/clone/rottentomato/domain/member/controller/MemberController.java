@@ -104,7 +104,7 @@ public class MemberController {
 
             // JWT를 URL 인코딩 및 쿠키 설정만 수행
             String encodedJwtToken = URLEncoder.encode(jwtToken, StandardCharsets.UTF_8);
-            encodedJwtToken = encodedJwtToken.replace("Bear", "");
+            encodedJwtToken = encodedJwtToken.replace("Bearer", "");
             encodedJwtToken = encodedJwtToken.replace("+", "");
             /*Cookie cookie = new Cookie("Authorization", encodedJwtToken);
             cookie.setPath("/");
@@ -114,11 +114,12 @@ public class MemberController {
             response.setStatus(HttpServletResponse.SC_OK);*/
 
             // Set-Cookie 헤더를 직접 설정
-            String cookieHeader = String.format(
-                    "Authorization=%s; Path=/;",
-                    encodedJwtToken
-            );
-            response.setHeader("Set-Cookie", cookieHeader);
+            //String cookieHeader = String.format(
+            //        "Authorization=%s; Path=/;",
+            //        encodedJwtToken
+            //);
+            response.setHeader("Access-Control-Expose-Headers", "Authorization");
+            response.setHeader("Authorization", encodedJwtToken);
 
             //로그인 처리후 다시 코드 업데이트
             Member member = memberService.findMemberByEmail(email);
@@ -148,16 +149,18 @@ public class MemberController {
             // JWT 토큰 생성
             String token = memberService.testAuth(email);
             String encodedJwtToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
-            encodedJwtToken = encodedJwtToken.replace("Bear", "");
+            encodedJwtToken = encodedJwtToken.replace("Bearer", "");
             encodedJwtToken = encodedJwtToken.replace("+", "");
             log.info("[TEST][Success] Token Create : {} ", token);
 
             // Set-Cookie 헤더를 직접 설정
-            String cookieHeader = String.format(
-                    "Authorization=%s; Path=/;",
-                    encodedJwtToken
-            );
-            response.setHeader("Set-Cookie", cookieHeader);
+            //String cookieHeader = String.format(
+            //        "Authorization=%s; Path=/;",
+            //        encodedJwtToken
+            //);
+            //response.setHeader("Set-Cookie", cookieHeader);
+            response.setHeader("Access-Control-Expose-Headers", "Authorization");
+            response.setHeader("Authorization", encodedJwtToken);
 
             // 성공 응답 반환
             return CommonResponse.success("JWT Token issued and Set-Cookie header added.");
