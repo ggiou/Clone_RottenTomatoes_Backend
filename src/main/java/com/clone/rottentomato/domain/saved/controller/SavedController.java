@@ -21,7 +21,7 @@ public class SavedController {
     @PostMapping("/{movie_id}/save")
     public CommonResponse save(@PathVariable Long movie_id,
                                @AuthenticationPrincipal UserDetailsImpl userDetails,
-                               int isStatus) {
+                               @RequestParam(defaultValue = "0") int isStatus) {
         return savedService.save(movie_id,userDetails.getMember(),isStatus);
     }
 

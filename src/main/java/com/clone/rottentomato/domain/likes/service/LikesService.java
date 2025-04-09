@@ -12,7 +12,6 @@ import com.clone.rottentomato.domain.movie.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,21 +31,21 @@ public class LikesService {
     //  좋아요
     public CommonResponse ok(Long movieId, Member member, int isStatus) {
         Movie movie = getMovie(movieId);
-        Optional<Likes> likes = likesRepository.findByIsStatusAndMovieAndMember(isStatus,movie,member);
+        Optional<Likes> likes = likesRepository.findByIsStatusAndMovieAndMember(1, movie, member);
         Member findMember = getMember(member.getMemberId());
         log.info("findMember: {}", findMember);
         if(likes.isPresent()) {
-            isStatus = 0;           //  상태 값
+            isStatus = 0;
             Likes findLikes = likes.get();
             likesRepository.delete(findLikes);
             int count = likesRepository.countByMovie(movie);
             log.info("findLikes : {}", findLikes);
             log.info("count : {}", count);
             log.info("----------------------- 취소하기 성공 --------------------");
-            return CommonResponse.success("취소",LikesResponseDto.of(HttpStatus.OK,false,count,isStatus));
+            return CommonResponse.success("취소",LikesResponseDto.of(HttpStatus.OK,false,count,0));
         }
-        isStatus = 1;           //  상태 값;
-        Likes newLikes = Likes.of(movie,findMember, isStatus);
+        isStatus = 1;
+        Likes newLikes = Likes.of(movie, findMember, 1);
         likesRepository.save(newLikes);
         int count = likesRepository.countByMovie(movie);
         log.info("newLikes:{}", newLikes);

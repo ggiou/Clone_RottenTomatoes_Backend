@@ -44,6 +44,7 @@ public class SecurityConfig {
                             log.error("OAuth Login Fail : ", exception);
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
                             response.getWriter().write("{\"error\": \"로그인 실패\"}");
                         })
                 )
@@ -61,13 +62,7 @@ public class SecurityConfig {
                                 "/member/login-code", //일반유저 보안코드 인증접속
                                 "/member/test", //일반유저 보안코드 인증접속
                                 "/login.html", //로그인성공 페이지
-                                "/likes/{movie_id}/isLiked",
-                                "/reviews",
-                                "{movie_id}/review",
-                                "/review/{review_id}",
-                                "/mypage/**",
-                                "/movie/**",//영화 관련 api
-                                "/save/**"
+                                "/movie/**"//영화 관련 api
                         ).permitAll()
                         //인증경로
 /*                        .requestMatchers("/member/user-info", "/member/**").authenticated()*/
