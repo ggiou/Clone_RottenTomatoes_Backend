@@ -4,6 +4,7 @@ import com.amazonaws.util.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,7 @@ public class UtilString {
         o.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         o.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         o.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+        o.registerModule(new JavaTimeModule());
         return o;
     }
 

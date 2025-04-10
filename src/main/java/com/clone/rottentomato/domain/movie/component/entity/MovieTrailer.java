@@ -14,6 +14,8 @@ import java.util.Objects;
 @Getter
 @Entity
 @NoArgsConstructor
+@Table(uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"movie_id", "display_order"})})
 public class MovieTrailer extends TimeStamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;    // 영화 예고편 id
