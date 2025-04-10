@@ -458,7 +458,7 @@ public class MovieService {
                 movieCrawlingDataElement = webElementService.getByClassName("sec_movie_photo");
                 // 영화 포스터 정보 요소 (첫번째 포스터 url을 가져온다.)
                 WebElement moviePosterElement = webElementService.getByMultipleClassNames(movieCrawlingDataElement, "area_card", "_image_base_poster");
-                WebElement firstMoviePosterElement = webElementService.getByCssSelectore(moviePosterElement, ".item._item[data-col='1']");
+                WebElement firstMoviePosterElement = webElementService.getByCssSelector(moviePosterElement, ".item._item[data-col='1']");
                 String posterUrl = webElementService.getByTagName(firstMoviePosterElement, "img").getAttribute("src");
 
                 // 3-1. 네이버 무비클립 탭 -> 네이버 무비의 경우 ui 노출이 이상해 유튜버에서 크롤링해오기로 변경
@@ -544,7 +544,7 @@ public class MovieService {
         // 검색할 유튜브 영상 요소가 존재할때 까지 대기
         List<WebElement> youtubeTrailerList;
         try {
-            youtubeTrailerList = webElementService.getListByIdWithWait("dismissible");
+            youtubeTrailerList = webElementService.getListByCssSelectorWithWait("#dismissible.style-scope ytd-video-renderer");
         } catch (Exception e){
             log.error("[getMovieTrailerByYoutube] 유튜브 영상 크롤링 중 오류가 발생했습니다. {}\n error: {}", searchName, e.getMessage());
             youtubeTrailerList = webElementService.getListById("dismissible");
@@ -559,7 +559,7 @@ public class MovieService {
             try {
                 if (searchNum++ > 10) break; // (최대 10번 탐색)
                 // 트레일러 url, 이름, 재생 시간
-                WebElement trailerTitleElement = webElementService.getById(trailer, "video-title");
+                WebElement trailerTitleElement = webElementService.getById(trailer, "video-title"); // 해당 이름 가져오는데 오류 발생?
                 if (Objects.isNull(trailerTitleElement)) continue;
                 String playName = Objects.requireNonNull(trailerTitleElement.getAttribute("title")).replaceAll("[<>|/!]", StringUtils.EMPTY);
 
@@ -573,7 +573,7 @@ public class MovieService {
                 if (Objects.isNull(playTime)) continue;
                 return MovieTrailerDto.forSave(disPlayOrder, playUrl, playName, playTime);
             }catch (Exception e){
-                log.error("[getMovieTrailerByYoutube] 유튜브 영화 예고편 정보를 탐색하는데 오류가 발생했습니다.\nerror : {}", e.getMessage());
+                log.error("[getMovieTrailerByYoutube][{}] 유튜브 영화 예고편 정보를 탐색하는데 오류가 발생했습니다.\nerror : {}", searchName, e.getMessage());
             }
         }
         return null;

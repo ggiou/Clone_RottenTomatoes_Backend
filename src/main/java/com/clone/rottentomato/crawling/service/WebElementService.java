@@ -98,8 +98,21 @@ public class WebElementService {
     }
 
     /** 부모 요소 내에서 CSS Selector 을 이용해 자식요소 찾아서 반환 */
-    public WebElement getByCssSelectore(WebElement parentElement, String selector) {
+    public WebElement getByCssSelector(WebElement parentElement, String selector) {
         return getPresenceChildElement(parentElement, By.cssSelector(selector));
+    }
+
+    public List<WebElement> getListByCssSelector(String idValue) {
+        List<WebElement> elementList = driver.findElements(By.cssSelector(idValue));
+        if(!CollectionUtils.isEmpty(elementList)) return elementList;
+        return null;
+    }
+
+    public List<WebElement> getListByCssSelectorWithWait(String idValue) {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(idValue)));
+        List<WebElement> elementList = driver.findElements(By.cssSelector(idValue));
+        if(!CollectionUtils.isEmpty(elementList)) return elementList;
+        return null;
     }
 
     // ==================== ID 기반 요소 찾기 ====================
@@ -115,13 +128,6 @@ public class WebElementService {
     }
 
     public List<WebElement> getListById(String idValue) {
-        List<WebElement> elementList = driver.findElements(By.id(idValue));
-        if(!CollectionUtils.isEmpty(elementList)) return elementList;
-        return null;
-    }
-
-    public List<WebElement> getListByIdWithWait(String idValue) {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(idValue)));
         List<WebElement> elementList = driver.findElements(By.id(idValue));
         if(!CollectionUtils.isEmpty(elementList)) return elementList;
         return null;
