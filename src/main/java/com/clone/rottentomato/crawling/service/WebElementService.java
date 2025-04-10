@@ -94,7 +94,7 @@ public class WebElementService {
     }
 
     public void scrollAllToLoad() {
-        scrollToLoad(999999999);
+        scrollToLoad(5, 999999999);
     }
 
     /** 페이지 로딩을 위해 스크롤
