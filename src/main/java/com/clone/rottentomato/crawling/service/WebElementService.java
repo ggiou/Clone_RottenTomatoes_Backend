@@ -1,15 +1,17 @@
 package com.clone.rottentomato.crawling.service;
 
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -18,26 +20,75 @@ import java.util.Objects;
  *  WebElement 관련 유틸리티 기능을 제공하는 서비스 클래스
  */
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class WebElementService {
+    private final WebDriverService webDriverService; // 싱글톤 WebDriverService 사용
     private WebDriverWait wait;
-    private WebDriver webDriver;
+    private WebDriver driver;
+    private int requestCount = 0;   // 페이지 이동 횟수
+    private static final int MAX_REQUEST = 50; // 페이지 이동 최대 요청 횟수
+    private static final int MAX_COOKIE = 10; // 쿠키 삭제 필요한 최대 페이지 이동 횟수
 
-    /**
-     * 기본 생성자 - WebDriver를 기반으로 WebDriverWait을 설정 (기본 대기 시간: 5초)
-     */
-    public WebElementService(WebDriver driver) {
-        this.webDriver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+
+    // ==================== webDriver  ====================
+    /** webElementService 에서 driver 리셋 과정 */
+    public void resetDriver(){
+        webDriverService.resetDriver();  // 새 드라이버 세션 시작
+        getDriver();  // 현재 드라이버를, 새로 드라이버로 변경
+        requestCount = 0; // 페이지 요청 횟수 초기화
+    }
+
+    /** webDriver 종료 */
+    public void quitDriver() {
+        webDriverService.quitDriver();
+        if (driver != null) {
+            driver.quit();
+            driver = null;
+            log.debug("WebElement - ChromeDriver 종료");
+        }
+    }
+
+    /** webDriver 가져오기 -> 초기 세팅 함께.. */
+    private void getDriver(){
+        this.driver = webDriverService.getDriver();
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10)); // default 10초
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body"))); // body 태그 존재 할 때 까지 대기
+    }
+
+
+    // ==================== 페이지 이동 ====================
+
+    /** 특정 url 로드 -> 웹페이지를 가져오는 메서드 (세션 만료시 자동으로 드라이버를 새로 시작) */
+    public void loadPage(String url) {
+        if (driver == null) resetDriver();
+        else if(requestCount % MAX_COOKIE == 0) driver.manage().deleteAllCookies();  // 페이지 이동 횟수가 최대 쿠키 횟수가 된다면, 쿠키 제거
+        else if(requestCount >= MAX_REQUEST) resetDriver(); // 최대 페이지 이동 횟수면, 드라이버 리셋
+
+        try {
+            driver.get(url);  // 웹 페이지 요청
+        } catch (Exception e) {
+            if (e.getMessage().contains("invalid session id")) {
+                log.error("세션 만료 오류 발생. 새 드라이버 세션을 시작합니다.");
+                resetDriver();
+                driver.get(url);  // 새 드라이버로 페이지 요청
+            } else {
+                log.error("페이지 로딩 중 오류 발생: ", e);
+                throw e;
+            }
+        }
+
+        requestCount ++;
     }
 
     /**
-     * 사용자 지정 대기 시간을 설정할 수 있는 생성자
+     * 현재 실행 중인 창을 종료하는 메서드
+     * WebDriver 창을 종료
      */
-    public WebElementService(WebDriver driver, int waitSecond) {
-        this.webDriver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitSecond));
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+    public void closePage() {
+        if (driver != null) {
+            driver.close();
+        }
     }
 
     // ==================== CSS Selector 기반 요소 찾기 ====================
@@ -64,7 +115,14 @@ public class WebElementService {
     }
 
     public List<WebElement> getListById(String idValue) {
-        List<WebElement> elementList = webDriver.findElements(By.id(idValue));
+        List<WebElement> elementList = driver.findElements(By.id(idValue));
+        if(!CollectionUtils.isEmpty(elementList)) return elementList;
+        return null;
+    }
+
+    public List<WebElement> getListByIdWithWait(String idValue) {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(idValue)));
+        List<WebElement> elementList = driver.findElements(By.id(idValue));
         if(!CollectionUtils.isEmpty(elementList)) return elementList;
         return null;
     }
@@ -162,8 +220,8 @@ public class WebElementService {
     // ==================== page 관련 함수  ====================
     /** 페이지가 완전히 로드될 때까지 대기 */
     public void waitForPageLoad() {
-        new WebDriverWait(webDriver, Duration.ofSeconds(10)).until(webDriver ->
-                Objects.equals((String) ((org.openqa.selenium.JavascriptExecutor) webDriver)
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(driver ->
+                Objects.equals((String) ((org.openqa.selenium.JavascriptExecutor) driver)
                         .executeScript("return document.readyState"), "complete")
         );
     }
@@ -218,7 +276,7 @@ public class WebElementService {
 
     private List<WebElement> findElements(By by) {
         try {
-            return webDriver.findElements(by);
+            return driver.findElements(by);
         }catch (NoSuchElementException e) {
             return null;
         }
@@ -227,7 +285,8 @@ public class WebElementService {
     /** 유효성 체크 */
     private void checkValidRequest(){
         if (Objects.isNull(this.wait)) {
-            throw new IllegalArgumentException("WebDriverWait가 존재하지 않습니다.");
+            log.error("WebDriverWait가 존재하지 않습니다. 5초로 재 설정 하겠습니다.");
+            this.wait = new WebDriverWait(driver, Duration.ofSeconds(5));
         }
     }
 }

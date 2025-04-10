@@ -14,6 +14,8 @@ import java.util.Objects;
 @Getter
 @Entity
 @NoArgsConstructor
+@Table(uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"movie_id", "display_order"})})
 public class MovieTrailer extends TimeStamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;    // 영화 예고편 id
@@ -29,7 +31,7 @@ public class MovieTrailer extends TimeStamped {
     private String playTime;    // 예고편 총 재생 시간 (mm:ss)
 
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "MOVIE_ID", nullable = false, unique = false)
     private Movie movie;    // 영화 정보
 

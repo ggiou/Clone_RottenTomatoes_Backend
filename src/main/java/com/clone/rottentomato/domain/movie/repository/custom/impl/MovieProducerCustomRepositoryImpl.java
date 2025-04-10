@@ -2,7 +2,6 @@ package com.clone.rottentomato.domain.movie.repository.custom.impl;
 
 import com.clone.rottentomato.common.constant.JpaError;
 import com.clone.rottentomato.domain.movie.component.entity.MovieProducer;
-import com.clone.rottentomato.domain.movie.component.entity.MovieProducerId;
 import com.clone.rottentomato.domain.movie.repository.MovieProducerRepository;
 import com.clone.rottentomato.domain.movie.repository.custom.MovieProducerCustomRepository;
 import com.clone.rottentomato.exception.JpaException;
@@ -11,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
