@@ -115,7 +115,7 @@ public class WebElementService {
     }
 
     public List<WebElement> getScrollToLoad(By value, int requireCnt) {
-        getScrollToLoad(value, requireCnt, 5, 1000);
+       return getScrollToLoad(value, requireCnt, 5, 1000);
     }
     /** 원하는 요소를 필요한 개수를 얻기 위해 scroll
      * @param requireCnt
