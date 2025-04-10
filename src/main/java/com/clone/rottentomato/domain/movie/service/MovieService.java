@@ -553,7 +553,7 @@ public class MovieService {
 
         if (CollectionUtils.isEmpty(youtubeTrailerList)) return null;
         // 최소 10번 탐색을 위해, 재 탐색
-        if (youtubeTrailerList.size() < 10) youtubeTrailerList = webElementService.getScrollToLoad(By.cssSelector("#dismissible.style-scope ytd-video-renderer"), 10);
+        if (youtubeTrailerList.size() < 10) youtubeTrailerList = webElementService.getScrollToLoad(By.cssSelector("#dismissible.style-scope ytd-video-renderer"), 10, 5, 2000);
         int searchNum = 0;
         String[] containNameArr = containName.split(" ");
 

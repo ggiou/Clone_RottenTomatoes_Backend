@@ -114,15 +114,18 @@ public class WebElementService {
         }
     }
 
+    public List<WebElement> getScrollToLoad(By value, int requireCnt) {
+        getScrollToLoad(value, requireCnt, 5, 1000);
+    }
     /** 원하는 요소를 필요한 개수를 얻기 위해 scroll
      * @param requireCnt
      * @param value 원하는 요소*/
-    public List<WebElement> getScrollToLoad(By value, int requireCnt) {
+    public List<WebElement> getScrollToLoad(By value, int requireCnt, int maxScroll, int height) {
         int prevCnt = 0; // 이전에 탐색된 요소 개수
         int failCnt = 0;  // 요소 개수가 안늘어나는 횟수 = 스크롤 x 횟수
         List<WebElement> videos = new ArrayList<>();
         while (requireCnt > prevCnt) {
-            scrollToLoad(5, 1000);
+            scrollToLoad(maxScroll, height);
             videos = driver.findElements(value);
             int nowCnt = videos.size();
             if(prevCnt == nowCnt){
