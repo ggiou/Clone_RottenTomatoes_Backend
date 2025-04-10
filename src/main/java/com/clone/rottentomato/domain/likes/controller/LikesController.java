@@ -26,4 +26,9 @@ public class LikesController {
     }
 
 
+    @GetMapping("/check")
+    public CommonResponse check(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                @RequestParam Long movie_id) {
+        return likesService.check(userDetails.getMember(),movie_id);
+    }
 }

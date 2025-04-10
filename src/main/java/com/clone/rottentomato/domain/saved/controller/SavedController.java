@@ -25,4 +25,11 @@ public class SavedController {
         return savedService.save(movie_id,userDetails.getMember(),isStatus);
     }
 
+
+    @GetMapping("/check")
+    public CommonResponse check(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                @RequestParam Long movie_id) {
+        return savedService.check(userDetails.getMember(),movie_id);
+    }
+
 }

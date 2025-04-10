@@ -3,6 +3,7 @@ package com.clone.rottentomato.domain.likes.service;
 
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.domain.likes.component.dto.LikesResponseDto;
+import com.clone.rottentomato.domain.likes.component.dto.LikesStatusResponseDto;
 import com.clone.rottentomato.domain.likes.component.entity.Likes;
 import com.clone.rottentomato.domain.likes.repository.LikesRepository;
 import com.clone.rottentomato.domain.member.component.entity.Member;
@@ -52,6 +53,15 @@ public class LikesService {
         log.info("count : {}", count);
         log.info("----------------------- 좋아요 성공 --------------------");
         return CommonResponse.success("좋아요",LikesResponseDto.of(HttpStatus.OK,true,count,isStatus));
+    }
+
+
+    //  저장하기 체크
+    @Transactional(readOnly = true)
+    public CommonResponse check(Member member, Long movieId) {
+        Movie movie = getMovie(movieId);
+        boolean liked = likesRepository.findByIsStatusAndMovieAndMember(1, movie, member).isPresent();
+        return CommonResponse.success("좋아요 상태 조회 성공", new LikesStatusResponseDto(movieId, liked));
     }
 
 
