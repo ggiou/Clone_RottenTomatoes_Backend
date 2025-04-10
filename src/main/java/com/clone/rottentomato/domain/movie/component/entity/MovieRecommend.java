@@ -21,11 +21,11 @@ public class MovieRecommend {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "MOVIE_ID", nullable = false)
     private Movie movie;    // 기준 영화 id
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "RECOMMEND_MOVIE_ID", nullable = false)
     private Movie recommendMovie;    // 추천 영화 id
 

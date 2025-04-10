@@ -25,5 +25,10 @@ spring:
 # logging --------------------------------
 logging:
   level:
-    com.amazonaws.util.EC2MetadataUtils: ERROR
-    org.springframework.mail: DEBUG
+    org.springframework.boot: error
+    org.springframework.web: error
+    org.springframework.security: error
+    com.clone: info
+    com.amazonaws.util.EC2MetadataUtils: error
+    org.springframework.mail: debug
+

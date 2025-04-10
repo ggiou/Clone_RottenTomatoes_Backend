@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
 @IdClass(MovieCategoryId.class) // 복합 키 클래스 지정 (영화/카테고리 정보)
 public class MovieCategory {
     @Id
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "MOVIE_ID")
     private Movie movie;    // 영화 id
 
     @Id
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "CATEGORY_INFO_ID")
     private CategoryInfo categoryInfo;    // 영화 카테고리 정보 id
 

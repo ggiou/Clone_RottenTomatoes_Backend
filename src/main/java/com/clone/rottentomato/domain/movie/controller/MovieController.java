@@ -93,8 +93,8 @@ public class MovieController {
     }
 
 
-    /** 비디오 정보 저장 api
-     * @param request - 비디오 정보 저장 request
+    /** 영화 정보 저장 api
+     * @param request - 영화 정보 저장 request
      * @return CommonResponse.List<MovieInfo> */
     @PostMapping("/save")
     public CommonResponse saveMovie(@RequestBody(required = false) @Valid List<MovieSaveRequest> request, BindingResult bindingResult){
