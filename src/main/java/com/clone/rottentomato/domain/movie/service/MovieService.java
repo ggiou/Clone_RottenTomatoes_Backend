@@ -20,6 +20,7 @@ import com.clone.rottentomato.util.UtilString;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.springframework.data.domain.Page;
@@ -551,6 +552,8 @@ public class MovieService {
         }
 
         if (CollectionUtils.isEmpty(youtubeTrailerList)) return null;
+        // 최소 10번 탐색을 위해, 재 탐색
+        if (youtubeTrailerList.size() < 10) youtubeTrailerList = webElementService.getScrollToLoad(By.cssSelector("#dismissible.style-scope ytd-video-renderer"), 10);
         int searchNum = 0;
         String[] containNameArr = containName.split(" ");
 
