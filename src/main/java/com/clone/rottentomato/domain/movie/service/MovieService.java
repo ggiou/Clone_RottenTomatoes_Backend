@@ -556,21 +556,25 @@ public class MovieService {
 
         // 검색 결과의 유튜브 영상 요소로 찾아 없다면(최대 5번 탐색) 해당 예고편은 제외
         for (WebElement trailer : youtubeTrailerList) {
-            if (searchNum++ > 10) break; // (최대 10번 탐색)
-            // 트레일러 url, 이름, 재생 시간
-            WebElement trailerTitleElement = webElementService.getById(trailer, "video-title");
-            if (Objects.isNull(trailerTitleElement)) continue;
-            String playName = Objects.requireNonNull(trailerTitleElement.getAttribute("title")).replaceAll("[<>|/!]", StringUtils.EMPTY);
+            try {
+                if (searchNum++ > 10) break; // (최대 10번 탐색)
+                // 트레일러 url, 이름, 재생 시간
+                WebElement trailerTitleElement = webElementService.getById(trailer, "video-title");
+                if (Objects.isNull(trailerTitleElement)) continue;
+                String playName = Objects.requireNonNull(trailerTitleElement.getAttribute("title")).replaceAll("[<>|/!]", StringUtils.EMPTY);
 
-            // 트레일러 이름이 포함되어 있지 않다면 다음 정보로 탐색
-            String playStr = playName.replaceAll(" ", "");
-            if (Arrays.stream(containNameArr).anyMatch(t->!playStr.contains(t))) continue;
+                // 트레일러 이름이 포함되어 있지 않다면 다음 정보로 탐색
+                String playStr = playName.replaceAll(" ", "");
+                if (Arrays.stream(containNameArr).anyMatch(t -> !playStr.contains(t))) continue;
 
-            String playUrl = trailerTitleElement.getAttribute("href");
-            String playTime = UtilString.formatTime(webElementService.getByClassName(trailer, "badge-shape-wiz__text").getText());
-            // 재생 시간이 숫자 형식이 아니라면 = 쇼츠라면 넘기기
-            if (Objects.isNull(playTime)) continue;
-            return MovieTrailerDto.forSave(disPlayOrder, playUrl, playName, playTime);
+                String playUrl = trailerTitleElement.getAttribute("href");
+                String playTime = UtilString.formatTime(webElementService.getByClassName(trailer, "badge-shape-wiz__text").getText());
+                // 재생 시간이 숫자 형식이 아니라면 = 쇼츠라면 넘기기
+                if (Objects.isNull(playTime)) continue;
+                return MovieTrailerDto.forSave(disPlayOrder, playUrl, playName, playTime);
+            }catch (Exception e){
+                log.error("[getMovieTrailerByYoutube] 유튜브 영화 예고편 정보를 탐색하는데 오류가 발생했습니다.\nerror : {}", e.getMessage());
+            }
         }
         return null;
     }
