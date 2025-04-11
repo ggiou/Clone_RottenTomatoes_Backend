@@ -418,6 +418,29 @@ public class MovieService {
                 WebElement storyElement = webElementService.getByMultipleClassNames(movieCrawlingDataElement, "intro_box", "_content ");
                 String story = webElementService.getByClassName(storyElement, "_content_text").getText();
 
+                // 시리즈물 체크
+                WebElement seriesElement;
+                boolean isSeries = false;
+                try {
+                    // 영화가 시리즈 물일 경우, 해당 element 존재
+                    seriesElement = webElementService.getByMultipleClassNames("scroll_box", "_button_scroller_fixed");
+                    isSeries = true;
+                } catch (NoSuchElementException | TimeoutException e) {
+                    seriesElement = null;
+                }
+                if (isSeries && !movieTitle.matches("[0-9]")){
+                    // 시리즈 물인데, 시리즈물 정보가 없는 경우 -> 시리즈 회차가 붙어야하는지 체크
+                    List<WebElement> seriesInfoElement = webElementService.getListByClassName(seriesElement, "_item");
+                    if(!CollectionUtils.isEmpty(seriesInfoElement)) {
+                        // 네이버에선 최신일 수록 리스트 앞에 배치해서 반대로 뒤집기
+                        Collections.reverse(seriesInfoElement);
+                        String firstTitle = StringUtils.EMPTY;
+                        String LastTitle = StringUtils.EMPTY;
+                        // 만약 1번째 타이틀 명이라면 = 근데 1이 없거나 해당 이름이 독자적인게 X라면, OR 시리즈 물인데 타이틀 명이 동일하다면, 해당 시리즈를 찾아 -> 1을 붙여줘야함
+                    }
+
+                }
+
                 // 2-2. 네이버 영화 출연/제작진 탭
                 // 해당 탭으로 페이지 이동 (출연/제작진 탭으로 이동)
                 getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 " + movieTitle + " 출연진"));
@@ -445,17 +468,10 @@ public class MovieService {
                     // 2-3-1. 검색 결과 창이 유효한지 확인 (네이버 영화 포스터 정보 영역이 존재해야함)
                     movieCrawlingDataElement = webElementService.getByClassName("sec_movie_photo");
                 } catch (NoSuchElementException | TimeoutException e) {
-                    // 시리즈 물의 경우, 포토가 안나오는 경우가 있다. 한번더 이동
-                    getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 " + movieTitle + "1 포토"));
-                    try {
-                        movieCrawlingDataElement = webElementService.getByClassName("sec_movie_photo");
-                        movieTitle += "1";
-                    } catch (NoSuchElementException | TimeoutException e2) {
-                        MovieDto failDto = MovieDto.fromResult(crawlingReq.getName(), false, "[CrawlingSiteGet] 잘못된 요청입니다. 영화 포토 정보가 존재하지 않습니다. [Error] " + e.getMessage());
-                        movieInfoDto.setMovieDto(failDto);
-                        failList.add(movieInfoDto);
-                        continue;
-                    }
+                    MovieDto failDto = MovieDto.fromResult(crawlingReq.getName(), false, "[CrawlingSiteGet] 잘못된 요청입니다. 영화 포토 정보가 존재하지 않습니다. [Error] " + e.getMessage());
+                    movieInfoDto.setMovieDto(failDto);
+                    failList.add(movieInfoDto);
+                    continue;
                 }
                 movieCrawlingDataElement = webElementService.getByClassName("sec_movie_photo");
                 // 영화 포스터 정보 요소 (첫번째 포스터 url을 가져온다.)
