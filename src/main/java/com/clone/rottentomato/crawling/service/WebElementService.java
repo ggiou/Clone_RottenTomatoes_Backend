@@ -93,51 +93,6 @@ public class WebElementService {
         }
     }
 
-    public void scrollAllToLoad() {
-        scrollToLoad(5, 999999999);
-    }
-
-    /** 페이지 로딩을 위해 스크롤
-     * @param maxScroll 몇번 스크롤 할 것 인가 int */
-    public void scrollToLoad(int maxScroll, int height) {
-        if(Objects.isNull(driver)) return;
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        String jsScript = String.format("window.scrollBy(0, %s);", Math.max(height, 500));
-        for (int i = 0; i < maxScroll; i++) {
-            js.executeScript(jsScript);
-            try {
-                Thread.sleep(1000); // wait for new elements to load
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-    }
-
-    public List<WebElement> getScrollToLoad(By value, int requireCnt) {
-       return getScrollToLoad(value, requireCnt, 5, 1000);
-    }
-    /** 원하는 요소를 필요한 개수를 얻기 위해 scroll
-     * @param requireCnt
-     * @param value 원하는 요소*/
-    public List<WebElement> getScrollToLoad(By value, int requireCnt, int maxScroll, int height) {
-        int prevCnt = 0; // 이전에 탐색된 요소 개수
-        int failCnt = 0;  // 요소 개수가 안늘어나는 횟수 = 스크롤 x 횟수
-        List<WebElement> videos = new ArrayList<>();
-        while (requireCnt > prevCnt) {
-            scrollToLoad(maxScroll, height);
-            videos = driver.findElements(value);
-            int nowCnt = videos.size();
-            if(prevCnt == nowCnt){
-                failCnt ++;
-                if(failCnt >=  3) break;    // 요소 증가가 3회 이상되지 않으면 중단
-            }else failCnt = 0;  // 새 요소가 생기면 실패 카운트 초기화
-            prevCnt = nowCnt;
-        }
-
-        return videos;
-    }
-
 
     // ==================== CSS Selector 기반 요소 찾기 ====================
     /** CSS Selector 을 이용해 요소 찾아서 반환 */

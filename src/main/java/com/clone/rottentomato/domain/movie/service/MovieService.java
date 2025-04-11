@@ -545,15 +545,13 @@ public class MovieService {
         // 검색할 유튜브 영상 요소가 존재할때 까지 대기
         List<WebElement> youtubeTrailerList;
         try {
-            youtubeTrailerList = webElementService.getListByCssSelectorWithWait("#dismissible.style-scope ytd-video-renderer");
+            youtubeTrailerList = webElementService.getListByCssSelectorWithWait("#dismissible.style-scope.ytd-video-renderer");
         } catch (Exception e){
             log.error("[getMovieTrailerByYoutube] 유튜브 영상 크롤링 중 오류가 발생했습니다. {}\n error: {}", searchName, e.getMessage());
             youtubeTrailerList = webElementService.getListById("dismissible");
         }
 
         if (CollectionUtils.isEmpty(youtubeTrailerList)) return null;
-        // 최소 10번 탐색을 위해, 재 탐색
-        if (youtubeTrailerList.size() < 10) youtubeTrailerList = webElementService.getScrollToLoad(By.cssSelector("#dismissible.style-scope ytd-video-renderer"), 10, 5, 2000);
         int searchNum = 0;
         String[] containNameArr = containName.split(" ");
 
