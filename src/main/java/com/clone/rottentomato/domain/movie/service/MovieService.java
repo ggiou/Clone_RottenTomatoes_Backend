@@ -17,6 +17,7 @@ import com.clone.rottentomato.exception.MovieException;
 import com.clone.rottentomato.util.UtilMap;
 import com.clone.rottentomato.util.UtilNumber;
 import com.clone.rottentomato.util.UtilString;
+import io.jsonwebtoken.lang.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -497,7 +498,9 @@ public class MovieService {
                     String searchName = UtilString.isContain(trailerName, movieTitle) ? trailerName : String.format("%s %s", movieTitle, trailerName);
                     if (!UtilString.isContain(searchName, "예고편")) searchName += " 예고편";
                     try {
-                        MovieTrailerDto movieTrailerDto = getMovieTrailerByYoutube(searchName, trailerName.replaceAll(movieTitle, StringUtils.EMPTY), ++disPlayOrder);
+                        // 영상, 영어 => '' && 예고편 => 예고
+                        String containName = trailerName.replaceAll("[A-Z|a-z]|영상", StringUtils.EMPTY).replaceAll("예고편", "예고");
+                        MovieTrailerDto movieTrailerDto = getMovieTrailerByYoutube(searchName, containName, ++disPlayOrder);
                         if (Objects.isNull(movieTrailerDto)) {
                             --disPlayOrder;
                             continue;
@@ -513,7 +516,7 @@ public class MovieService {
 
                 // 네이버 영화 예고편과 동일한 이름의 예고편이 없다면, 영화이름 예고편 을 찾아 1개만 등록
                 if (movieTrailerDtos.isEmpty()) {
-                    MovieTrailerDto movieTrailerDto = getMovieTrailerByYoutube(String.format("%s %s", movieTitle, "예고편"), "예고편", ++disPlayOrder);
+                    MovieTrailerDto movieTrailerDto = getMovieTrailerByYoutube(String.format("%s %s", movieTitle, "예고편"), "예고", ++disPlayOrder);
                     if (!Objects.isNull(movieTrailerDto)) movieTrailerDtos.add(movieTrailerDto);
                 }
 
