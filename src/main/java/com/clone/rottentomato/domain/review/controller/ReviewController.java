@@ -6,6 +6,7 @@ import com.clone.rottentomato.common.component.dto.SortRequestDto;
 import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import com.clone.rottentomato.domain.mypage.component.dto.MypageReviewResponseDto;
+import com.clone.rottentomato.domain.review.component.dto.ReviewListResponseDto;
 import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
 import com.clone.rottentomato.domain.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,15 @@ public class ReviewController {
     public CommonResponse createReview(@PathVariable Long movie_id, @RequestBody ReviewRequestDto reviewRequestDto,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reviewService.createReview(movie_id,reviewRequestDto,userDetails.getMember());
+    }
+
+
+    //  해당 영화의 대한 리뷰 전체조회
+    @GetMapping("/{movie_id}/reviewList")
+    public ResponseEntity<List<ReviewListResponseDto>>getReviewList(@PathVariable Long movie_id,
+                                                                    @RequestParam(value = "page")int page,
+                                                                    @RequestParam(value = "size")int size) {
+        return reviewService.getReviewList(movie_id,page,size);
     }
 
 

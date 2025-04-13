@@ -7,10 +7,7 @@ import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.repository.MovieRepository;
 import com.clone.rottentomato.domain.mypage.component.dto.MypageReviewResponseDto;
-import com.clone.rottentomato.domain.review.component.dto.ReviewRatingDto;
-import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
-import com.clone.rottentomato.domain.review.component.dto.ReviewResponseDto;
-import com.clone.rottentomato.domain.review.component.dto.SuccessResponse;
+import com.clone.rottentomato.domain.review.component.dto.*;
 import com.clone.rottentomato.domain.review.component.entity.Review;
 import com.clone.rottentomato.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +58,21 @@ public class ReviewService {
         log.info("saveReview = {}",saveReview);
         log.info("------------------------------ 저장 성공 -----------------------------------");
         return CommonResponse.success("저장 성공",ReviewResponseDto.of(saveReview,member,movie));
+    }
+
+
+    //  해당 영화의 대한 리뷰 전체조회
+    public ResponseEntity<List<ReviewListResponseDto>> getReviewList(Long movieId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "regDate")); // 최신순 정렬
+        Page<Review> reviewPage = reviewRepository.findByMovieId(pageable,movieId);
+        if (reviewPage.isEmpty()) {
+            log.info("해당 영화에 등록된 리뷰가 없습니다.");
+            throw new IllegalArgumentException("해당 리뷰가 없습니다.");
+        }
+        List<ReviewListResponseDto> responseDtos = reviewPage.getContent().stream()
+                .map(ReviewListResponseDto::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDtos);
     }
 
 
@@ -172,5 +184,6 @@ public class ReviewService {
         };
 
     }
+
 
 }
