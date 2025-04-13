@@ -4,12 +4,9 @@ package com.clone.rottentomato.domain.review.controller;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.component.dto.SortRequestDto;
 import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
-import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import com.clone.rottentomato.domain.mypage.component.dto.MypageReviewResponseDto;
 import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
-import com.clone.rottentomato.domain.review.component.dto.ReviewResponseDto;
-import com.clone.rottentomato.domain.review.component.dto.SuccessResponse;
 import com.clone.rottentomato.domain.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
-
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -38,7 +33,7 @@ public class ReviewController {
 
 
     //  리뷰 전체 조회
-    @GetMapping("/reviews")
+    @PostMapping("/reviews")
     public ResponseEntity<List<MypageReviewResponseDto>> getReviews(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                     @RequestParam(value = "page")int page,
                                                                     @RequestParam(value = "size")int size,
