@@ -14,14 +14,13 @@ import com.clone.rottentomato.domain.movie.repository.custom.*;
 import com.clone.rottentomato.exception.CommonException;
 import com.clone.rottentomato.exception.JpaException;
 import com.clone.rottentomato.exception.MovieException;
+import com.clone.rottentomato.util.UtilDate;
 import com.clone.rottentomato.util.UtilMap;
 import com.clone.rottentomato.util.UtilNumber;
 import com.clone.rottentomato.util.UtilString;
-import io.jsonwebtoken.lang.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.springframework.data.domain.Page;
@@ -420,6 +419,7 @@ public class MovieService {
 
                 // 시리즈물 체크
                 WebElement seriesElement;
+                Long orgMovieId = null;
                 boolean isSeries = false;
                 try {
                     // 영화가 시리즈 물일 경우, 해당 element 존재
@@ -431,14 +431,20 @@ public class MovieService {
                 if (isSeries && !movieTitle.matches("[0-9]")){
                     // 시리즈 물인데, 시리즈물 정보가 없는 경우 -> 시리즈 회차가 붙어야하는지 체크
                     List<WebElement> seriesInfoElement = webElementService.getListByClassName(seriesElement, "_item");
-                    if(!CollectionUtils.isEmpty(seriesInfoElement)) {
+                    if(!Objects.isNull(seriesInfoElement) && seriesInfoElement.size() > 1) {
                         // 네이버에선 최신일 수록 리스트 앞에 배치해서 반대로 뒤집기
                         Collections.reverse(seriesInfoElement);
-                        String firstTitle = StringUtils.EMPTY;
-                        String LastTitle = StringUtils.EMPTY;
-                        // 만약 1번째 타이틀 명이라면 = 근데 1이 없거나 해당 이름이 독자적인게 X라면, OR 시리즈 물인데 타이틀 명이 동일하다면, 해당 시리즈를 찾아 -> 1을 붙여줘야함
+                        WebElement seriesTitleElement = webElementService.getByClassName(seriesInfoElement.get(0), "title_box");
+                        String firstTitle = webElementService.getByClassName(seriesTitleElement, "_text").getText();
+                        seriesTitleElement = webElementService.getByClassName(seriesInfoElement.get(seriesInfoElement.size()-1), "title_box");
+                        String lastTitle = webElementService.getByClassName(seriesTitleElement, "_text").getText();
+                        // 만약 영화 제목이 1번째 타이틀 명이라면 = 근데 1이 없거나 해당 이름이 독자적인게 X라면, OR 시리즈 물인데 타이틀 명이 동일하다면, 해당 시리즈를 찾아 -> 1을 붙여줘야함
+                        if(movieTitle.equals(firstTitle) && lastTitle.contains(firstTitle)){
+                            Optional<Movie> existsMovie = movieRepository.findTop1ByNameContainingAndReleaseDate(movieTitle, UtilDate.getLocalDateTimeOrEls(releaseDate, null));
+                            if(existsMovie.isPresent()) orgMovieId = existsMovie.get().getId();
+                            movieTitle += "1";
+                        }
                     }
-
                 }
 
                 // 2-2. 네이버 영화 출연/제작진 탭
@@ -538,6 +544,7 @@ public class MovieService {
 
                 // 가져온 정보를 기준으로 저장을 위한 dto 생성
                 MovieDto movieDto = MovieDto.forSave(movieTitle, posterUrl, releaseDate);
+                if(!Objects.isNull(orgMovieId)) movieDto.setId(orgMovieId);
                 MovieDetailDto movieDetailDto = MovieDetailDto.forSave(story, UtilString.joinStrByDelimiter(actorNames, ","), UtilString.joinStrByDelimiter(directorNames, ","), actorNames, directorNames);
                 List<CategoryInfoDto> categoryInfoDtos = Arrays.stream(categoryStr.split("[,/]")).map(CategoryInfoDto::forSave).toList();
 

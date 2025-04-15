@@ -31,15 +31,6 @@ public class MovieDto extends ResponseDto {
         this.releaseDate = releaseDate;
     }
 
-    private MovieDto(Long id, String name, String rating, String posterUrl, String releaseDate, boolean isSeries){
-        this.id = id;
-        this.name = name;
-        this.rating = rating;
-        this.posterUrl = posterUrl;
-        this.releaseDate = releaseDate;
-        this.isSeries = isSeries;
-    }
-
     public MovieDto(Long id, String name, BigDecimal rating, String posterUrl, LocalDateTime releaseDate){
         this.id = id;
         this.name = name;
