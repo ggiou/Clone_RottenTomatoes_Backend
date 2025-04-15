@@ -92,8 +92,9 @@ public class MovieService {
     /** 영화 정렬기준과 요창 page에 따라 영화 리스트 반환  */
     public List<MovieFindResponse> getMovieListBySort(List<MovieFindRequest> requestList){
         if(Objects.isNull(requestList) || requestList.isEmpty()) throw new MovieException("영화 리스트 반환 요청 값이 없습니다.", MovieError.BAD_REQUEST_MOVIE_LIST_FIND);
-
+        //  requestList가 null값이거나 requestList값이 다르면 Throw new 영화 리스트 반환 요청 값이 없습니다 예외
         List<MovieFindResponse> findResList = new ArrayList<>();
+        //  MovieFindResponse값을 List로 불러와서 findResList 변수에 담는다
         for(MovieFindRequest request : requestList){
             // 정렬 기준으로 리스트 반환
             if(Objects.isNull(request) || SortType.find(request.getSortType()) == null) continue;

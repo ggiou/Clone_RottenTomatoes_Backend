@@ -16,6 +16,7 @@ public class MypageReviewResponseDto {
     private Long id;
     private String content;
     private String memberName;
+    private String reviewContent;
     private String posterUrl;
     private BigDecimal rating;
     private LocalDateTime createTime;
@@ -25,6 +26,7 @@ public class MypageReviewResponseDto {
     public MypageReviewResponseDto(Review review, Member member, Movie movie) {
         this.id = review.getReview_id();
         this.content = movie.getName();
+        this.reviewContent = review.getReviewContent();
         this.posterUrl = movie.getPosterUrl();
         this.rating = movie.getRating();
         this.memberName = member.getMemberName();

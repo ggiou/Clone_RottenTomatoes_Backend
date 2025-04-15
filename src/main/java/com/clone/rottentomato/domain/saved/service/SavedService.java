@@ -7,12 +7,12 @@ import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.repository.MovieRepository;
 import com.clone.rottentomato.domain.saved.component.dto.SavedResponseDto;
+import com.clone.rottentomato.domain.saved.component.dto.SavedStatusResponseDto;
 import com.clone.rottentomato.domain.saved.component.entity.Saved;
 import com.clone.rottentomato.domain.saved.repository.SavedRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,12 +31,12 @@ public class SavedService {
 
     public CommonResponse save(Long movieId, Member member, int isStatus) {
         Movie movie = getMovie(movieId);
-        Optional<Saved> save = savedRepository.findByIsStatusAndMovieAndMember(isStatus,movie,member);
+        Optional<Saved> save = savedRepository.findByIsStatusAndMovieAndMember(1,movie,member);
         Member findMember = getMember(member.getMemberId());
         log.info("findMember : {}", findMember);
         if(save.isPresent()) {
-            Saved findSave = save.get();
             isStatus = 0;
+            Saved findSave = save.get();
             savedRepository.delete(findSave);
             int count = savedRepository.countByMovie(movie);
             log.info("findSave = {}",findSave);
@@ -44,7 +44,7 @@ public class SavedService {
             log.info("----------------------- 취소하기 성공 --------------------");
             return CommonResponse.success("취소",SavedResponseDto.of(HttpStatus.OK,false,count,isStatus));
         }
-        Saved newSave = Saved.of(movie,findMember,isStatus);
+        Saved newSave = Saved.of(movie,findMember,1);
         isStatus = 1;
         savedRepository.save(newSave);
         int count = savedRepository.countByMovie(movie);
@@ -52,6 +52,15 @@ public class SavedService {
         log.info("count = {}",count);
         log.info("----------------------- 저장하기 성공 --------------------");
         return CommonResponse.success("저장",SavedResponseDto.of(HttpStatus.OK,true,count,isStatus));
+    }
+
+
+    //  좋아요 체크
+    @Transactional(readOnly = true)
+    public CommonResponse check(Member member, Long movieId) {
+        Movie movie = getMovie(movieId);
+        boolean saved = savedRepository.findByIsStatusAndMovieAndMember(1, movie, member).isPresent();
+        return CommonResponse.success("좋아요 상태 조회 성공", new SavedStatusResponseDto(movieId, saved));
     }
 
 
