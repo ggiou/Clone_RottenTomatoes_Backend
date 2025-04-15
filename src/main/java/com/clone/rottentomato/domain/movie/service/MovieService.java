@@ -4,7 +4,7 @@ import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.constant.CommonError;
 import com.clone.rottentomato.common.constant.SortType;
 import com.clone.rottentomato.crawling.constant.CrawlingSite;
-import com.clone.rottentomato.crawling.service.WebDriverService;
+import org.openqa.selenium.NoSuchElementException;
 import com.clone.rottentomato.crawling.service.WebElementService;
 import com.clone.rottentomato.domain.movie.component.dto.*;
 import com.clone.rottentomato.domain.movie.component.entity.*;
@@ -424,7 +424,7 @@ public class MovieService {
                 boolean isSeries = false;
                 try {
                     // 영화가 시리즈 물일 경우, 해당 element 존재
-                    seriesElement = webElementService.getByMultipleClassNames("scroll_box", "_button_scroller_fixed");
+                    seriesElement = webElementService.getByMultipleClassNames(false, "scroll_box", "_button_scroller_fixed");
                     isSeries = true;
                 } catch (NoSuchElementException | TimeoutException e) {
                     seriesElement = null;

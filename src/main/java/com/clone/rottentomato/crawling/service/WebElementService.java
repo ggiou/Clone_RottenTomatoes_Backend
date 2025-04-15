@@ -1,10 +1,9 @@
 package com.clone.rottentomato.crawling.service;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -13,9 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -172,9 +169,14 @@ public class WebElementService {
     }
 
     /** 특정 클래스들을 모두 포함하는 요소 찾기 */
-    public WebElement getByMultipleClassNames(String... classNames) {
+    public WebElement getByMultipleClassNames(boolean isWait, String... classNames) {
         String selector = "." + String.join(".", classNames); // .class1.class2.class3 형식 생성
-        return getPresenceElement(By.cssSelector(selector));
+        if (isWait) return getPresenceElement(By.cssSelector(selector));
+        return driver.findElement(By.cssSelector(selector));
+    }
+
+    public WebElement getByMultipleClassNames(String... classNames) {
+        return getByMultipleClassNames(true, classNames);
     }
 
     /** 특정 클래스들을 모두 포함하는 요소 리스트 찾기 */
@@ -286,6 +288,14 @@ public class WebElementService {
     private List<WebElement> findElements(By by) {
         try {
             return driver.findElements(by);
+        }catch (NoSuchElementException e) {
+            return null;
+        }
+    }
+
+    private WebElement findElement(By by) {
+        try {
+            return driver.findElement(by);
         }catch (NoSuchElementException e) {
             return null;
         }
