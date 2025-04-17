@@ -10,11 +10,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface MovieRepository extends JpaRepository<Movie, Long> {
     Optional<Movie> findByName(String movieName);
+    Optional<Movie> findTop1ByNameContainingAndReleaseDate(String name, LocalDateTime releaseDate);
     @Query("SELECT new com.clone.rottentomato.domain.movie.component.dto.MovieDto(m.id, m.name, m.rating, m.posterUrl, m.releaseDate) FROM Movie m")
     Page<MovieDto> findAllMovies(Pageable pageable);
     @Query("SELECT COUNT(m) FROM Movie m")

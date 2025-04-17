@@ -1,9 +1,9 @@
 package com.clone.rottentomato.crawling.service;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -13,7 +13,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -91,6 +90,7 @@ public class WebElementService {
         }
     }
 
+
     // ==================== CSS Selector 기반 요소 찾기 ====================
     /** CSS Selector 을 이용해 요소 찾아서 반환 */
     public WebElement getByCssSelectore(String selector) {
@@ -98,8 +98,21 @@ public class WebElementService {
     }
 
     /** 부모 요소 내에서 CSS Selector 을 이용해 자식요소 찾아서 반환 */
-    public WebElement getByCssSelectore(WebElement parentElement, String selector) {
+    public WebElement getByCssSelector(WebElement parentElement, String selector) {
         return getPresenceChildElement(parentElement, By.cssSelector(selector));
+    }
+
+    public List<WebElement> getListByCssSelector(String idValue) {
+        List<WebElement> elementList = driver.findElements(By.cssSelector(idValue));
+        if(!CollectionUtils.isEmpty(elementList)) return elementList;
+        return null;
+    }
+
+    public List<WebElement> getListByCssSelectorWithWait(String idValue) {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(idValue)));
+        List<WebElement> elementList = driver.findElements(By.cssSelector(idValue));
+        if(!CollectionUtils.isEmpty(elementList)) return elementList;
+        return null;
     }
 
     // ==================== ID 기반 요소 찾기 ====================
@@ -120,13 +133,6 @@ public class WebElementService {
         return null;
     }
 
-    public List<WebElement> getListByIdWithWait(String idValue) {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(idValue)));
-        List<WebElement> elementList = driver.findElements(By.id(idValue));
-        if(!CollectionUtils.isEmpty(elementList)) return elementList;
-        return null;
-    }
-
     /**  부모 요소 내에서 ID를 이용하여 자식 요소 찾아 반환 */
      public WebElement getById(WebElement parentElement, String id) {
         return getPresenceChildElement(parentElement, By.id(id));
@@ -135,8 +141,12 @@ public class WebElementService {
     // ==================== Class Name 기반 요소 찾기 ====================
 
     /** 클래스명을 이용하여 요소 찾아 반환 */
-    public WebElement getByClassName(String className) {
-        return getPresenceElement(By.className(className));
+    public WebElement getByClassName(String className){
+        return getByClassName(true, className);
+    }
+    public WebElement getByClassName(boolean isWait, String className) {
+        if(isWait) return getPresenceElement(By.className(className));
+        return driver.findElement(By.className(className));
     }
 
     /** 부모 요소 내에서 클래스명을 이용해 자식 요소를 찾아 반환 */
@@ -163,9 +173,14 @@ public class WebElementService {
     }
 
     /** 특정 클래스들을 모두 포함하는 요소 찾기 */
-    public WebElement getByMultipleClassNames(String... classNames) {
+    public WebElement getByMultipleClassNames(boolean isWait, String... classNames) {
         String selector = "." + String.join(".", classNames); // .class1.class2.class3 형식 생성
-        return getPresenceElement(By.cssSelector(selector));
+        if (isWait) return getPresenceElement(By.cssSelector(selector));
+        return driver.findElement(By.cssSelector(selector));
+    }
+
+    public WebElement getByMultipleClassNames(String... classNames) {
+        return getByMultipleClassNames(true, classNames);
     }
 
     /** 특정 클래스들을 모두 포함하는 요소 리스트 찾기 */
@@ -277,6 +292,14 @@ public class WebElementService {
     private List<WebElement> findElements(By by) {
         try {
             return driver.findElements(by);
+        }catch (NoSuchElementException e) {
+            return null;
+        }
+    }
+
+    private WebElement findElement(By by) {
+        try {
+            return driver.findElement(by);
         }catch (NoSuchElementException e) {
             return null;
         }
