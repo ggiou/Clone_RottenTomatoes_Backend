@@ -13,7 +13,6 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class MovieDto extends ResponseDto {
     private Long id;    // 영화 id
@@ -21,7 +20,6 @@ public class MovieDto extends ResponseDto {
     private String rating;  // 영화 평점 (리뷰 별점 기준 -> 0.0 ~ 5.0)
     private String posterUrl;   // 영화 포스터 url
     private String releaseDate;  // 개봉일
-    private boolean isSeries = false;
 
     private MovieDto(Long id, String name, String rating, String posterUrl, String releaseDate){
         this.id = id;
@@ -51,10 +49,6 @@ public class MovieDto extends ResponseDto {
     }
 
     /** 영화 저장을 위한 객체 생성 */
-    public static MovieDto forSave(String name, String posterUrl, String releaseDate, boolean isSeries){
-        return new MovieDto(null, name, null, posterUrl, releaseDate, true);
-    }
-
     public static MovieDto forSave(String name, String posterUrl, String releaseDate){
         return new MovieDto(null, name, null, posterUrl, releaseDate);
     }
