@@ -141,8 +141,12 @@ public class WebElementService {
     // ==================== Class Name 기반 요소 찾기 ====================
 
     /** 클래스명을 이용하여 요소 찾아 반환 */
-    public WebElement getByClassName(String className) {
-        return getPresenceElement(By.className(className));
+    public WebElement getByClassName(String className){
+        return getByClassName(true, className);
+    }
+    public WebElement getByClassName(boolean isWait, String className) {
+        if(isWait) return getPresenceElement(By.className(className));
+        return driver.findElement(By.className(className));
     }
 
     /** 부모 요소 내에서 클래스명을 이용해 자식 요소를 찾아 반환 */

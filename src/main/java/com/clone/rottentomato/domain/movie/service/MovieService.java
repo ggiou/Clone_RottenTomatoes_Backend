@@ -33,6 +33,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -384,7 +385,7 @@ public class MovieService {
                     getWebDriverSiteForMovieSave(crawlingReq, " 정보");
                     try {
                         // 1-2. 검색 결과 창이 유효한지 확인 (네이버 영화 영역이 존재해야, 영화 정보 탐색 가능)
-                        movieCrawlingDataElement = webElementService.getByMultipleClassNames("sc_new", "cs_common_module", "case_empasis", "_au_movie_content_wrap");
+                        movieCrawlingDataElement = webElementService.getByMultipleClassNames(false, "sc_new", "cs_common_module", "case_empasis", "_au_movie_content_wrap");
                     } catch (NoSuchElementException | TimeoutException e) {
                         throw new MovieException("잘못된 요청입니다. 영화 검색 결과 값이 존재하지 않습니다.");
                     }
@@ -452,7 +453,7 @@ public class MovieService {
                 // 해당 탭으로 페이지 이동 (출연/제작진 탭으로 이동)
                 getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 " + movieTitle + " 출연진"));
                 try {
-                    movieCrawlingDataElement = webElementService.getByMultipleClassNames("cm_content_wrap", "_actor_wrap");
+                    movieCrawlingDataElement = webElementService.getByMultipleClassNames(false, "cm_content_wrap", "_actor_wrap");
                 } catch (NoSuchElementException | TimeoutException e) {
                     MovieDto failDto = MovieDto.fromResult(crawlingReq.getName(), false, "[CrawlingSiteGet] 잘못된 요청입니다. 영화 제작진 정보가 존재하지 않습니다. [Error] " + e.getMessage());
                     movieInfoDto.setMovieDto(failDto);
@@ -473,7 +474,7 @@ public class MovieService {
                 getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 " + movieTitle + " 포토"));
                 try {
                     // 2-3-1. 검색 결과 창이 유효한지 확인 (네이버 영화 포스터 정보 영역이 존재해야함)
-                    movieCrawlingDataElement = webElementService.getByClassName("sec_movie_photo");
+                    movieCrawlingDataElement = webElementService.getByClassName(false, "sec_movie_photo");
                 } catch (NoSuchElementException | TimeoutException e) {
                     MovieDto failDto = MovieDto.fromResult(crawlingReq.getName(), false, "[CrawlingSiteGet] 잘못된 요청입니다. 영화 포토 정보가 존재하지 않습니다. [Error] " + e.getMessage());
                     movieInfoDto.setMovieDto(failDto);
@@ -489,31 +490,31 @@ public class MovieService {
                 // 3-1. 네이버 무비클립 탭 -> 네이버 무비의 경우 ui 노출이 이상해 유튜버에서 크롤링해오기로 변경
                 getPage(CrawlingSite.NAVER.getMovieSearchFullUrl("영화 " + movieTitle + " 예고편"));
                 try {
-                    movieCrawlingDataElement = webElementService.getByMultipleClassNames("area_card", "_sec_movie_clip_trailer");
+                    movieCrawlingDataElement = webElementService.getByMultipleClassNames(false, "area_card", "_sec_movie_clip_trailer");
                 } catch (NoSuchElementException | TimeoutException e) {
-                    MovieDto failDto = MovieDto.fromResult(crawlingReq.getName(), false, "[CrawlingSiteGet] 잘못된 요청입니다. 영화 예고편 정보가 존재하지 않습니다. [Error] " + e.getMessage());
-                    movieInfoDto.setMovieDto(failDto);
-                    failList.add(movieInfoDto);
-                    continue;
-                }
-                WebElement moreWrapElement = webElementService.getByClassName(movieCrawlingDataElement, "more_wrap");
-                if (!Objects.isNull(moreWrapElement)) {
-                    WebElement moreButton = webElementService.getByTagName(moreWrapElement, "a");
-                    moreButton.click(); // 더보기 버튼 클릭
-                    webElementService.waitForPageLoad();
-                }
-                WebElement trailerWrappedElement = webElementService.getByMultipleClassNames(movieCrawlingDataElement, "area_video_list", "_panel");
-                List<WebElement> trailerElements = webElementService.getListByTagName(trailerWrappedElement, "li");
-                // 유튜브에서 검색할 영화 예고편 이름 리스트
-                List<String> movieTrailerNames = new ArrayList<>();
-                for (WebElement trailerElement : trailerElements) {
-                    WebElement areaInfoWrappedElement = webElementService.getByClassName(trailerElement, "area_info");
-                    WebElement playInfo = webElementService.getByTagName(areaInfoWrappedElement, "a");
-                    // 영화 트레일러 검색 이름
-                    String playName = playInfo.getText();
-                    movieTrailerNames.add(playName.replaceAll("[<>|/!]", StringUtils.EMPTY));
+                    movieCrawlingDataElement  = null;
                 }
 
+                // 영화 예고편 이름 리스트 (유튜브에서 검색 할 대상)
+                List<String> movieTrailerNames = new ArrayList<>();
+                if(!Objects.isNull(movieCrawlingDataElement)) {
+                    WebElement moreWrapElement = webElementService.getByClassName(movieCrawlingDataElement, "more_wrap");
+                    if (!Objects.isNull(moreWrapElement)) {
+                        WebElement moreButton = webElementService.getByTagName(moreWrapElement, "a");
+                        moreButton.click(); // 더보기 버튼 클릭
+                        webElementService.waitForPageLoad();
+                    }
+                    WebElement trailerWrappedElement = webElementService.getByMultipleClassNames(movieCrawlingDataElement, "area_video_list", "_panel");
+                    List<WebElement> trailerElements = webElementService.getListByTagName(trailerWrappedElement, "li");
+
+                    for (WebElement trailerElement : trailerElements) {
+                        WebElement areaInfoWrappedElement = webElementService.getByClassName(trailerElement, "area_info");
+                        WebElement playInfo = webElementService.getByTagName(areaInfoWrappedElement, "a");
+                        // 영화 트레일러 검색 이름
+                        String playName = playInfo.getText();
+                        movieTrailerNames.add(playName.replaceAll("[<>|/!]", StringUtils.EMPTY));
+                    }
+                }
                 // 3-2. 유튜브 예고편 정보 크롤링 (네이버 무비 클립 제목을 통한 크롤링)
                 List<MovieTrailerDto> movieTrailerDtos = new ArrayList<>();
                 int disPlayOrder = 0;
@@ -593,7 +594,10 @@ public class MovieService {
 
                 // 트레일러 이름이 포함되어 있지 않다면 다음 정보로 탐색
                 String playStr = playName.replaceAll(" ", "");
-                if (Arrays.stream(containNameArr).anyMatch(t -> !playStr.contains(t))) continue;
+                if(Arrays.stream(containNameArr).anyMatch(t -> !playStr.contains(t))){
+                    if(playStr.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*")) continue;
+                    if(!playStr.toLowerCase().contains("trailer")) continue; // 재생 이름이 모두 영어일 경우, 예고편이란 영단어 포함되면 저장
+                }
 
                 String playUrl = trailerTitleElement.getAttribute("href");
                 String playTime = UtilString.formatTime(webElementService.getByClassName(trailer, "badge-shape-wiz__text").getText());
