@@ -1,5 +1,7 @@
 package com.clone.rottentomato.common.constant;
 
+import com.clone.rottentomato.common.CommonService;
+
 import java.time.format.DateTimeFormatter;
 
 /** 프로젝트 공통으로 사용할 수 있는 상수 */
@@ -21,4 +23,22 @@ public class CommonConst {
     public static class DATA_NAME{
         public final static String FIND_MAP_NAME = "findResponse";
     }
+
+    /** 운영 체제 */
+    public static class OS {
+        public final static String OS_WIN = "Windows";
+        public final static String OS_MAC = "macOs";
+        public final static String OS_LINUX = "Linux";
+        public final static String OS_WIN_DIR_PATH = "\\win";
+        public final static String OS_MAC_DIR_PATH = "/mac";
+        public final static String OS_LINUX_DIR_PATH = "/linux";
+
+        // 현재 사용 중인 os
+        public final static String RUNNING_OS = CommonService.setRunningOs();
+    }
+
+    // 사용자 현재 디렉터리 위치
+    public final static String USER_DIR = System.getProperty("user.dir");
+    // 사용자 홈 디렉터리 위치
+    public final static String USER_HOME = System.getProperty("user.home");
 }

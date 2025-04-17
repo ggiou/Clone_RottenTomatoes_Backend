@@ -3,15 +3,11 @@ package com.clone.rottentomato.domain.review.service;
 
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.component.dto.SortRequestDto;
-import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
 import com.clone.rottentomato.domain.member.component.entity.Member;
 import com.clone.rottentomato.domain.movie.component.entity.Movie;
 import com.clone.rottentomato.domain.movie.repository.MovieRepository;
 import com.clone.rottentomato.domain.mypage.component.dto.MypageReviewResponseDto;
-import com.clone.rottentomato.domain.review.component.dto.ReviewRatingDto;
-import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
-import com.clone.rottentomato.domain.review.component.dto.ReviewResponseDto;
-import com.clone.rottentomato.domain.review.component.dto.SuccessResponse;
+import com.clone.rottentomato.domain.review.component.dto.*;
 import com.clone.rottentomato.domain.review.component.entity.Review;
 import com.clone.rottentomato.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -65,10 +61,25 @@ public class ReviewService {
     }
 
 
+    //  해당 영화의 대한 리뷰 전체조회
+    public ResponseEntity<List<ReviewListResponseDto>> getReviewList(Long movieId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "regDate")); // 최신순 정렬
+        Page<Review> reviewPage = reviewRepository.findByMovieId(pageable,movieId);
+        if (reviewPage.isEmpty()) {
+            log.info("해당 영화에 등록된 리뷰가 없습니다.");
+            throw new IllegalArgumentException("해당 리뷰가 없습니다.");
+        }
+        List<ReviewListResponseDto> responseDtos = reviewPage.getContent().stream()
+                .map(ReviewListResponseDto::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDtos);
+    }
+
+
     //  리뷰 전체 조회
-    @Transactional(readOnly = true)
     public ResponseEntity<List<MypageReviewResponseDto>> getReviews(Member member, int page, int size, SortRequestDto sortRequestDto) {
         Sort sort = getSortBySortType(sortRequestDto);
+        log.info("정렬 조건: {}", sortRequestDto.getSortStr());
         Pageable pageable = PageRequest.of(page, size,sort);
         // 리뷰 리스트 조회
         Page<Review> reviewPage = reviewRepository.findByAndMemberEmail(pageable, member.getMemberEmail());
@@ -166,12 +177,13 @@ public class ReviewService {
         Sort.Direction direction = sortRequest.isAsc() ? Sort.Direction.ASC : Sort.Direction.DESC;
 
         return switch (sortRequest.getSortType()) {
-            case ORDER -> Sort.by(direction, "최신순"); // 작성 날짜 기준 정렬
-            case NAME -> Sort.by(direction, "제목순"); // 영화 제목 기준 정렬
-            case HIGH -> Sort.by(direction, "높은순"); // 높은 평점 기준 정렬
-            case LOW -> Sort.by(direction, "낮은순").descending(); // 낮은 평점 기준 정렬
-            default -> Sort.by(Sort.Direction.DESC, "최신순"); // 기본적으로 최신순 정렬
+            case ORDER -> Sort.by(direction, "createdAt");       // 작성일자 컬럼
+            case NAME -> Sort.by(direction, "movie.title");      // 영화 제목 (Join 컬럼인 경우 주의)
+            case HIGH, LOW -> Sort.by(direction, "rating");      // 평점
+            default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
+
     }
+
 
 }

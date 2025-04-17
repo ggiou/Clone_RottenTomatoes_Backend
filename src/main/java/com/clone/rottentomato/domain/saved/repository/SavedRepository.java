@@ -21,6 +21,6 @@ public interface SavedRepository extends JpaRepository<Saved,Long> {
 
     int countByMovie(Movie movie);
 
-    @Query("select s from Saved s where s.member.memberEmail=:email")
-    Page<Saved> findByAndMemberEmail(Pageable pageable, String email);
+    @Query("select l from Saved l where l.member.memberEmail = :email")
+    Page<Saved> findByMemberEmail(@Param("email") String email, Pageable pageable);
 }
