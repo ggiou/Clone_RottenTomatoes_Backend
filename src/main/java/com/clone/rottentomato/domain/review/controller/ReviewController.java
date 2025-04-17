@@ -4,7 +4,6 @@ package com.clone.rottentomato.domain.review.controller;
 import com.clone.rottentomato.common.component.dto.CommonResponse;
 import com.clone.rottentomato.common.component.dto.SortRequestDto;
 import com.clone.rottentomato.domain.auth.component.UserDetailsImpl;
-import com.clone.rottentomato.domain.member.repository.MemberRepository;
 import com.clone.rottentomato.domain.mypage.component.dto.MypageReviewResponseDto;
 import com.clone.rottentomato.domain.review.component.dto.ReviewListResponseDto;
 import com.clone.rottentomato.domain.review.component.dto.ReviewRequestDto;
@@ -22,7 +21,6 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
-    private final MemberRepository memberRepository;
 
 
     //  리뷰작성

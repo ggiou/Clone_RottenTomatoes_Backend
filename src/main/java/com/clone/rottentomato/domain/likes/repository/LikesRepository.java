@@ -21,6 +21,6 @@ public interface LikesRepository extends JpaRepository<Likes,Long> {
 
     int countByMovie(Movie movie);
 
-    @Query("select l from Likes l where l.member.memberEmail=:email")
-    Page<Likes> findByAndMemberEmail(Pageable pageable,String email);
+    @Query("select l from Likes l where l.member.memberEmail = :email")
+    Page<Likes> findByMemberEmail(@Param("email") String email, Pageable pageable);
 }
