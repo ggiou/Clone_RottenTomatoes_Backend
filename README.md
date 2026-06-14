@@ -62,6 +62,8 @@ MySQL
 Selenium Crawling
 (Youtube / Movie Data)
 ````
+<img width="1536" height="1024" alt="rotten_architecture" src="https://github.com/user-attachments/assets/ac23e47b-65b2-4e39-8ece-885613edf858" />
+
 
 <br>
 
